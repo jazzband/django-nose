@@ -41,8 +41,8 @@ Caveats
 -------
 
 `South`_ installs its own test command that turns off migrations during
-testing.  Make sure that 'django_nose' comes *after* 'south' in ``INSTALLED_APPS``
-so that django_nose's test command is used.
+testing.  Make sure that ``django_nose`` comes *after* ``south`` in
+``INSTALLED_APPS`` so that django_nose's test command is used.
 
 .. _nose docs: http://somethingaboutorange.com/mrl/projects/nose/
 .. _South: http://south.aeracode.org/
