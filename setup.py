@@ -5,7 +5,7 @@ setup(
     name='django-nose',
     version='0.0.1',
     description='Django test runner that uses nose.',
-    long_description=open('README.md').read(),
+    long_description=open('README.rst').read(),
     author='Jeff Balogh',
     author_email='me@jeffbalogh.org',
     url='http://github.com/jbalogh/django-nose',
