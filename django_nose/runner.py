@@ -15,7 +15,9 @@ from django.core.management.base import BaseCommand
 from django.db import connection
 from django.test import utils
 
-import nose
+import nose.core
+
+from django_nose.plugin import ResultPlugin
 
 
 def run_tests(test_labels, verbosity=1, interactive=True):
@@ -47,12 +49,15 @@ def run_tests(test_labels, verbosity=1, interactive=True):
         print ' '.join(nose_argv)
 
     try:
-        success = nose.run(argv=nose_argv)
+        result_plugin = ResultPlugin()
+        test_program = nose.core.TestProgram(argv=nose_argv, exit=False,
+                                             addplugins=[result_plugin])
+        result = result_plugin.result
+        return len(result.failures) + len(result.errors)
     finally:
         # Clean up django.
         connection.creation.destroy_test_db(old_db_name, verbosity)
         utils.teardown_test_environment()
-        return success
 
 
 def _get_options():
