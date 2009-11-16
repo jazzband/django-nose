@@ -67,3 +67,4 @@ def _get_options():
 
 
 run_tests.options = _get_options()
+run_tests.__test__ = False
