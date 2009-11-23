@@ -19,13 +19,20 @@ import nose.core
 
 from django_nose.plugin import ResultPlugin
 
+def run_gis_tests(test_labels, verbosity=1, interactive=True):
+    """Test runner that invokes nose with a spatial database for GeoDjango."""
+    run_tests(test_labels, verbosity=1, interactive=True, use_spatial_db=True)
 
-def run_tests(test_labels, verbosity=1, interactive=True):
+def run_tests(test_labels, verbosity=1, interactive=True, use_spatial_db=False):
     """Test runner that invokes nose."""
     # Prepare django for testing.
     utils.setup_test_environment()
     old_db_name = settings.DATABASE_NAME
-    connection.creation.create_test_db(verbosity, autoclobber=not interactive)
+    if use_spatial_db:
+        from django.contrib.gis.db.backend import create_test_spatial_db
+        create_test_spatial_db(verbosity, autoclobber=not interactive)
+    else:
+        connection.creation.create_test_db(verbosity, autoclobber=not interactive)
 
     # Pretend it's a production environment.
     settings.DEBUG = False
@@ -73,3 +80,6 @@ def _get_options():
 
 run_tests.options = _get_options()
 run_tests.__test__ = False
+
+run_gis_tests.options = _get_options()
+run_gis_tests.__test__ = False
