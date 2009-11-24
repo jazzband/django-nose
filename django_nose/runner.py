@@ -19,20 +19,19 @@ import nose.core
 
 from django_nose.plugin import ResultPlugin
 
-def run_gis_tests(test_labels, verbosity=1, interactive=True):
-    """Test runner that invokes nose with a spatial database for GeoDjango."""
-    run_tests(test_labels, verbosity=1, interactive=True, use_spatial_db=True)
 
-def run_tests(test_labels, verbosity=1, interactive=True, use_spatial_db=False):
+def run_tests(test_labels, verbosity=1, interactive=True, spatial_db=False):
     """Test runner that invokes nose."""
     # Prepare django for testing.
     utils.setup_test_environment()
     old_db_name = settings.DATABASE_NAME
-    if use_spatial_db:
+
+    if spatial_db:
         from django.contrib.gis.db.backend import create_test_spatial_db
         create_test_spatial_db(verbosity, autoclobber=not interactive)
     else:
-        connection.creation.create_test_db(verbosity, autoclobber=not interactive)
+        connection.creation.create_test_db(verbosity,
+                                           autoclobber=not interactive)
 
     # Pretend it's a production environment.
     settings.DEBUG = False
@@ -67,6 +66,11 @@ def run_tests(test_labels, verbosity=1, interactive=True, use_spatial_db=False):
         utils.teardown_test_environment()
 
 
+def run_gis_tests(test_labels, verbosity=1, interactive=True):
+    """Test runner that invokes nose with a spatial database for GeoDjango."""
+    run_tests(test_labels, verbosity, interactive, spatial_db=True)
+
+
 def _get_options():
     """Return all nose options that don't conflict with django options."""
     cfg_files = nose.core.all_config_files()
@@ -78,6 +82,7 @@ def _get_options():
                                        o.action != 'help')
 
 
+# Replace the builtin command options with the merged django/nose options.
 run_tests.options = _get_options()
 run_tests.__test__ = False
 

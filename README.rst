@@ -30,7 +30,7 @@ your ``INSTALLED_APPS`` in ``settings.py``: ::
 Then set ``TEST_RUNNER`` in ``settings.py``: ::
 
     TEST_RUNNER = 'django_nose.run_tests'
-    
+
 If you are using ``django.contrib.gis`` (GeoDjango) and need a spatial database
 to run your tests, use the GIS test runner instead: ::
 
