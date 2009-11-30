@@ -19,6 +19,15 @@ import nose.core
 
 from django_nose.plugin import ResultPlugin
 
+try:
+    any
+except NameError:
+    def any(iterable):
+        for element in iterable:
+            if element:
+                return True
+        return False
+
 
 def run_tests(test_labels, verbosity=1, interactive=True, spatial_db=False):
     """Test runner that invokes nose."""
