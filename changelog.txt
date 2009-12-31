@@ -1,0 +1,13 @@
+- 0.0.3 (12-31-09)
+
+  * Python 2.4 support (Blake Winton)
+  * GeoDjango spatial database support (Peter Baumgartner)
+  * Return the number of failing tests on the command line
+
+- 0.0.2 (10-01-09)
+
+  * rst readme (Rob Madole)
+
+- 0.0.1 (10-01-09)
+
+  * birth!
