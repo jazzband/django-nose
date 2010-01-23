@@ -53,10 +53,10 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
         the test case name with a colon. Filenames may be relative or
         absolute. Examples:
 
-        runner.run_tets('test.module')
-        runner.run_tets('another.test:TestCase.test_method')
-        runner.run_tets('a.test:TestCase')
-        runner.run_tets('/path/to/test/file.py:test_function')
+        runner.run_tests('test.module')
+        runner.run_tests('another.test:TestCase.test_method')
+        runner.run_tests('a.test:TestCase')
+        runner.run_tests('/path/to/test/file.py:test_function')
 
         Returns the number of tests that failed.
         """
