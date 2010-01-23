@@ -7,10 +7,10 @@ from django.core.management.base import BaseCommand
 from django.test.utils import get_runner
 
 
-test_runner = get_runner(settings)
+TestRunner = get_runner(settings)
 
-if hasattr(test_runner, 'options'):
-    extra_options = test_runner.options
+if hasattr(TestRunner, 'options'):
+    extra_options = TestRunner.options
 else:
     extra_options = []
 
@@ -39,6 +39,18 @@ class Command(BaseCommand):
             # during testings.  If we detected south, we need to fix syncdb.
             management._commands['syncdb'] = 'django.core'
 
-        failures = test_runner(test_labels, verbosity=verbosity, interactive=interactive)
+        if hasattr(TestRunner, 'func_name'):
+            # Pre 1.2 test runners were just functions,
+            # and did not support the 'failfast' option.
+            import warnings
+            warnings.warn(
+                'Function-based test runners are deprecated. Test runners should be classes with a run_tests() method.',
+                PendingDeprecationWarning
+            )
+            failures = TestRunner(test_labels, verbosity=verbosity, interactive=interactive)
+        else:
+            test_runner = TestRunner(verbosity=verbosity, interactive=interactive, failfast=failfast)
+            failures = test_runner.run_tests(test_labels)
+
         if failures:
             sys.exit(failures)
