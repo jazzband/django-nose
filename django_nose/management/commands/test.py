@@ -33,11 +33,7 @@ class Command(BaseCommand):
         interactive = options.get('interactive', True)
         failfast = options.get('failfast', False)
 
-        try:
-            import south
-        except ImportError:
-            pass
-        else:
+        if management._commands['syncdb'] == 'south':
             # South has its own test command that turns off migrations
             # during testings.  If we detected south, we need to fix syncdb.
             management._commands['syncdb'] = 'django.core'
