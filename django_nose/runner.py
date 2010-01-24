@@ -29,6 +29,10 @@ except NameError:
                 return True
         return False
 
+# This is a table of Django's "manage.py test" options which
+# correspond to nosetests options with a different name:
+OPTION_TRANSLATION = {'--failfast': '-x'}
+
 class NoseTestSuiteRunner(DjangoTestSuiteRunner):
     def run_suite(self, nose_argv):
         result_plugin = ResultPlugin()
@@ -71,13 +75,14 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
             nose_argv.extend(settings.NOSE_ARGS)
 
         # Skip over 'manage.py test' and any arguments handled by django.
-        django_opts = ['--noinput', '--failfast']
+        django_opts = ['--noinput']
         for opt in BaseCommand.option_list:
             django_opts.extend(opt._long_opts)
             django_opts.extend(opt._short_opts)
 
-        nose_argv.extend(opt for opt in sys.argv[2:] if
-                         not any(opt.startswith(d) for d in django_opts))
+        nose_argv.extend(OPTION_TRANSLATION.get(opt, opt)
+                         for opt in sys.argv[2:]
+                         if not any(opt.startswith(d) for d in django_opts))
 
         if self.verbosity >= 1:
             print ' '.join(nose_argv)
