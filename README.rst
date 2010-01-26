@@ -7,6 +7,14 @@ This package is most useful when installed with:
     * Django
     * nosetests
 
+
+Version Notes
+-------------
+
+The ``master`` branch of django-nose currently supports Django 1.1.  If you need
+Django trunk support, please check out the ``django-1.2`` branch.
+
+
 Installation
 ------------
 
