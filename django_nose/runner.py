@@ -63,7 +63,7 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
             get_tests(app)
         old_names = self.setup_databases()
 
-        nose_argv = ['nosetests']
+        nose_argv = ['nosetests', '--verbosity', str(self.verbosity)]
         if hasattr(settings, 'NOSE_ARGS'):
             nose_argv.extend(settings.NOSE_ARGS)
 
