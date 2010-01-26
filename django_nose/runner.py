@@ -12,7 +12,6 @@ import sys
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.db import connection
 from django.db.models import get_apps
 from django.test.simple import DjangoTestSuiteRunner, get_tests
 
@@ -33,29 +32,23 @@ except NameError:
 # correspond to nosetests options with a different name:
 OPTION_TRANSLATION = {'--failfast': '-x'}
 
+
 class NoseTestSuiteRunner(DjangoTestSuiteRunner):
+
     def run_suite(self, nose_argv):
         result_plugin = ResultPlugin()
         nose.core.TestProgram(argv=nose_argv, exit=False,
                               addplugins=[result_plugin])
         return result_plugin.result
 
-    def build_suite(self):
-        """Unused method
-
-        The build_suite() method of django.test.simple.DjangoTestSuiteRunner is
-        not used in django_nose.
-        """
-        pass
-
     def run_tests(self, test_labels, extra_tests=None):
         """
         Run the unit tests for all the test names in the provided list.
 
         Test names specified may be file or module names, and may optionally
-        indicate the test case to run by separating the module or file name from
-        the test case name with a colon. Filenames may be relative or
-        absolute. Examples:
+        indicate the test case to run by separating the module or file name
+        from the test case name with a colon. Filenames may be relative or
+        absolute.  Examples:
 
         runner.run_tests('test.module')
         runner.run_tests('another.test:TestCase.test_method')
@@ -91,6 +84,7 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
         self.teardown_databases(old_names)
         self.teardown_test_environment()
         return self.suite_result(result)
+
 
 def _get_options():
     """Return all nose options that don't conflict with django options."""
