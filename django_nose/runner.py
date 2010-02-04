@@ -12,8 +12,7 @@ import sys
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.db.models import get_apps
-from django.test.simple import DjangoTestSuiteRunner, get_tests
+from django.test.simple import DjangoTestSuiteRunner
 
 import nose.core
 
@@ -58,9 +57,6 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
         Returns the number of tests that failed.
         """
         self.setup_test_environment()
-        for app in get_apps():
-            # register models from .tests modules in apps
-            get_tests(app)
         old_names = self.setup_databases()
 
         nose_argv = ['nosetests', '--verbosity', str(self.verbosity)]
