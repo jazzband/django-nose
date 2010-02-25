@@ -30,11 +30,7 @@ class Command(BaseCommand):
         verbosity = int(options.get('verbosity', 1))
         interactive = options.get('interactive', True)
 
-        try:
-            import south
-        except ImportError:
-            pass
-        else:
+        if 'south' in settings.INSTALLED_APPS:
             # South has its own test command that turns off migrations
             # during testings.  If we detected south, we need to fix syncdb.
             management._commands['syncdb'] = 'django.core'
