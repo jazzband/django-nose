@@ -6,9 +6,9 @@ from django.conf import settings
 from django.test.utils import get_runner
 
 
-try:
+if 'south' in settings.INSTALLED_APPS:
     from south.management.commands.test import Command
-except ImportError:
+else:
     from django.core.management.commands.test import Command
 
 
