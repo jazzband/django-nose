@@ -31,9 +31,13 @@ class Command(BaseCommand):
         interactive = options.get('interactive', True)
 
         if 'south' in settings.INSTALLED_APPS:
-            # South has its own test command that turns off migrations
-            # during testings.  If we detected south, we need to fix syncdb.
-            management._commands['syncdb'] = 'django.core'
+            if hasattr(settings, "SOUTH_TESTS_MIGRATE") and not settings.SOUTH_TESTS_MIGRATE:
+                # point at the core syncdb command when creating tests
+                # tests should always be up to date with the most recent model structure
+                management._commands['syncdb'] = 'django.core'
+            else:
+                from south.management.commands.test import MigrateAndSyncCommand
+                management._commands['syncdb'] = MigrateAndSyncCommand()
 
         failures = test_runner(test_labels, verbosity=verbosity, interactive=interactive)
         if failures:
