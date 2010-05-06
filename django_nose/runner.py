@@ -77,7 +77,7 @@ def run_tests(test_labels, verbosity=1, interactive=True, spatial_db=False):
 
 def run_gis_tests(test_labels, verbosity=1, interactive=True):
     """Test runner that invokes nose with a spatial database for GeoDjango."""
-    run_tests(test_labels, verbosity, interactive, spatial_db=True)
+    return run_tests(test_labels, verbosity, interactive, spatial_db=True)
 
 
 def _get_options():
