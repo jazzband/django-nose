@@ -12,8 +12,7 @@ import sys
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.db import connection
-from django.test import utils
+from django.test.simple import DjangoTestSuiteRunner
 
 import nose.core
 
@@ -28,56 +27,60 @@ except NameError:
                 return True
         return False
 
+# This is a table of Django's "manage.py test" options which
+# correspond to nosetests options with a different name:
+OPTION_TRANSLATION = {'--failfast': '-x'}
 
-def run_tests(test_labels, verbosity=1, interactive=True, spatial_db=False):
-    """Test runner that invokes nose."""
-    # Prepare django for testing.
-    utils.setup_test_environment()
-    old_db_name = settings.DATABASE_NAME
 
-    if spatial_db:
-        from django.contrib.gis.db.backend import create_test_spatial_db
-        create_test_spatial_db(verbosity, autoclobber=not interactive)
-    else:
-        connection.creation.create_test_db(verbosity,
-                                           autoclobber=not interactive)
+class NoseTestSuiteRunner(DjangoTestSuiteRunner):
 
-    # Pretend it's a production environment.
-    settings.DEBUG = False
-
-    # We pass nose a list of arguments that looks like sys.argv, but customize
-    # to avoid unknown django arguments.
-    nose_argv = ['nosetests']
-    if hasattr(settings, 'NOSE_ARGS'):
-        nose_argv.extend(settings.NOSE_ARGS)
-
-    # Skip over 'manage.py test' and any arguments handled by django.
-    django_opts = ['--noinput']
-    for opt in BaseCommand.option_list:
-        django_opts.extend(opt._long_opts)
-        django_opts.extend(opt._short_opts)
-
-    nose_argv.extend(opt for opt in sys.argv[2:] if
-                     not any(opt.startswith(d) for d in django_opts))
-
-    if verbosity >= 1:
-        print ' '.join(nose_argv)
-
-    try:
+    def run_suite(self, nose_argv):
         result_plugin = ResultPlugin()
-        test_program = nose.core.TestProgram(argv=nose_argv, exit=False,
-                                             addplugins=[result_plugin])
-        result = result_plugin.result
-        return len(result.failures) + len(result.errors)
-    finally:
-        # Clean up django.
-        connection.creation.destroy_test_db(old_db_name, verbosity)
-        utils.teardown_test_environment()
+        nose.core.TestProgram(argv=nose_argv, exit=False,
+                              addplugins=[result_plugin])
+        return result_plugin.result
 
+    def run_tests(self, test_labels, extra_tests=None):
+        """
+        Run the unit tests for all the test names in the provided list.
 
-def run_gis_tests(test_labels, verbosity=1, interactive=True):
-    """Test runner that invokes nose with a spatial database for GeoDjango."""
-    return run_tests(test_labels, verbosity, interactive, spatial_db=True)
+        Test names specified may be file or module names, and may optionally
+        indicate the test case to run by separating the module or file name
+        from the test case name with a colon. Filenames may be relative or
+        absolute.  Examples:
+
+        runner.run_tests('test.module')
+        runner.run_tests('another.test:TestCase.test_method')
+        runner.run_tests('a.test:TestCase')
+        runner.run_tests('/path/to/test/file.py:test_function')
+
+        Returns the number of tests that failed.
+        """
+        self.setup_test_environment()
+        old_names = self.setup_databases()
+
+        nose_argv = ['nosetests', '--verbosity', str(self.verbosity)]
+        if hasattr(settings, 'NOSE_ARGS'):
+            nose_argv.extend(settings.NOSE_ARGS)
+
+        # Skip over 'manage.py test' and any arguments handled by django.
+        django_opts = ['--noinput']
+        for opt in BaseCommand.option_list:
+            django_opts.extend(opt._long_opts)
+            django_opts.extend(opt._short_opts)
+
+        nose_argv.extend(OPTION_TRANSLATION.get(opt, opt)
+                         for opt in sys.argv[2:]
+                         if not any(opt.startswith(d) for d in django_opts))
+
+        if self.verbosity >= 1:
+            print ' '.join(nose_argv)
+
+        result = self.run_suite(nose_argv)
+        self.teardown_databases(old_names)
+        self.teardown_test_environment()
+        # suite_result expects the suite as the first argument.  Fake it.
+        return self.suite_result({}, result)
 
 
 def _get_options():
@@ -92,8 +95,5 @@ def _get_options():
 
 
 # Replace the builtin command options with the merged django/nose options.
-run_tests.options = _get_options()
-run_tests.__test__ = False
-
-run_gis_tests.options = _get_options()
-run_gis_tests.__test__ = False
+NoseTestSuiteRunner.options = _get_options()
+NoseTestSuiteRunner.__test__ = False

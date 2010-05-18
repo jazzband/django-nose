@@ -8,11 +8,23 @@ This package is most useful when installed with:
     * nosetests
 
 
-Version Notes
--------------
+===========================
+Upgrading from Django < 1.2
+===========================
 
-The ``master`` branch of django-nose currently supports Django 1.1.  If you need
-Django trunk support, please check out the ``django-1.2`` branch.
+Django 1.2 switches to a `class-based test runner`_.  To use ``django-nose``
+with Django 1.2, change your ``TEST_RUNNER`` from ``django_nose.run_tests`` to
+``django_nose.NoseTestSuiteRunner``.
+
+``django_nose.run_tests`` will continue to work in Django 1.2, but will raise a
+warning.  In Django 1.3 it will stop working.
+
+If you were using ``django_nose.run_gis_tests``, you should also switch to
+``django_nose.NoseTestSuiteRunner`` and use one of the `spatial backends`_ in
+your ``DATABASES`` settings.
+
+.. _class-based test runner: http://docs.djangoproject.com/en/dev/releases/1.2/#function-based-test-runners
+.. _spatial backends: http://docs.djangoproject.com/en/dev/ref/contrib/gis/db-api/#id1
 
 
 Installation
@@ -37,12 +49,8 @@ your ``INSTALLED_APPS`` in ``settings.py``: ::
 
 Then set ``TEST_RUNNER`` in ``settings.py``: ::
 
-    TEST_RUNNER = 'django_nose.run_tests'
+    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
-If you are using ``django.contrib.gis`` (GeoDjango) and need a spatial database
-to run your tests, use the GIS test runner instead: ::
-
-    TEST_RUNNER = 'django_nose.run_gis_tests'
 
 Usage
 -----

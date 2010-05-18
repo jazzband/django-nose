@@ -1,3 +1,8 @@
+- 0.0.4 (???)
+  * Class-based test runner (Antti Kaihola)
+  * Django 1.2 compatibility (Antti Kaihola)
+  * Mapping Django verbosity to nose verbosity
+
 - 0.0.3 (12-31-09)
 
   * Python 2.4 support (Blake Winton)

@@ -27,3 +27,4 @@ django_test() {
 
 django_test 'settings' 'normal settings'
 django_test 'settings_with_south' 'with south in installed apps'
+django_test 'settings_old_style' 'django_nose.run_tests format'
