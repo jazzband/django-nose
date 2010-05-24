@@ -4,6 +4,8 @@
 Assertions that sort of follow Python unittest/Django test cases
 """
 
+from django.test.testcases import to_list
+
 from django.utils.encoding import smart_str
 
 from django.http import QueryDict
@@ -76,7 +78,35 @@ def assert_form_error(response, form, field, errors, msg_prefix=''):
     if msg_prefix:
         msg_prefix = '%s: ' % msg_prefix
 
-    assert False
+    # Put context(s) into a list to simplify processing.
+    contexts = to_list(response.context)
+
+    assert contexts, msg_prefix + 'Response did not use any contexts to render the response'
+
+    # Put error(s) into a list to simplify processing.
+    errors = to_list(errors)
+
+    found_form = False
+    for i, context in enumerate(contexts):
+        if form not in context:
+            continue
+        found_form = True
+        for err in errors:
+            if field:
+                if field in context[form].errors:
+                    field_errors = context[form].errors[field]
+                    assert err in field_errors, msg_prefix + "The field '%s' on form '%s' in context %d does not contain the error '%s' (actual errors: %s)" % (field, form, i, err, repr(field_errors))
+                elif field in context[form].fields:
+                    raise AssertionError(msg_prefix + "The field '%s' on form '%s' in context %d contains no errors" % (field, form, i))
+                else:
+                    raise AssertionError(msg_prefix + "The form '%s' in context %d does not contain the field '%s'" % (form, i, field))
+
+            else:
+                non_field_errors = context[form].non_field_errors()
+                assert err in non_field_errors, msg_prefix + "The form '%s' in context %d does not contain the non-field error '%s' (actual errors: %s)" % (form, i, err, non_field_errors)
+
+    if not found_form:
+        raise AssertionError(msg_prefix + "The form '%s' was not used to render the response" % form)
 
 def assert_template_used(response, template_name, msg_prefix=''):
     if msg_prefix:
