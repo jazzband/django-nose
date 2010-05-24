@@ -4,6 +4,8 @@
 Assertions that sort of follow Python unittest/Django test cases
 """
 
+from django.utils.encoding import smart_str
+
 from django.http import QueryDict
 
 from urlparse import urlsplit, urlunsplit
@@ -50,7 +52,15 @@ def assert_contains(response, text, count=None, status_code=200, msg_prefix=''):
     if msg_prefix:
         msg_prefix = '%s: ' % msg_prefix
 
-    assert False
+    assert response.status_code == status_code, msg_prefix + "Couldn't retrieve page: Response code was %d (expeced %d)" % (response.status_code, status_code)
+
+    text = smart_str(text, response._charset)
+    real_count = response.content.count(text)
+
+    if count is not None:
+        assert real_count == count, msg_prefix + "Found %d instances of '%s' in response (expected %d)" % (real_count, text, count)
+    else:
+        assert real_count != 0, msg_prefix + "Couldn't find '%s' in response" % text
 
 def assert_not_contains(response, text, status_code=200, msg_prefix=''):
     if msg_prefix:
