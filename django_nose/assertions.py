@@ -43,18 +43,33 @@ assert_raises = fail_unless_raises
 ## Django
 
 def assert_contains(response, text, count=None, status_code=200, msg_prefix=''):
+    if msg_prefix:
+        msg_prefix = '%s: ' % msg_prefix
+
     assert False
 
 def assert_not_contains(response, text, status_code=200, msg_prefix=''):
+    if msg_prefix:
+        msg_prefix = '%s: ' % msg_prefix
+
     assert False
 
 def assert_form_error(response, form, field, errors, msg_prefix=''):
+    if msg_prefix:
+        msg_prefix = '%s: ' % msg_prefix
+
     assert False
 
 def assert_template_used(response, template_name, msg_prefix=''):
+    if msg_prefix:
+        msg_prefix = '%s: ' % msg_prefix
+
     assert False
 
 def assert_redirects(response, expected_url, status_code=302, target_status_code=200, msg_prefix=''):
+    if msg_prefix:
+        msg_prefix = '%s: ' % msg_prefix
+
     assert False
 
 # EOF
