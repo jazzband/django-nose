@@ -112,7 +112,12 @@ def assert_template_used(response, template_name, msg_prefix=''):
     if msg_prefix:
         msg_prefix = '%s: ' % msg_prefix
 
-    assert False
+    template_names = [t.name for t in to_list(response.template)]
+    if not template_names:
+        raise AssertionError(msg_prefix + 'No templates used to render the response')
+
+    assert template_name in template_names, msg_prefix + "Template '%s' was not a template used to render the response. Actual template(s) used: %s" % (template_name, u', '.join(template_names))
+
 
 def assert_redirects(response, expected_url, status_code=302, target_status_code=200, host=None, msg_prefix=''):
     if msg_prefix:
