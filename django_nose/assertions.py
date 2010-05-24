@@ -160,6 +160,17 @@ def assert_redirects(response, expected_url, status_code=302, target_status_code
 
     assert url == expected_url, msg_prefix + "Response redirected to '%s, expected '%s'" % (url, expected_url)
 
+## New
+
+def assert_code(response, status_code, msg_prefix=''):
+    if msg_prefix:
+        msg_prefix = '%s: ' % msg_prefix
+
+    assert response.status_code == status_code, 'Response code was %d (expected %d)' % (response.status_code, status_code)
+
+def assert_ok(response, msg_prefix=''):
+    return assert_code(response, 200, msg_prefix=msg_prefix)
+
 # EOF
 
 
