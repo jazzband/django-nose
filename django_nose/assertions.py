@@ -4,6 +4,10 @@
 Assertions that sort of follow Python unittest/Django test cases
 """
 
+from django.http import QueryDict
+
+from urlparse import urlsplit, urlunsplit
+
 ## Python
 
 def fail_unless_equal(first, second, msg=None):
@@ -66,11 +70,40 @@ def assert_template_used(response, template_name, msg_prefix=''):
 
     assert False
 
-def assert_redirects(response, expected_url, status_code=302, target_status_code=200, msg_prefix=''):
+def assert_redirects(response, expected_url, status_code=302, target_status_code=200, host=None, msg_prefix=''):
     if msg_prefix:
         msg_prefix = '%s: ' % msg_prefix
 
-    assert False
+    if hasattr(response, 'redirect_chain'):
+        # The request was a followed redirect
+        assert len(response.redirect_chain), msg_prefix + "Response didn't redirect as expected: Response code was %d (expected %d)" % (response.status_code, status_code)
+
+        assert response.redirect_chain[0][1] == status_code, msg_prefix + "Initial response didn't redirect as expected: Response code was %d (expected %d)" % (response.redirect_chain[0][1], status_Code)
+
+        # 2010-05-24: mjt: is this a bug in Django?
+        url, status_code = response.redirect_chain[-1]
+
+        # 2010-05-24: mjt: Django says response.status_code == but we do not
+        assert status_code == target_status_code, msg_prefix + "Response didn't redirect as expected: Final Response code was %d (expected %d)" % (status_code, target_status_code)
+
+    else:
+        # Not a followed redirect
+        assert response.status_code == status_code, msg_prefix + "Response didn't redirect as expected: Response code was %d (expected %d)" % (response.status_code, status_code)
+
+        url = response['Location']
+        scheme, netloc, path, query, fragment = urlsplit(url)
+
+        redirect_response = response.client.get(path, QueryDict(query))
+
+        # Get the redirection page, using the same client that was used
+        # to obtain the original response.
+        assert redirect_response.status_code == target_status_code, msg_prefix + "Couldn't retrieve redirection page '%s': response code was %d (expected %d)" % (path, redirect_response.status_code, target_status_code)
+
+    e_scheme, e_netloc, e_path, e_query, e_fragment = urlsplit(expected_url)
+    if not (e_scheme or e_netloc):
+        expected_url = urlunsplit(('http', host or 'testserver', e_path, e_query, e_fragment))
+
+    assert url == expected_url, msg_prefix + "Response redirected to '%s, expected '%s'" % (url, expected_url)
 
 # EOF
 
