@@ -66,7 +66,11 @@ def assert_not_contains(response, text, status_code=200, msg_prefix=''):
     if msg_prefix:
         msg_prefix = '%s: ' % msg_prefix
 
-    assert False
+    assert response.status_code == status_code, msg_prefix + "Couldn't retrieve page: Response code was %d (expeced %d)" % (response.status_code, status_code)
+
+    text = smart_str(text, response._charset)
+
+    assert response.content.count(text) == 0, msg_prefix + "Response should not contain '%s'" % text
 
 def assert_form_error(response, form, field, errors, msg_prefix=''):
     if msg_prefix:
