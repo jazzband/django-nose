@@ -118,6 +118,12 @@ def assert_template_used(response, template_name, msg_prefix=''):
 
     assert template_name in template_names, msg_prefix + "Template '%s' was not a template used to render the response. Actual template(s) used: %s" % (template_name, u', '.join(template_names))
 
+def assert_template_not_used(response, template_name, msg_prefix=''):
+    if msg_prefix:
+        msg_prefix = '%s: ' % msg_prefix
+
+    template_names = [t.name for t in to_list(response.template)]
+    assert template_name not in template_names, "Template '%s' was used unexpectedly in rendering the response" % template_name
 
 def assert_redirects(response, expected_url, status_code=302, target_status_code=200, host=None, msg_prefix=''):
     if msg_prefix:
