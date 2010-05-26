@@ -40,6 +40,9 @@ del pep8
 ## New
 
 def assert_code(response, status_code, msg_prefix=''):
+    """Asserts the response was returned with the given status code
+    """
+
     if msg_prefix:
         msg_prefix = '%s: ' % msg_prefix
 
@@ -48,6 +51,9 @@ def assert_code(response, status_code, msg_prefix=''):
             (response.status_code, status_code)
 
 def assert_ok(response, msg_prefix=''):
+    """Asserts the response was returned with status 200 (OK)
+    """
+
     return assert_code(response, 200, msg_prefix=msg_prefix)
 
 # EOF
