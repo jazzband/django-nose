@@ -43,7 +43,9 @@ def assert_code(response, status_code, msg_prefix=''):
     if msg_prefix:
         msg_prefix = '%s: ' % msg_prefix
 
-    assert response.status_code == status_code, 'Response code was %d (expected %d)' % (response.status_code, status_code)
+    assert response.status_code == status_code, \
+        'Response code was %d (expected %d)' % \
+            (response.status_code, status_code)
 
 def assert_ok(response, msg_prefix=''):
     return assert_code(response, 200, msg_prefix=msg_prefix)
