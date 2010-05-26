@@ -1,7 +1,7 @@
 # vim: tabstop=4 expandtab autoindent shiftwidth=4 fileencoding=utf-8
 
 """
-Assertions that sort of follow Python unittest/Django test cases
+Provides Nose and Django test case assert functions
 """
 
 from django.test.testcases import TestCase
