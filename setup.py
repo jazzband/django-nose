@@ -10,7 +10,7 @@ setup(
     author_email='me@jeffbalogh.org',
     url='http://github.com/jbalogh/django-nose',
     license='BSD',
-    packages=find_packages(),
+    packages=find_packages(exclude=['testapp','testapp/*']),
     include_package_data=True,
     zip_safe=False,
     install_requires=['nose'],
