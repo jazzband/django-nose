@@ -59,7 +59,7 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
         self.setup_test_environment()
         old_names = self.setup_databases()
 
-        nose_argv = ['nosetests', '--verbosity', str(self.verbosity)]
+        nose_argv = ['nosetests', '--verbosity', str(self.verbosity)] + list(test_labels)
         if hasattr(settings, 'NOSE_ARGS'):
             nose_argv.extend(settings.NOSE_ARGS)
 
@@ -71,7 +71,7 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
 
         nose_argv.extend(OPTION_TRANSLATION.get(opt, opt)
                          for opt in sys.argv[2:]
-                         if not any(opt.startswith(d) for d in django_opts))
+                         if opt.startswith('-') and not any(opt.startswith(d) for d in django_opts))
 
         if self.verbosity >= 1:
             print ' '.join(nose_argv)
