@@ -70,7 +70,7 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
             django_opts.extend(opt._short_opts)
 
         nose_argv.extend(OPTION_TRANSLATION.get(opt, opt)
-                         for opt in sys.argv[2:]
+                         for opt in sys.argv[1:]
                          if opt.startswith('-') and not any(opt.startswith(d) for d in django_opts))
 
         if self.verbosity >= 1:
