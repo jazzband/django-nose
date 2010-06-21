@@ -16,7 +16,7 @@ from django.test.simple import DjangoTestSuiteRunner
 
 import nose.core
 
-from django_nose.plugin import ResultPlugin
+from django_nose.plugin import DjangoSetUpPlugin, ResultPlugin
 
 try:
     any
@@ -35,9 +35,11 @@ OPTION_TRANSLATION = {'--failfast': '-x'}
 class NoseTestSuiteRunner(DjangoTestSuiteRunner):
 
     def run_suite(self, nose_argv):
+        django_setup_plugin = DjangoSetUpPlugin(self)
+
         result_plugin = ResultPlugin()
         nose.core.TestProgram(argv=nose_argv, exit=False,
-                              addplugins=[result_plugin])
+                              addplugins=[django_setup_plugin, result_plugin])
         return result_plugin.result
 
     def run_tests(self, test_labels, extra_tests=None):
@@ -56,9 +58,6 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
 
         Returns the number of tests that failed.
         """
-        self.setup_test_environment()
-        old_names = self.setup_databases()
-
         nose_argv = ['nosetests', '--verbosity', str(self.verbosity)] + list(test_labels)
         if hasattr(settings, 'NOSE_ARGS'):
             nose_argv.extend(settings.NOSE_ARGS)
@@ -77,8 +76,6 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
             print ' '.join(nose_argv)
 
         result = self.run_suite(nose_argv)
-        self.teardown_databases(old_names)
-        self.teardown_test_environment()
         # suite_result expects the suite as the first argument.  Fake it.
         return self.suite_result({}, result)
 
