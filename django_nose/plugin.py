@@ -26,6 +26,11 @@ class DjangoSetUpPlugin(object):
     name = "django setup"
     enabled = True
 
+    # We need this to run before the coverage plugin (which has a score
+    # of 500), so that we still have a stdout for the user interaction
+    # Django sometimes wants to do during test database setup.
+    score = 700
+
     def __init__(self, runner):
         super(DjangoSetUpPlugin, self).__init__()
         self.runner = runner
