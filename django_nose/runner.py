@@ -13,6 +13,8 @@ import sys
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.test.simple import DjangoTestSuiteRunner
+from django.utils.importlib import import_module
+from django.core import exceptions
 
 import nose.core
 
@@ -38,8 +40,13 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
         django_setup_plugin = DjangoSetUpPlugin(self)
 
         result_plugin = ResultPlugin()
+        plugins_to_add = [django_setup_plugin, result_plugin]
+
+        for plugin in _get_plugins_from_settings():
+            plugins_to_add.append(plugin)
+
         nose.core.TestProgram(argv=nose_argv, exit=False,
-                              addplugins=[django_setup_plugin, result_plugin])
+                              addplugins=plugins_to_add)
         return result_plugin.result
 
     def run_tests(self, test_labels, extra_tests=None):
@@ -90,6 +97,27 @@ def _get_options():
     return tuple(o for o in options if o.dest not in django_opts and
                                        o.action != 'help')
 
+def _get_plugins_from_settings():
+    if hasattr(settings, 'NOSE_PLUGINS'):
+        for plg_path in settings.NOSE_PLUGINS:
+            try:
+                dot = plg_path.rindex('.')
+            except ValueError:
+                raise exceptions.ImproperlyConfigured(
+                                    '%s isn\'t a Nose plugin module' % plg_path)
+            p_mod, p_classname = plg_path[:dot], plg_path[dot+1:]
+            try:
+                mod = import_module(p_mod)
+            except ImportError, e:
+                raise exceptions.ImproperlyConfigured(
+                        'Error importing Nose plugin module %s: "%s"' % (p_mod, e))
+            try:
+                p_class = getattr(mod, p_classname)
+            except AttributeError:
+                raise exceptions.ImproperlyConfigured(
+                        'Nose plugin module "%s" does not define a "%s" class' % (
+                                                                p_mod, p_classname))
+            yield p_class()
 
 # Replace the builtin command options with the merged django/nose options.
 NoseTestSuiteRunner.options = _get_options()

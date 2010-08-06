@@ -58,6 +58,33 @@ Usage
 See ``django help test`` for all the options nose provides, and look to the `nose
 docs`_ for more help with nose.
 
+Customization
+-------------
+
+Always Passing The Same Options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To always set the same command line options you can use a nose.cfg or setup.cfg
+(as usual) or you can specify them in settings.py like this::
+
+    NOSE_ARGS = ['--failed', '--stop']
+
+Using Custom Plugins
+~~~~~~~~~~~~~~~~~~~~
+
+If you need to make a couple plugins specifically for your Django app, you can
+put your plugin class somewhere within your app and load them from settings.py
+like this::
+
+    NOSE_PLUGINS = [
+        'yourapp.tests.plugins.SystematicDysfunctioner',
+        # ...
+    ]
+
+Just like middleware or anything else, each string must be a dot separated,
+importable path to an actual class.  Each plugin class will be instantiated and
+added to the Nose test runner.
+
 Caveats
 -------
 
