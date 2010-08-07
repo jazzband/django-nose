@@ -67,14 +67,16 @@ Always Passing The Same Options
 To always set the same command line options you can use a nose.cfg or setup.cfg
 (as usual) or you can specify them in settings.py like this::
 
+To always set the same command line options you can use a `nose.cfg or
+setup.cfg`_ (as usual) or you can specify them in settings.py like this::
+
     NOSE_ARGS = ['--failed', '--stop']
 
 Using Custom Plugins
 ~~~~~~~~~~~~~~~~~~~~
 
-If you need to make a couple plugins specifically for your Django app, you can
-put your plugin class somewhere within your app and load them from settings.py
-like this::
+If you need to `make custom plugins`_, you can define each plugin class
+somewhere within your app and load them from settings.py like this::
 
     NOSE_PLUGINS = [
         'yourapp.tests.plugins.SystematicDysfunctioner',
@@ -93,4 +95,6 @@ testing.  Make sure that ``django_nose`` comes *after* ``south`` in
 ``INSTALLED_APPS`` so that django_nose's test command is used.
 
 .. _nose docs: http://somethingaboutorange.com/mrl/projects/nose/
+.. _nose.cfg or setup.cfg: http://somethingaboutorange.com/mrl/projects/nose/0.11.2/usage.html#configuration
+.. _make custom plugins: http://somethingaboutorange.com/mrl/projects/nose/0.11.2/plugins.html#writing-plugins
 .. _South: http://south.aeracode.org/
