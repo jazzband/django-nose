@@ -1,4 +1,12 @@
-- 0.0.4 (???)
+- 0.1.2 (08-14-10)
+  * run_tests API support (carjm)
+  * better coverage numbers (rozza & miracle2k)
+  * support for adding custom nose plugins (kumar303)
+
+- 0.1.1 (06-01-10)
+  * Cleaner installation (Michael Fladischer)
+
+- 0.1 (05-18-10)
   * Class-based test runner (Antti Kaihola)
   * Django 1.2 compatibility (Antti Kaihola)
   * Mapping Django verbosity to nose verbosity
