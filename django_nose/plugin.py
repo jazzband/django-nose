@@ -1,4 +1,4 @@
-
+import sys
 
 class ResultPlugin(object):
     """
@@ -22,23 +22,23 @@ class DjangoSetUpPlugin(object):
     This allows coverage to report on all code imported and used during the
     initialisation of the test runner.
     """
-
     name = "django setup"
     enabled = True
-
-    # We need this to run before the coverage plugin (which has a score
-    # of 500), so that we still have a stdout for the user interaction
-    # Django sometimes wants to do during test database setup.
-    score = 700
 
     def __init__(self, runner):
         super(DjangoSetUpPlugin, self).__init__()
         self.runner = runner
+        self.sys_stdout = sys.stdout
 
     def begin(self):
         """Setup the environment"""
+        sys_stdout = sys.stdout
+        sys.stdout = self.sys_stdout
+
         self.runner.setup_test_environment()
         self.old_names = self.runner.setup_databases()
+
+        sys.stdout = sys_stdout
 
     def finalize(self, result):
         """Destroy the environment"""
