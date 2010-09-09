@@ -1,4 +1,4 @@
-VERSION = (0, 0, 4)
+VERSION = (0, 1, 3)
 __version__ = '.'.join(map(str, VERSION))
 
 from django_nose.runner import NoseTestSuiteRunner

@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-nose',
-    version='0.1.2',
+    version='0.1.3',
     description='Django test runner that uses nose.',
     long_description=open('README.rst').read(),
     author='Jeff Balogh',
