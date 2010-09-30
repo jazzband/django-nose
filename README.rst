@@ -64,9 +64,6 @@ Customization
 Always Passing The Same Options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To always set the same command line options you can use a nose.cfg or setup.cfg
-(as usual) or you can specify them in settings.py like this::
-
 To always set the same command line options you can use a `nose.cfg or
 setup.cfg`_ (as usual) or you can specify them in settings.py like this::
 
