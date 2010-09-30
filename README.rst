@@ -55,8 +55,8 @@ Then set ``TEST_RUNNER`` in ``settings.py``: ::
 Usage
 -----
 
-See ``django help test`` for all the options nose provides, and look to the `nose
-docs`_ for more help with nose.
+See ``./manage.py help test`` for all the options nose provides, and look to
+the `nose docs`_ for more help with nose.
 
 Customization
 -------------
