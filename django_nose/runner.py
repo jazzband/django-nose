@@ -92,6 +92,7 @@ def _get_options():
     cfg_files = nose.core.all_config_files()
     manager = nose.core.DefaultPluginManager()
     config = nose.core.Config(env=os.environ, files=cfg_files, plugins=manager)
+    config.plugins.addPlugins(list(_get_plugins_from_settings()))
     options = config.getParser().option_list
     django_opts = [opt.dest for opt in BaseCommand.option_list] + ['version']
     return tuple(o for o in options if o.dest not in django_opts and
