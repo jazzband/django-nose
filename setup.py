@@ -1,11 +1,13 @@
+import os
 from setuptools import setup, find_packages
 
+ROOT = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name='django-nose',
     version='0.1.3',
     description='Django test runner that uses nose.',
-    long_description=open('README.rst').read(),
+    long_description=open(os.path.join(ROOT, 'README.rst')).read(),
     author='Jeff Balogh',
     author_email='me@jeffbalogh.org',
     url='http://github.com/jbalogh/django-nose',
