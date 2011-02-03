@@ -4,7 +4,7 @@ Requirements
 
 This package is most useful when installed with:
 
-    * Django
+    * Django 1.2+
     * nosetests
 
 
@@ -95,3 +95,12 @@ testing.  Make sure that ``django_nose`` comes *after* ``south`` in
 .. _nose.cfg or setup.cfg: http://somethingaboutorange.com/mrl/projects/nose/0.11.2/usage.html#configuration
 .. _make custom plugins: http://somethingaboutorange.com/mrl/projects/nose/0.11.2/plugins.html#writing-plugins
 .. _South: http://south.aeracode.org/
+
+
+======================
+Support for Django 1.1
+======================
+
+If you want to use django-nose with Django 1.1, use
+https://github.com/jbalogh/django-nose/tree/django-1.1 or
+http://pypi.python.org/pypi/django-nose/0.0.3.
