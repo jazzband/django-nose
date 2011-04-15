@@ -5,7 +5,7 @@ Requirements
 This package is most useful when installed with:
 
     * Django 1.2+
-    * nosetests
+    * nose
 
 
 ===========================
