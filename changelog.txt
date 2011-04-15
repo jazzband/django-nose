@@ -1,3 +1,9 @@
+- 0.1.3 (04-15-10)
+  * Even better coverage support (rozza)
+  * README fixes (carljm and ionelmc)
+  * optparse OptionGroups are handled better (outofculture)
+  * nose plugins are loaded before listing options
+
 - 0.1.2 (08-14-10)
   * run_tests API support (carjm)
   * better coverage numbers (rozza & miracle2k)
