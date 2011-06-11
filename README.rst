@@ -58,6 +58,32 @@ Usage
 See ``./manage.py help test`` for all the options nose provides, and look to
 the `nose docs`_ for more help with nose.
 
+Assertions
+----------
+
+``django-nose.tools`` provides pep8 versions of Django's TestCase asserts
+and some of its own as functions. ::
+
+   assert_redirects(response, expected_url, status_code=302, target_status_code=200, host=None, msg_prefix='')
+
+   assert_contains(response, text, count=None, status_code=200, msg_prefix='')
+   assert_not_contains(response, text, count=None, status_code=200, msg_prefix='')
+
+   assert_form_error(response, form, field, errors, msg_prefix='')
+
+   assert_template_used(response, template_name, msg_prefix='')
+   assert_template_not_used(response, template_name, msg_prefix='')
+
+   assert_queryset_equal(qs, values, transform=repr)
+
+   assert_num_queries(num, func=None, *args, **kwargs)
+
+   assert_code(response, status_code, msg_prefix='')
+
+   assert_ok(response, msg_prefix='')
+
+   assert_mail_count(count, msg=None)
+
 Customization
 -------------
 
