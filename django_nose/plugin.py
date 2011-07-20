@@ -38,7 +38,6 @@ class DjangoSetUpPlugin(object):
         self.sys_stderr = sys.stderr
 
     def begin(self):
-        self.started = False
         self.add_apps = set()
 
     def beforeImport(self, filename, module):
@@ -58,12 +57,7 @@ class DjangoSetUpPlugin(object):
         if os.path.exists(models_path):
             self.add_apps.add(module.rsplit('.', 1)[0])
 
-    def beforeTest(self, test):
-        if self.started:
-            return
-
-        self.started = True
-
+    def prepareTestRunner(self, test):
         if self.add_apps:
             settings.INSTALLED_APPS = set(settings.INSTALLED_APPS)
             for app in self.add_apps:
@@ -101,6 +95,6 @@ class DjangoSetUpPlugin(object):
         sys.stderr = sys_stderr
 
     def finalize(self, result):
-        if self.started and hasattr(self, 'old_names'):
+        if hasattr(self, 'old_names'):
             self.runner.teardown_databases(self.old_names)
             self.runner.teardown_test_environment()
