@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db import connections, router
 from django.db.models import signals
 from django.db.models.loading import get_apps, get_models, load_app
+from django.test.testcases import TransactionTestCase
 
 class ResultPlugin(object):
     """
@@ -21,6 +22,8 @@ class ResultPlugin(object):
     def finalize(self, result):
         self.result = result
 
+class _EmptyClass(object):
+    pass
 
 class DjangoSetUpPlugin(object):
     """
@@ -36,9 +39,19 @@ class DjangoSetUpPlugin(object):
         self.runner = runner
         self.sys_stdout = sys.stdout
         self.sys_stderr = sys.stderr
+        self.needs_db = False
+        self.started = False
 
     def begin(self):
         self.add_apps = set()
+
+    def wantClass(self, cls):
+        if issubclass(cls, TransactionTestCase):
+            self.needs_db = True
+
+    def wantMethod(self, method):
+        if issubclass(method.im_class, TransactionTestCase):
+            self.needs_db = True
 
     def beforeImport(self, filename, module):
         # handle case of tests.models
@@ -58,6 +71,12 @@ class DjangoSetUpPlugin(object):
             self.add_apps.add(module.rsplit('.', 1)[0])
 
     def prepareTestRunner(self, test):
+        cur_stdout = sys.stdout
+        cur_stderr = sys.stderr
+
+        sys.stdout = self.sys_stdout
+        sys.stderr = self.sys_stderr
+
         if self.add_apps:
             settings.INSTALLED_APPS = set(settings.INSTALLED_APPS)
             for app in self.add_apps:
@@ -66,35 +85,35 @@ class DjangoSetUpPlugin(object):
                     settings.INSTALLED_APPS.add(app)
             settings.INSTALLED_APPS = tuple(settings.INSTALLED_APPS)
 
-        sys_stdout = sys.stdout
-        sys_stderr = sys.stderr
-        sys.stdout = self.sys_stdout
-        sys.stderr = self.sys_stderr
-
         get_apps()
 
         self.runner.setup_test_environment()
 
-        # HACK: We need to kill post_syncdb receivers to stop them from sending when the databases
-        #       arent fully ready.
-        post_syncdb_receivers = signals.post_syncdb.receivers
-        signals.post_syncdb.receivers = []
-        self.old_names = self.runner.setup_databases()
-        signals.post_syncdb.receivers = post_syncdb_receivers
+        if self.needs_db:
+            # HACK: We need to kill post_syncdb receivers to stop them from sending when the databases
+            #       arent fully ready.
+            post_syncdb_receivers = signals.post_syncdb.receivers
+            signals.post_syncdb.receivers = []
+            self.old_names = self.runner.setup_databases()
+            signals.post_syncdb.receivers = post_syncdb_receivers
 
-        for app in get_apps():
-            app_models = list(get_models(app, include_auto_created=True))
-            for db in connections:
-                all_models = [m for m in app_models if router.allow_syncdb(db, m)]
-                if not all_models:
-                    continue
-                signals.post_syncdb.send(app=app, created_models=all_models, verbosity=self.runner.verbosity,
-                                         db=db, sender=app, interactive=False)
+            for app in get_apps():
+                app_models = list(get_models(app, include_auto_created=True))
+                for db in connections:
+                    all_models = [m for m in app_models if router.allow_syncdb(db, m)]
+                    if not all_models:
+                        continue
+                    signals.post_syncdb.send(app=app, created_models=all_models, verbosity=self.runner.verbosity,
+                                             db=db, sender=app, interactive=False)
 
-        sys.stdout = sys_stdout
-        sys.stderr = sys_stderr
+        sys.stdout = cur_stdout
+        sys.stderr = cur_stderr
+
+        self.started = True
 
     def finalize(self, result):
-        if hasattr(self, 'old_names'):
-            self.runner.teardown_databases(self.old_names)
+        if self.started:
+            if self.needs_db:
+                self.runner.teardown_databases(self.old_names)
+            
             self.runner.teardown_test_environment()
