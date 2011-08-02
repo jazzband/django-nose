@@ -65,7 +65,8 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
 
         Returns the number of tests that failed.
         """
-        nose_argv = ['nosetests', '--verbosity', str(self.verbosity)] + list(test_labels)
+        nose_argv = (['nosetests', '--verbosity', str(self.verbosity)]
+                     + list(test_labels))
         if hasattr(settings, 'NOSE_ARGS'):
             nose_argv.extend(settings.NOSE_ARGS)
 
@@ -75,9 +76,10 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
             django_opts.extend(opt._long_opts)
             django_opts.extend(opt._short_opts)
 
-        nose_argv.extend(OPTION_TRANSLATION.get(opt, opt)
-                         for opt in sys.argv[1:]
-                         if opt.startswith('-') and not any(opt.startswith(d) for d in django_opts))
+        nose_argv.extend(
+            OPTION_TRANSLATION.get(opt, opt) for opt in sys.argv[1:]
+            if opt.startswith('-')
+               and not any(opt.startswith(d) for d in django_opts))
 
         if self.verbosity >= 1:
             print ' '.join(nose_argv)
@@ -98,26 +100,28 @@ def _get_options():
     return tuple(o for o in options if o.dest not in django_opts and
                                        o.action != 'help')
 
+
 def _get_plugins_from_settings():
     if hasattr(settings, 'NOSE_PLUGINS'):
         for plg_path in settings.NOSE_PLUGINS:
             try:
                 dot = plg_path.rindex('.')
             except ValueError:
-                raise exceptions.ImproperlyConfigured(
-                                    '%s isn\'t a Nose plugin module' % plg_path)
+                msg = "%s isn't a Nose plugin module" % plg_path
+                raise exceptions.ImproperlyConfigured(msg)
             p_mod, p_classname = plg_path[:dot], plg_path[dot+1:]
             try:
                 mod = import_module(p_mod)
             except ImportError, e:
-                raise exceptions.ImproperlyConfigured(
-                        'Error importing Nose plugin module %s: "%s"' % (p_mod, e))
+                msg = ('Error importing Nose plugin module %s: "%s"' %
+                       (p_mod, e))
+                raise exceptions.ImproperlyConfigured(msg)
             try:
                 p_class = getattr(mod, p_classname)
             except AttributeError:
-                raise exceptions.ImproperlyConfigured(
-                        'Nose plugin module "%s" does not define a "%s" class' % (
-                                                                p_mod, p_classname))
+                msg = ('Nose plugin module "%s" does not define a "%s" class' %
+                       (p_mod, p_classname))
+                raise exceptions.ImproperlyConfigured(msg)
             yield p_class()
 
 # Replace the builtin command options with the merged django/nose options.

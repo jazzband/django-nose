@@ -6,6 +6,7 @@ from django.db import connections, router
 from django.db.models import signals
 from django.db.models.loading import get_apps, get_models, load_app
 
+
 class ResultPlugin(object):
     """
     Captures the TestResult object for later inspection.
@@ -47,7 +48,7 @@ class DjangoSetUpPlugin(object):
             module = module.rsplit('.', 1)[0]
         else:
             filepath = filename
-        
+
         models_path = os.path.join(filepath, 'models.py')
         if os.path.exists(models_path):
             self.add_apps.add(module)
@@ -75,8 +76,8 @@ class DjangoSetUpPlugin(object):
 
         self.runner.setup_test_environment()
 
-        # HACK: We need to kill post_syncdb receivers to stop them from sending when the databases
-        #       arent fully ready.
+        # HACK: We need to kill post_syncdb receivers to stop them from sending
+        # when the databases arent fully ready.
         post_syncdb_receivers = signals.post_syncdb.receivers
         signals.post_syncdb.receivers = []
         self.old_names = self.runner.setup_databases()
@@ -85,10 +86,12 @@ class DjangoSetUpPlugin(object):
         for app in get_apps():
             app_models = list(get_models(app, include_auto_created=True))
             for db in connections:
-                all_models = [m for m in app_models if router.allow_syncdb(db, m)]
+                all_models = [m for m in app_models
+                              if router.allow_syncdb(db, m)]
                 if not all_models:
                     continue
-                signals.post_syncdb.send(app=app, created_models=all_models, verbosity=self.runner.verbosity,
+                signals.post_syncdb.send(app=app, created_models=all_models,
+                                         verbosity=self.runner.verbosity,
                                          db=db, sender=app, interactive=False)
 
         sys.stdout = sys_stdout
