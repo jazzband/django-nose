@@ -49,6 +49,10 @@ class DjangoSetUpPlugin(object):
         if issubclass(cls, TransactionTestCase):
             self.needs_db = True
 
+    def wantMethod(self, method):
+        if issubclass(method.im_class, TransactionTestCase):
+            self.needs_db = True
+
     def beforeImport(self, filename, module):
         # handle case of tests.models
         if not os.path.isdir(filename):
