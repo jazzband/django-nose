@@ -30,6 +30,11 @@ class DjangoSetUpPlugin(object):
     Configures Django to setup and tear down the environment.
     This allows coverage to report on all code imported and used during the
     initialisation of the test runner.
+    
+    Only sets up databases if a single class inherits from
+    ``django.test.testcases.TransactionTestCase``.
+    
+    Also ensures you don't run the same test case multiple times.
     """
     name = "django setup"
     enabled = True
@@ -41,6 +46,7 @@ class DjangoSetUpPlugin(object):
         self.sys_stderr = sys.stderr
         self.needs_db = False
         self.started = False
+        self._registry
 
     def begin(self):
         self.add_apps = set()
@@ -49,9 +55,22 @@ class DjangoSetUpPlugin(object):
         if issubclass(cls, TransactionTestCase):
             self.needs_db = True
 
+        if cls in self._registry:
+            return False
+        self._registry.add(id(cls))
+    
     def wantMethod(self, method):
         if issubclass(method.im_class, TransactionTestCase):
             self.needs_db = True
+        
+        if method in self._registry:
+            return False
+        self._registry.add(id(method))
+
+    def wantFunction(self, function):
+        if function in self._registry:
+            return False
+        self._registry.add(id(function))
 
     def beforeImport(self, filename, module):
         # handle case of tests.models
