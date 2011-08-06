@@ -57,7 +57,7 @@ class DjangoSetUpPlugin(object):
 
         if cls in self._registry:
             return False
-        self._registry.add(id(cls))
+        self._registry.add(cls)
     
     def wantMethod(self, method):
         if issubclass(method.im_class, TransactionTestCase):
@@ -65,12 +65,12 @@ class DjangoSetUpPlugin(object):
         
         if method in self._registry:
             return False
-        self._registry.add(id(method))
+        self._registry.add(method)
 
     def wantFunction(self, function):
         if function in self._registry:
             return False
-        self._registry.add(id(function))
+        self._registry.add(function)
 
     def beforeImport(self, filename, module):
         # handle case of tests.models
