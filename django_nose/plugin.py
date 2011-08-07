@@ -2,9 +2,7 @@ import os.path
 import sys
 
 from django.conf import settings
-from django.db import connections, router
-from django.db.models import signals
-from django.db.models.loading import get_apps, get_models, load_app
+from django.db.models.loading import get_apps, load_app
 from django.test.testcases import TransactionTestCase
 
 class ResultPlugin(object):
@@ -109,21 +107,7 @@ class DjangoSetUpPlugin(object):
         self.runner.setup_test_environment()
 
         if self.needs_db:
-            # HACK: We need to kill post_syncdb receivers to stop them from sending when the databases
-            #       arent fully ready.
-            post_syncdb_receivers = signals.post_syncdb.receivers
-            signals.post_syncdb.receivers = []
             self.old_names = self.runner.setup_databases()
-            signals.post_syncdb.receivers = post_syncdb_receivers
-
-            for app in get_apps():
-                app_models = list(get_models(app, include_auto_created=True))
-                for db in connections:
-                    all_models = [m for m in app_models if router.allow_syncdb(db, m)]
-                    if not all_models:
-                        continue
-                    signals.post_syncdb.send(app=app, created_models=all_models, verbosity=self.runner.verbosity,
-                                             db=db, sender=app, interactive=False)
 
         sys.stdout = cur_stdout
         sys.stderr = cur_stderr
