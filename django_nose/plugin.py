@@ -44,7 +44,7 @@ class DjangoSetUpPlugin(object):
         self.sys_stderr = sys.stderr
         self.needs_db = False
         self.started = False
-        self._registry
+        self._registry = set()
 
     def begin(self):
         self.add_apps = set()
