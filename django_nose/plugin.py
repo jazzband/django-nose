@@ -97,12 +97,12 @@ class DjangoSetUpPlugin(object):
         sys.stderr = self.sys_stderr
 
         if self.add_apps:
-            settings.INSTALLED_APPS = set(settings.INSTALLED_APPS)
             for app in self.add_apps:
+                if app in settings.INSTALLED_APPS:
+                    continue
                 mod = load_app(app)
                 if mod:
-                    settings.INSTALLED_APPS.add(app)
-            settings.INSTALLED_APPS = tuple(settings.INSTALLED_APPS)
+                    settings.INSTALLED_APPS.append(app)
 
         get_apps()
 
