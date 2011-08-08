@@ -21,8 +21,6 @@ class ResultPlugin(object):
     def finalize(self, result):
         self.result = result
 
-class _EmptyClass(object):
-    pass
 
 class DjangoSetUpPlugin(object):
     """
