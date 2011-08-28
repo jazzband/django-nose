@@ -13,10 +13,12 @@ import sys
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.test.simple import DjangoTestSuiteRunner
+from django.utils.importlib import import_module
+from django.core import exceptions
 
 import nose.core
 
-from django_nose.plugin import ResultPlugin
+from django_nose.plugin import DjangoSetUpPlugin, ResultPlugin
 
 try:
     any
@@ -35,9 +37,16 @@ OPTION_TRANSLATION = {'--failfast': '-x'}
 class NoseTestSuiteRunner(DjangoTestSuiteRunner):
 
     def run_suite(self, nose_argv):
+        django_setup_plugin = DjangoSetUpPlugin(self)
+
         result_plugin = ResultPlugin()
+        plugins_to_add = [django_setup_plugin, result_plugin]
+
+        for plugin in _get_plugins_from_settings():
+            plugins_to_add.append(plugin)
+
         nose.core.TestProgram(argv=nose_argv, exit=False,
-                              addplugins=[result_plugin])
+                              addplugins=plugins_to_add)
         return result_plugin.result
 
     def run_tests(self, test_labels, extra_tests=None):
@@ -56,10 +65,8 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
 
         Returns the number of tests that failed.
         """
-        self.setup_test_environment()
-        old_names = self.setup_databases()
-
-        nose_argv = ['nosetests', '--verbosity', str(self.verbosity)]
+        nose_argv = (['nosetests', '--verbosity', str(self.verbosity)]
+                     + list(test_labels))
         if hasattr(settings, 'NOSE_ARGS'):
             nose_argv.extend(settings.NOSE_ARGS)
 
@@ -69,16 +76,15 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
             django_opts.extend(opt._long_opts)
             django_opts.extend(opt._short_opts)
 
-        nose_argv.extend(OPTION_TRANSLATION.get(opt, opt)
-                         for opt in sys.argv[2:]
-                         if not any(opt.startswith(d) for d in django_opts))
+        nose_argv.extend(
+            OPTION_TRANSLATION.get(opt, opt) for opt in sys.argv[1:]
+            if opt.startswith('-')
+               and not any(opt.startswith(d) for d in django_opts))
 
         if self.verbosity >= 1:
             print ' '.join(nose_argv)
 
         result = self.run_suite(nose_argv)
-        self.teardown_databases(old_names)
-        self.teardown_test_environment()
         # suite_result expects the suite as the first argument.  Fake it.
         return self.suite_result({}, result)
 
@@ -88,11 +94,35 @@ def _get_options():
     cfg_files = nose.core.all_config_files()
     manager = nose.core.DefaultPluginManager()
     config = nose.core.Config(env=os.environ, files=cfg_files, plugins=manager)
-    options = config.getParser().option_list
+    config.plugins.addPlugins(list(_get_plugins_from_settings()))
+    options = config.getParser()._get_all_options()
     django_opts = [opt.dest for opt in BaseCommand.option_list] + ['version']
     return tuple(o for o in options if o.dest not in django_opts and
                                        o.action != 'help')
 
+
+def _get_plugins_from_settings():
+    if hasattr(settings, 'NOSE_PLUGINS'):
+        for plg_path in settings.NOSE_PLUGINS:
+            try:
+                dot = plg_path.rindex('.')
+            except ValueError:
+                msg = "%s isn't a Nose plugin module" % plg_path
+                raise exceptions.ImproperlyConfigured(msg)
+            p_mod, p_classname = plg_path[:dot], plg_path[dot+1:]
+            try:
+                mod = import_module(p_mod)
+            except ImportError, e:
+                msg = ('Error importing Nose plugin module %s: "%s"' %
+                       (p_mod, e))
+                raise exceptions.ImproperlyConfigured(msg)
+            try:
+                p_class = getattr(mod, p_classname)
+            except AttributeError:
+                msg = ('Nose plugin module "%s" does not define a "%s" class' %
+                       (p_mod, p_classname))
+                raise exceptions.ImproperlyConfigured(msg)
+            yield p_class()
 
 # Replace the builtin command options with the merged django/nose options.
 NoseTestSuiteRunner.options = _get_options()
