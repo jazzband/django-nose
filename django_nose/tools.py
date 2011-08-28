@@ -6,6 +6,8 @@ Provides Nose and Django test case assert functions
 
 from django.test.testcases import TestCase
 
+from django.core import mail
+
 import re
 
 ## Python
@@ -55,6 +57,17 @@ def assert_ok(response, msg_prefix=''):
     """
 
     return assert_code(response, 200, msg_prefix=msg_prefix)
+
+def assert_mail_count(count, msg=None):
+    """Assert the number of emails sent.
+    The message here tends to be long, so allow for replacing the whole
+    thing instead of prefixing.
+    """
+
+    if msg is None:
+        msg = ', '.join([e.subject for e in mail.outbox])
+        msg = '%d != %d %s' % (len(mail.outbox), count, msg)
+    assert_equals(len(mail.outbox), count, msg)
 
 # EOF
 
