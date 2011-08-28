@@ -17,7 +17,7 @@ test_runner = settings.TEST_RUNNER
 if test_runner.endswith('run_tests') or test_runner.endswith('run_gis_tests'):
     import warnings
     warnings.warn(
-        'Use `django_nose.NoseTestSuiteRuner` instead of `%s`' % test_runner,
+        'Use `django_nose.NoseTestSuiteRunner` instead of `%s`' % test_runner,
         DeprecationWarning)
 
 

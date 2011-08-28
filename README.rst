@@ -4,8 +4,8 @@ Requirements
 
 This package is most useful when installed with:
 
-    * Django
-    * nosetests
+    * Django 1.2+
+    * nose
 
 
 ===========================
@@ -55,8 +55,34 @@ Then set ``TEST_RUNNER`` in ``settings.py``: ::
 Usage
 -----
 
-See ``django help test`` for all the options nose provides, and look to the `nose
-docs`_ for more help with nose.
+See ``./manage.py help test`` for all the options nose provides, and look to
+the `nose docs`_ for more help with nose.
+
+Customization
+-------------
+
+Always Passing The Same Options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To always set the same command line options you can use a `nose.cfg or
+setup.cfg`_ (as usual) or you can specify them in settings.py like this::
+
+    NOSE_ARGS = ['--failed', '--stop']
+
+Using Custom Plugins
+~~~~~~~~~~~~~~~~~~~~
+
+If you need to `make custom plugins`_, you can define each plugin class
+somewhere within your app and load them from settings.py like this::
+
+    NOSE_PLUGINS = [
+        'yourapp.tests.plugins.SystematicDysfunctioner',
+        # ...
+    ]
+
+Just like middleware or anything else, each string must be a dot separated,
+importable path to an actual class.  Each plugin class will be instantiated and
+added to the Nose test runner.
 
 Caveats
 -------
@@ -66,4 +92,15 @@ testing.  Make sure that ``django_nose`` comes *after* ``south`` in
 ``INSTALLED_APPS`` so that django_nose's test command is used.
 
 .. _nose docs: http://somethingaboutorange.com/mrl/projects/nose/
+.. _nose.cfg or setup.cfg: http://somethingaboutorange.com/mrl/projects/nose/0.11.2/usage.html#configuration
+.. _make custom plugins: http://somethingaboutorange.com/mrl/projects/nose/0.11.2/plugins.html#writing-plugins
 .. _South: http://south.aeracode.org/
+
+
+======================
+Support for Django 1.1
+======================
+
+If you want to use django-nose with Django 1.1, use
+https://github.com/jbalogh/django-nose/tree/django-1.1 or
+http://pypi.python.org/pypi/django-nose/0.0.3.
