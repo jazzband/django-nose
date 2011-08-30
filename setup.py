@@ -16,6 +16,10 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=['nose'],
+    entry_points="""
+        [nose.plugins.0.10]
+        fixture_bundler = django_nose.fixture_bundling:FixtureBundlingPlugin
+        """,
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
