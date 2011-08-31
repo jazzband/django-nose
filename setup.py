@@ -5,7 +5,7 @@ ROOT = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name='django-nose',
-    version='0.1.3',
+    version='0.2',
     description='Django test runner that uses nose.',
     long_description=open(os.path.join(ROOT, 'README.rst')).read(),
     author='Jeff Balogh',
@@ -17,6 +17,10 @@ setup(
     zip_safe=False,
     install_requires=['nose'],
     tests_require=['Django', 'south'],
+    entry_points="""
+        [nose.plugins.0.10]
+        fixture_bundler = django_nose.fixture_bundling:FixtureBundlingPlugin
+        """,
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',

@@ -18,6 +18,7 @@ from django.core import exceptions
 
 import nose.core
 
+from django_nose.fixture_bundling import FixtureBundlingPlugin
 from django_nose.plugin import DjangoSetUpPlugin, ResultPlugin
 
 try:
@@ -37,10 +38,8 @@ OPTION_TRANSLATION = {'--failfast': '-x'}
 class NoseTestSuiteRunner(DjangoTestSuiteRunner):
 
     def run_suite(self, nose_argv):
-        django_setup_plugin = DjangoSetUpPlugin(self)
-
         result_plugin = ResultPlugin()
-        plugins_to_add = [django_setup_plugin, result_plugin]
+        plugins_to_add = [DjangoSetUpPlugin(self), result_plugin]
 
         for plugin in _get_plugins_from_settings():
             plugins_to_add.append(plugin)
@@ -102,27 +101,25 @@ def _get_options():
 
 
 def _get_plugins_from_settings():
-    if hasattr(settings, 'NOSE_PLUGINS'):
-        for plg_path in settings.NOSE_PLUGINS:
-            try:
-                dot = plg_path.rindex('.')
-            except ValueError:
-                msg = "%s isn't a Nose plugin module" % plg_path
-                raise exceptions.ImproperlyConfigured(msg)
-            p_mod, p_classname = plg_path[:dot], plg_path[dot+1:]
-            try:
-                mod = import_module(p_mod)
-            except ImportError, e:
-                msg = ('Error importing Nose plugin module %s: "%s"' %
-                       (p_mod, e))
-                raise exceptions.ImproperlyConfigured(msg)
-            try:
-                p_class = getattr(mod, p_classname)
-            except AttributeError:
-                msg = ('Nose plugin module "%s" does not define a "%s" class' %
-                       (p_mod, p_classname))
-                raise exceptions.ImproperlyConfigured(msg)
-            yield p_class()
+    for plg_path in list(getattr(settings, 'NOSE_PLUGINS', [])) + ['django_nose.fixture_bundling.FixtureBundlingPlugin']:
+        try:
+            dot = plg_path.rindex('.')
+        except ValueError:
+            raise exceptions.ImproperlyConfigured(
+                    "%s isn't a Nose plugin module" % plg_path)
+        p_mod, p_classname = plg_path[:dot], plg_path[dot+1:]
+        try:
+            mod = import_module(p_mod)
+        except ImportError, e:
+            raise exceptions.ImproperlyConfigured(
+                    'Error importing Nose plugin module %s: "%s"' % (p_mod, e))
+        try:
+            p_class = getattr(mod, p_classname)
+        except AttributeError:
+            raise exceptions.ImproperlyConfigured(
+                    'Nose plugin module "%s" does not define a "%s"' %
+                    (p_mod, p_classname))
+        yield p_class()
 
 # Replace the builtin command options with the merged django/nose options.
 NoseTestSuiteRunner.options = _get_options()
