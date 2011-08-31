@@ -4,7 +4,7 @@
 Provides Nose and Django test case assert functions
 """
 
-from django.test.testcases import TestCase
+from django.test.testcases import TransactionTestCase
 
 from django.core import mail
 
@@ -25,7 +25,7 @@ def pep8(name):
     return caps.sub(lambda m: '_' + m.groups()[0].lower(), name)
 
 
-class Dummy(TestCase):
+class Dummy(TransactionTestCase):
     def nop():
         pass
 _t = Dummy('nop')
