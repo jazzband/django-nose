@@ -22,16 +22,13 @@ class ResultPlugin(object):
         self.result = result
 
 
+
 class DjangoSetUpPlugin(object):
     """
     Configures Django to setup and tear down the environment.
     This allows coverage to report on all code imported and used during the
     initialisation of the test runner.
 
-    Only sets up databases if a single class inherits from
-    ``django.test.testcases.TransactionTestCase``.
-
-    Also ensures you don't run the same test case multiple times.
     """
     name = "django setup"
     enabled = True
@@ -40,6 +37,37 @@ class DjangoSetUpPlugin(object):
         super(DjangoSetUpPlugin, self).__init__()
         self.runner = runner
         self.sys_stdout = sys.stdout
+
+    def begin(self):
+        sys_stdout = sys.stdout
+        sys.stdout = self.sys_stdout
+
+        self.runner.setup_test_environment()
+        self.old_names = self.runner.setup_databases()
+
+        sys.stdout = sys_stdout
+
+    def finalize(self, result):
+        self.runner.teardown_databases(self.old_names)
+        self.runner.teardown_test_environment()
+
+
+# TODO: Moving this out of the main plugin because it's causing issues like #41
+# and won't let you run something like
+# `manage.py test apps/webapps/tests/test_models.py`. The plugin isn't
+# functional in this state but should be rewritten to cooperate with other
+# plugins rather than being embedded inside the main plugin (if possible).
+# It was functional as of
+# https://github.com/jbalogh/django-nose/blob/8d8498b/django_nose/plugin.py
+class XXPlugin(object):
+    """
+    Only sets up databases if a single class inherits from
+    ``django.test.testcases.TransactionTestCase``.
+
+    Also ensures you don't run the same test case multiple times.
+    """
+
+    def __init__(self, runner):
         self.sys_stderr = sys.stderr
         self.needs_db = False
         self.started = False
