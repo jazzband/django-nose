@@ -35,7 +35,45 @@ except NameError:
 OPTION_TRANSLATION = {'--failfast': '-x'}
 
 
+def _get_plugins_from_settings():
+    for plg_path in list(getattr(settings, 'NOSE_PLUGINS', [])) + ['django_nose.fixture_bundling.FixtureBundlingPlugin']:
+        try:
+            dot = plg_path.rindex('.')
+        except ValueError:
+            raise exceptions.ImproperlyConfigured(
+                    "%s isn't a Nose plugin module" % plg_path)
+        p_mod, p_classname = plg_path[:dot], plg_path[dot+1:]
+        try:
+            mod = import_module(p_mod)
+        except ImportError, e:
+            raise exceptions.ImproperlyConfigured(
+                    'Error importing Nose plugin module %s: "%s"' % (p_mod, e))
+        try:
+            p_class = getattr(mod, p_classname)
+        except AttributeError:
+            raise exceptions.ImproperlyConfigured(
+                    'Nose plugin module "%s" does not define a "%s"' %
+                    (p_mod, p_classname))
+        yield p_class()
+
+
+def _get_options():
+    """Return all nose options that don't conflict with django options."""
+    cfg_files = nose.core.all_config_files()
+    manager = nose.core.DefaultPluginManager()
+    config = nose.core.Config(env=os.environ, files=cfg_files, plugins=manager)
+    config.plugins.addPlugins(list(_get_plugins_from_settings()))
+    options = config.getParser()._get_all_options()
+    django_opts = [opt.dest for opt in BaseCommand.option_list] + ['version']
+    return tuple(o for o in options if o.dest not in django_opts and
+                                       o.action != 'help')
+
+
 class NoseTestSuiteRunner(DjangoTestSuiteRunner):
+    __test__ = False
+
+    # Replace the builtin command options with the merged django/nose options:
+    options = _get_options()
 
     def run_suite(self, nose_argv):
         result_plugin = ResultPlugin()
@@ -87,40 +125,3 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
         # suite_result expects the suite as the first argument.  Fake it.
         return self.suite_result({}, result)
 
-
-def _get_options():
-    """Return all nose options that don't conflict with django options."""
-    cfg_files = nose.core.all_config_files()
-    manager = nose.core.DefaultPluginManager()
-    config = nose.core.Config(env=os.environ, files=cfg_files, plugins=manager)
-    config.plugins.addPlugins(list(_get_plugins_from_settings()))
-    options = config.getParser()._get_all_options()
-    django_opts = [opt.dest for opt in BaseCommand.option_list] + ['version']
-    return tuple(o for o in options if o.dest not in django_opts and
-                                       o.action != 'help')
-
-
-def _get_plugins_from_settings():
-    for plg_path in list(getattr(settings, 'NOSE_PLUGINS', [])) + ['django_nose.fixture_bundling.FixtureBundlingPlugin']:
-        try:
-            dot = plg_path.rindex('.')
-        except ValueError:
-            raise exceptions.ImproperlyConfigured(
-                    "%s isn't a Nose plugin module" % plg_path)
-        p_mod, p_classname = plg_path[:dot], plg_path[dot+1:]
-        try:
-            mod = import_module(p_mod)
-        except ImportError, e:
-            raise exceptions.ImproperlyConfigured(
-                    'Error importing Nose plugin module %s: "%s"' % (p_mod, e))
-        try:
-            p_class = getattr(mod, p_classname)
-        except AttributeError:
-            raise exceptions.ImproperlyConfigured(
-                    'Nose plugin module "%s" does not define a "%s"' %
-                    (p_mod, p_classname))
-        yield p_class()
-
-# Replace the builtin command options with the merged django/nose options.
-NoseTestSuiteRunner.options = _get_options()
-NoseTestSuiteRunner.__test__ = False
