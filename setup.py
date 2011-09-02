@@ -17,10 +17,12 @@ setup(
     zip_safe=False,
     install_requires=['nose'],
     tests_require=['Django', 'south'],
-    entry_points="""
-        [nose.plugins.0.10]
-        fixture_bundler = django_nose.fixture_bundling:FixtureBundlingPlugin
-        """,
+    # XXX This blows up django-nose because it leads to django settings being
+    # evaluated long before they initialized. Eeew.
+    #entry_points="""
+    #    [nose.plugins.0.10]
+    #    fixture_bundler = django_nose.fixture_bundling:FixtureBundlingPlugin
+    #    """,
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
