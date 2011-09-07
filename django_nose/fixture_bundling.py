@@ -9,8 +9,11 @@ class Bucketer(object):
         self.buckets = {}
 
     def add(self, test):
-        fixtures = frozenset(getattr(test.context, 'fixtures', []))
-        self.buckets.setdefault(fixtures, []).append(test)
+        """Put a test into a bucket according to its set of fixtures and the
+        value of its exempt_from_fixture_bundling attr."""
+        key = (frozenset(getattr(test.context, 'fixtures', [])),
+               getattr(test.context, 'exempt_from_fixture_bundling', False))
+        self.buckets.setdefault(key, []).append(test)
 
 
 class FixtureBundlingPlugin(Plugin):
@@ -75,12 +78,13 @@ class FixtureBundlingPlugin(Plugin):
             # Lay the bundles of common-fixture-having test classes end to end
             # in a single list so we can make a test suite out of them:
             flattened = []
-            for (key, fixture_bundle) in bucketer.buckets.iteritems():
+            for ((fixtures, is_exempt), fixture_bundle) in bucketer.buckets.iteritems():
                 # Advise first and last test classes in each bundle to set up
                 # and tear down fixtures and the rest not to:
-                if key:  # Ones with fixtures are sure to be classes, which
-                         # means they're sure to be ContextSuites with
-                         # contexts.
+                if fixtures and not is_exempt:
+                    # Ones with fixtures are sure to be classes, which means
+                    # they're sure to be ContextSuites with contexts.
+
                     # First class with this set of fixtures sets up:
                     fixture_bundle[0].context._fb_should_setup_fixtures = True
 
