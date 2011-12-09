@@ -55,8 +55,55 @@ Then set ``TEST_RUNNER`` in ``settings.py``: ::
 Usage
 -----
 
-See ``./manage.py help test`` for all the options nose provides, and look to
-the `nose docs`_ for more help with nose.
+The use of django-nose is mostly transparent; just run ``./manage.py test`` as
+usual. See ``./manage.py help test`` for all the options nose provides, and
+look to the `nose docs`_ for more help with nose.
+
+Fixture Bundling
+----------------
+
+django-nose includes a nose plugin which can drastically speed up your tests by
+eliminating redundant setup of Django test fixtures. To activate the plugin,
+add the ``--with-fixture-bundling`` option when running tests.
+
+How Fixture Bundling Works
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The fixture bundler reorders your test classes so that ones with identical sets
+of fixtures run adjacently. It then advises the first of each series to load
+the fixtures once for all of them (and the remaining ones not to bother). It
+also advises the last to tear them down. Depending on the size and repetition
+of your fixtures, you can expect a 25% to 50% speed increase.
+
+Incidentally, the author prefers to avoid Django fixtures, as they encourage
+irrelevant coupling between tests and make tests harder to comprehend and
+modify. For future tests, it is better to use the "model maker" pattern,
+creating DB objects programmatically. This way, tests avoid setup they don't
+need, and there is a clearer tie between a test and the exact state it
+requires. The fixture bundler is intended to make existing tests, which have
+already committed to fixtures, more tolerable.
+
+Troubleshooting
+~~~~~~~~~~~~~~~
+
+If using ``--with-fixture-bundling`` causes test failures, it likely indicates
+an order dependency between some of your tests. Here are the most frequent
+sources of state leakage we have encountered:
+
+* Locale activation, which is maintained in a threadlocal variable. Be sure to
+  reset your locale selection between tests.
+* memcached contents. Be sure to flush between tests.
+
+Exempting A Class From Bundling
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In some unusual cases, it is desirable to exempt a test class from fixture
+bundling, forcing it to set up and tear down its fixtures at the class
+boundaries. For example, we might have a ``TestCase`` subclass which sets up
+some state outside the DB in ``setUpClass`` and tears it down in
+``tearDownClass``, and it might not be possible to adapt those routines to heed
+the advice of the fixture bundler. In such a case, simply set the
+``exempt_from_fixture_bundling`` attribute of the test class to ``True``.
 
 Assertions
 ----------
