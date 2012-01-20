@@ -124,7 +124,7 @@ the advice of the fixture bundler. In such a case, simply set the
 settings_test.py
 ----------------
 
-test_utils allows you to create a ``settings_test`` module where you
+django-nose allows you to create a ``settings_test`` module where you
 can provide configuration settings which are used solely in your
 testing environment.
 
@@ -145,7 +145,7 @@ Using With South
 ----------------
 
 `South`_ installs its own test command that turns off migrations during
-testing. Make sure that ``django_nose`` comes *after* ``south`` in
+testing. Make sure that django-nose comes *after* ``south`` in
 ``INSTALLED_APPS`` so that django_nose's test command is used.
 
 .. _South: http://south.aeracode.org/
@@ -186,7 +186,7 @@ Older Versions of Django
 Upgrading from Django < 1.2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Django 1.2 switches to a `class-based test runner`_. To use ``django-nose``
+Django 1.2 switches to a `class-based test runner`_. To use django-nose
 with Django 1.2, change your ``TEST_RUNNER`` from ``django_nose.run_tests`` to
 ``django_nose.NoseTestSuiteRunner``.
 
