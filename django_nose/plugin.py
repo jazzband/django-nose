@@ -1,12 +1,14 @@
 import os.path
 import sys
 
+from nose.plugins.base import Plugin
+
 from django.conf import settings
 from django.db.models.loading import get_apps, load_app
 from django.test.testcases import TransactionTestCase
 
 
-class ResultPlugin(object):
+class ResultPlugin(Plugin):
     """
     Captures the TestResult object for later inspection.
 
@@ -23,7 +25,7 @@ class ResultPlugin(object):
 
 
 
-class DjangoSetUpPlugin(object):
+class DjangoSetUpPlugin(Plugin):
     """
     Configures Django to setup and tear down the environment.
     This allows coverage to report on all code imported and used during the
@@ -59,7 +61,7 @@ class DjangoSetUpPlugin(object):
 # plugins rather than being embedded inside the main plugin (if possible).
 # It was functional as of
 # https://github.com/jbalogh/django-nose/blob/8d8498b/django_nose/plugin.py
-class XXPlugin(object):
+class XXPlugin(Plugin):
     """
     Only sets up databases if a single class inherits from
     ``django.test.testcases.TransactionTestCase``.
