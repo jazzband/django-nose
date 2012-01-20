@@ -5,14 +5,14 @@ django-nose
 Features
 --------
 
-* All the goodness of nose_ in your Django tests
+* All the goodness of `nose`_ in your Django tests
 * Fast fixture bundling, an optional feature which speeds up your fixture-based
   tests by a factor of 4
 * Reuse of previously created test DBs, saving setup time
 * A place to put special Django settings used only during tests
 
 
-.. _nose docs: http://somethingaboutorange.com/mrl/projects/nose/
+.. _nose: http://somethingaboutorange.com/mrl/projects/nose/
 
 
 Installation
@@ -44,23 +44,36 @@ Use
 ---
 
 The day-to-day use of django-nose is mostly transparent; just run ``./manage.py
-test`` as usual. See ``./manage.py help test`` for all the options nose
-provides, and look to the `nose docs`_ for more help with nose.
+test`` as usual. The one new wrinkle is that, whenever your DB schema changes,
+you should set the ``FORCE_DB`` environment variable the next time you run
+tests. This will cue the test runner to reinitialize the database, which it
+usually avoids to save you time::
+
+    FORCE_DB=1 ./manage.py test
+
+Alternatively, if you don't want to be bothered, you can use a slightly slower
+but maintenance-free test runner by saying so in ``settings.py``::
+
+    TEST_RUNNER = 'django_nose.BasicNoseRunner'
+
+
+See ``./manage.py help test`` for all the options nose provides, and look to
+the `nose docs`_ for more help with nose.
 
 .. _nose docs: http://somethingaboutorange.com/mrl/projects/nose/
 
 
-Fast Fixtures
--------------
+Enabling Fast Fixtures
+----------------------
 
-django-nose includes a nose plugin which can drastically speed up your tests by
-eliminating redundant setup of Django test fixtures. To take advantage of this...
+django-nose includes a nose plugin which drastically speeds up your tests by
+eliminating redundant setup of Django test fixtures. To use it...
 
 1. Subclass ``django_nose.FastFixtureTestCase`` instead of
    ``django.test.TestCase``. (I like to import it ``as TestCase`` in my
    project's ``tests/__init__.py`` and then import it from there into my actual
    tests. Then it's easy to sub the base class in an out.)
-1. Activate the plugin by passing the ``--with-fixture-bundling`` option to ``./manage.py test``.
+2. Activate the plugin by passing the ``--with-fixture-bundling`` option to ``./manage.py test``.
 
 How Fixture Bundling Works
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -92,9 +105,9 @@ sources of state leakage we have encountered:
   this automatically.
 
 It's also possible that you have ``post_save`` signal handlers which create
-additional database rows. ``FastFixtureTestCase`` isn't yet smart enough to
-notice this and clean up after it, so you'll have to go back to plain old
-``TestCase`` for now.
+additional database rows while loading the fixtures. ``FastFixtureTestCase``
+isn't yet smart enough to notice this and clean up after it, so you'll have to
+go back to plain old ``TestCase`` for now.
 
 Exempting A Class From Bundling
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -34,7 +34,7 @@ except NameError:
         return False
 
 
-__all__ = ['RunnyNose', 'NoseTestSuiteRunner', 'uses_mysql']
+__all__ = ['BasicNoseRunner', 'NoseTestSuiteRunner', 'uses_mysql']
 
 
 # This is a table of Django's "manage.py test" options which
@@ -80,7 +80,7 @@ def _get_options():
                                        o.action != 'help')
 
 
-class RunnyNose(DjangoTestSuiteRunner):
+class BasicNoseRunner(DjangoTestSuiteRunner):
     """Facade that implements a nose runner in the guise of a Django runner
 
     You shouldn't have to use this directly unless the additions made by
@@ -142,6 +142,16 @@ class RunnyNose(DjangoTestSuiteRunner):
         # suite_result expects the suite as the first argument.  Fake it.
         return self.suite_result({}, result)
 
+    def setup_test_environment(self, **kwargs):
+        """If we have a settings_test.py, roll it into our settings."""
+        try:
+            import settings_test
+            # Use setattr to update Django's proxies:
+            for k in dir(settings_test):
+                setattr(settings, k, getattr(settings_test, k))
+        except ImportError:
+            pass
+        super(BasicNoseRunner, self).setup_test_environment(**kwargs)
 
 
 _old_handle = Command.handle
@@ -185,7 +195,7 @@ class SkipDatabaseCreation(mysql.DatabaseCreation):
         return self._get_test_db_name()
 
 
-class NoseTestSuiteRunner(RunnyNose):
+class NoseTestSuiteRunner(BasicNoseRunner):
     """A runner that skips DB creation when possible
 
     This test runner monkeypatches connection.creation to skip database
@@ -274,14 +284,3 @@ class NoseTestSuiteRunner(RunnyNose):
 
     def teardown_databases(self, old_config, **kwargs):
         """Leave those poor, reusable databases alone."""
-
-    def setup_test_environment(self, **kwargs):
-        # If we have a settings_test.py let's roll it into our settings.
-        try:
-            import settings_test
-            # Use setattr to update Django's proxies:
-            for k in dir(settings_test):
-                setattr(settings, k, getattr(settings_test, k))
-        except ImportError:
-            pass
-        super(NoseTestSuiteRunner, self).setup_test_environment(**kwargs)
