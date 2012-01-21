@@ -18,12 +18,14 @@ class ResultPlugin(Plugin):
     """
 
     name = "result"
-    enabled = True
 
+    def configure(self, *args, **kw_args):
+        "force self.enabled=True, which would otherwise be set to False by superclass"
+        super(ResultPlugin, self).configure(*args, **kw_args)
+        self.enabled = True
+        
     def finalize(self, result):
         self.result = result
-
-
 
 class DjangoSetUpPlugin(Plugin):
     """
@@ -33,12 +35,16 @@ class DjangoSetUpPlugin(Plugin):
 
     """
     name = "django setup"
-    enabled = True
 
     def __init__(self, runner):
         super(DjangoSetUpPlugin, self).__init__()
         self.runner = runner
         self.sys_stdout = sys.stdout
+
+    def configure(self, *args, **kw_args):
+        "force self.enabled=True, which would otherwise be set to False by superclass"
+        super(DjangoSetUpPlugin, self).configure(*args, **kw_args)
+        self.enabled = True
 
     def begin(self):
         sys_stdout = sys.stdout
@@ -74,6 +80,11 @@ class XXPlugin(Plugin):
         self.needs_db = False
         self.started = False
         self._registry = set()
+
+    def configure(self, *args, **kw_args):
+        "force self.enabled, which would otherwise be set to False by superclass"
+        super(DjangoSetUpPlugin, self).configure(*args, **kw_args)
+        self.enabled = False # as noted above, this plugin is not functional
 
     def begin(self):
         self.add_apps = set()
