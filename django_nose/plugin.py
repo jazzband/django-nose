@@ -93,7 +93,7 @@ class XXPlugin(Plugin):
 
     def configure(self, *args, **kw_args):
         "force self.enabled, which would otherwise be set to False by superclass"
-        super(DjangoSetUpPlugin, self).configure(*args, **kw_args)
+        super(XXPlugin, self).configure(*args, **kw_args)
         self.enabled = False # as noted above, this plugin is not functional
 
     def begin(self):
