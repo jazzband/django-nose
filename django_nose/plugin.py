@@ -19,10 +19,15 @@ class ResultPlugin(Plugin):
 
     name = "result"
 
+    def options(self, parser, env):
+        # We don't have any options, and this plugin is allways
+        # enabled, so we don't want to use superclass's options()
+        # method which would add a --with-* option.
+        pass
+
     def configure(self, *args, **kw_args):
-        "force self.enabled=True, which would otherwise be set to False by superclass"
         super(ResultPlugin, self).configure(*args, **kw_args)
-        self.enabled = True
+        self.enabled = True # force this plugin to be allways enabled
         
     def finalize(self, result):
         self.result = result
@@ -41,10 +46,15 @@ class DjangoSetUpPlugin(Plugin):
         self.runner = runner
         self.sys_stdout = sys.stdout
 
+    def options(self, parser, env):
+        # We don't have any options, and this plugin is allways
+        # enabled, so we don't want to use superclass's options()
+        # method which would add a --with-* option.
+        pass
+
     def configure(self, *args, **kw_args):
-        "force self.enabled=True, which would otherwise be set to False by superclass"
         super(DjangoSetUpPlugin, self).configure(*args, **kw_args)
-        self.enabled = True
+        self.enabled = True # force this plugin to be allways enabled
 
     def begin(self):
         sys_stdout = sys.stdout
