@@ -1,12 +1,14 @@
 import os.path
 import sys
 
+from nose.plugins.base import Plugin
+
 from django.conf import settings
 from django.db.models.loading import get_apps, load_app
 from django.test.testcases import TransactionTestCase
 
 
-class ResultPlugin(object):
+class ResultPlugin(Plugin):
     """
     Captures the TestResult object for later inspection.
 
@@ -16,14 +18,21 @@ class ResultPlugin(object):
     """
 
     name = "result"
-    enabled = True
 
+    def options(self, parser, env):
+        # We don't have any options, and this plugin is always
+        # enabled, so we don't want to use superclass's options()
+        # method which would add a --with-* option.
+        pass
+
+    def configure(self, *args, **kw_args):
+        super(ResultPlugin, self).configure(*args, **kw_args)
+        self.enabled = True # force this plugin to be always enabled
+        
     def finalize(self, result):
         self.result = result
 
-
-
-class DjangoSetUpPlugin(object):
+class DjangoSetUpPlugin(Plugin):
     """
     Configures Django to setup and tear down the environment.
     This allows coverage to report on all code imported and used during the
@@ -31,12 +40,21 @@ class DjangoSetUpPlugin(object):
 
     """
     name = "django setup"
-    enabled = True
 
     def __init__(self, runner):
         super(DjangoSetUpPlugin, self).__init__()
         self.runner = runner
         self.sys_stdout = sys.stdout
+
+    def options(self, parser, env):
+        # We don't have any options, and this plugin is always
+        # enabled, so we don't want to use superclass's options()
+        # method which would add a --with-* option.
+        pass
+
+    def configure(self, *args, **kw_args):
+        super(DjangoSetUpPlugin, self).configure(*args, **kw_args)
+        self.enabled = True # force this plugin to be always enabled
 
     def begin(self):
         sys_stdout = sys.stdout
@@ -59,7 +77,7 @@ class DjangoSetUpPlugin(object):
 # plugins rather than being embedded inside the main plugin (if possible).
 # It was functional as of
 # https://github.com/jbalogh/django-nose/blob/8d8498b/django_nose/plugin.py
-class XXPlugin(object):
+class XXPlugin(Plugin):
     """
     Only sets up databases if a single class inherits from
     ``django.test.testcases.TransactionTestCase``.
@@ -72,6 +90,11 @@ class XXPlugin(object):
         self.needs_db = False
         self.started = False
         self._registry = set()
+
+    def configure(self, *args, **kw_args):
+        "force self.enabled, which would otherwise be set to False by superclass"
+        super(XXPlugin, self).configure(*args, **kw_args)
+        self.enabled = False # as noted above, this plugin is not functional
 
     def begin(self):
         self.add_apps = set()
