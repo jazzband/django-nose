@@ -142,17 +142,6 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
         # suite_result expects the suite as the first argument.  Fake it.
         return self.suite_result({}, result)
 
-    def setup_test_environment(self, **kwargs):
-        """If we have a settings_test.py, roll it into our settings."""
-        try:
-            import settings_test
-            # Use setattr to update Django's proxies:
-            for k in dir(settings_test):
-                setattr(settings, k, getattr(settings_test, k))
-        except ImportError:
-            pass
-        super(BasicNoseRunner, self).setup_test_environment(**kwargs)
-
 
 _old_handle = Command.handle
 def _foreign_key_ignoring_handle(self, *fixture_labels, **options):
@@ -198,27 +187,26 @@ class SkipDatabaseCreation(mysql.DatabaseCreation):
 class NoseTestSuiteRunner(BasicNoseRunner):
     """A runner that skips DB creation when possible
 
-    This test runner monkeypatches connection.creation to skip database
-    creation if it appears that the DB already exists.  Your tests will run
-    much faster.
+    This test monkeypatches connection.creation to let you skip creating
+    databases if they already exist. Your tests will run much faster.
 
-    To force the normal database creation, set the environment variable
-    ``FORCE_DB`` to something that isn't "0" or "false" (case aside).
+    To opt into this behavior, set the environment variable ``REUSE_DB`` to
+    something that isn't "0" or "false" (case aside).
 
     """
     def setup_databases(self):
         def should_create_database(connection):
             """Return whether we should recreate the given DB.
 
-            This is true if the DB doesn't exist or if the FORCE_DB env var is
-            truthy.
+            This is true if the DB doesn't exist or the REUSE_DB env var
+            isn't truthy.
 
             """
             # TODO: Notice when the Model classes change and return True. Worst
             # case, we can generate sqlall and hash it, though it's a bit slow
             # (2 secs) and hits the DB for no good reason. Until we find a
             # faster way, I'm inclined to keep making people explicitly saying
-            # FORCE_DB if they want a new DB.
+            # REUSE_DB if they want to reuse the DB.
 
             # Notice whether the DB exists, and create it if it doesn't:
             try:
@@ -226,8 +214,8 @@ class NoseTestSuiteRunner(BasicNoseRunner):
             except StandardError:  # TODO: Be more discerning but still DB
                                    # agnostic.
                 return True
-            return (os.getenv('FORCE_DB', 'false').lower()
-                    not in ('false', '0', ''))
+            return not (os.getenv('REUSE_DB', 'false').lower() in
+                        ('true', '1', ''))
 
         def sql_reset_sequences(connection):
             """Return a list of SQL statements needed to reset all sequences
@@ -260,9 +248,6 @@ class NoseTestSuiteRunner(BasicNoseRunner):
             connection.settings_dict['NAME'] = test_db_name
 
             if not should_create_database(connection):
-                print ('Reusing old database "%s". Set env var FORCE_DB=1 if '
-                       'you need fresh DBs.' % test_db_name)
-
                 # Reset auto-increment sequences. Apparently, SUMO's tests are
                 # horrid and coupled to certain numbers.
                 cursor = connection.cursor()
@@ -272,6 +257,8 @@ class NoseTestSuiteRunner(BasicNoseRunner):
 
                 creation.__class__ = SkipDatabaseCreation
             else:
+                print ('To reuse old database "%s" for speed, set env var '
+                       'REUSE_DB=1' % test_db_name)
                 # We're not using SkipDatabaseCreation, so put the DB name
                 # back.
                 connection.settings_dict['NAME'] = orig_db_name

@@ -9,7 +9,6 @@ Features
 * Fast fixture bundling, an optional feature which speeds up your fixture-based
   tests by a factor of 4
 * Reuse of previously created test DBs, saving setup time
-* A place to put special Django settings used only during tests
 
 
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/
@@ -119,26 +118,6 @@ some state outside the DB in ``setUpClass`` and tears it down in
 ``tearDownClass``, and it might not be possible to adapt those routines to heed
 the advice of the fixture bundler. In such a case, simply set the
 ``exempt_from_fixture_bundling`` attribute of the test class to ``True``.
-
-
-settings_test.py
-----------------
-
-django-nose allows you to create a ``settings_test`` module where you
-can provide configuration settings which are used solely in your
-testing environment.
-
-For example, if I wanted to make Celery always eager in my test environment,
-I could define ``CELERY_ALWAYS_EAGER`` like this:
-
-settings.py::
-
-    CELERY_ALWAYS_EAGER = False
-
-
-settings_test.py::
-
-    CELERY_ALWAYS_EAGER = True
 
 
 Using With South
