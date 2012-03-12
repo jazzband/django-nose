@@ -263,7 +263,13 @@ class NoseTestSuiteRunner(BasicNoseRunner):
             orig_db_name = connection.settings_dict['NAME']
             connection.settings_dict['NAME'] = test_db_name
 
-            if not should_create_database(connection):
+            if should_create_database(connection):
+                print ('To reuse old database "%s" for speed, set env var '
+                       'REUSE_DB=1' % test_db_name)
+                # We're not using SkipDatabaseCreation, so put the DB name
+                # back.
+                connection.settings_dict['NAME'] = orig_db_name
+            else:
                 # Reset auto-increment sequences. Apparently, SUMO's tests are
                 # horrid and coupled to certain numbers.
                 cursor = connection.cursor()
@@ -272,12 +278,6 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 connection.commit_unless_managed()  # which it is
 
                 creation.__class__ = SkipDatabaseCreation
-            else:
-                print ('To reuse old database "%s" for speed, set env var '
-                       'REUSE_DB=1' % test_db_name)
-                # We're not using SkipDatabaseCreation, so put the DB name
-                # back.
-                connection.settings_dict['NAME'] = orig_db_name
 
         Command.handle = _foreign_key_ignoring_handle
 
