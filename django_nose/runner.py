@@ -196,6 +196,11 @@ class SkipDatabaseCreation(mysql.DatabaseCreation):
         return self._get_test_db_name()
 
 
+def _reusing_db():
+    """Return whether the ``REUSE_DB`` flag was passed"""
+    return (os.getenv('REUSE_DB', 'false').lower() in ('true', '1', ''))
+
+
 class NoseTestSuiteRunner(BasicNoseRunner):
     """A runner that skips DB creation when possible
 
@@ -226,8 +231,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
             except StandardError:  # TODO: Be more discerning but still DB
                                    # agnostic.
                 return True
-            return not (os.getenv('REUSE_DB', 'false').lower() in
-                        ('true', '1', ''))
+            return not _reusing_db()
 
         def sql_reset_sequences(connection):
             """Return a list of SQL statements needed to reset all sequences
@@ -281,5 +285,9 @@ class NoseTestSuiteRunner(BasicNoseRunner):
         # objects:
         return super(NoseTestSuiteRunner, self).setup_databases()
 
-    def teardown_databases(self, old_config, **kwargs):
-        """Leave those poor, reusable databases alone."""
+    def teardown_databases(self, *args, **kwargs):
+        """Leave those poor, reusable databases alone if REUSE_DB is true."""
+        if not _reusing_db():
+            return super(NoseTestSuiteRunner, self).teardown_databases(
+                    *args, **kwargs)
+        # else skip tearing down the DB so we can reuse it next time
