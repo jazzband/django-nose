@@ -4,7 +4,6 @@
     is in one place (erikrose)
   * NoseTestSuiteRunner is now the DB-creation-skipping runner, brought over
     from test_utils. (stolen by erikrose)
-  * settings_test.py support (stolen by erikrose)
 
 - 0.1.3 (04-15-10)
   * Even better coverage support (rozza)
