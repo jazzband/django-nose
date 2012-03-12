@@ -43,23 +43,26 @@ Use
 ---
 
 The day-to-day use of django-nose is mostly transparent; just run ``./manage.py
-test`` as usual. The one new wrinkle is that, whenever your DB schema changes,
-you should set the ``FORCE_DB`` environment variable the next time you run
-tests. This will cue the test runner to reinitialize the database, which it
-usually avoids to save you time::
-
-    FORCE_DB=1 ./manage.py test
-
-Alternatively, if you don't want to be bothered, you can use a slightly slower
-but maintenance-free test runner by saying so in ``settings.py``::
-
-    TEST_RUNNER = 'django_nose.BasicNoseRunner'
-
+test`` as usual.
 
 See ``./manage.py help test`` for all the options nose provides, and look to
 the `nose docs`_ for more help with nose.
 
 .. _nose docs: http://somethingaboutorange.com/mrl/projects/nose/
+
+
+Enabling Database Reuse
+-----------------------
+
+You can save several seconds at the beginning and end of your test suite by
+reusing the test database from the last run. To do this, set the environment
+variable ``REUSE_DB`` to 1::
+
+    REUSE_DB=1 ./manage.py test
+
+The one new wrinkle is that, whenever your DB schema changes, you should leave
+the flag off the next time you run tests. This will cue the test runner to
+reinitialize the test database.
 
 
 Enabling Fast Fixtures
