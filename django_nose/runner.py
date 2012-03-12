@@ -16,6 +16,7 @@ from django.core.management.base import BaseCommand
 from django.core.management.color import no_style
 from django.core.management.commands.loaddata import Command
 from django.db import connections, DEFAULT_DB_ALIAS
+from django.db.backends.creation import BaseDatabaseCreation
 from django.db.backends.mysql import creation as mysql
 from django.test.simple import DjangoTestSuiteRunner
 from django.utils.importlib import import_module
@@ -44,6 +45,17 @@ OPTION_TRANSLATION = {'--failfast': '-x'}
 
 def uses_mysql(connection):
     return 'mysql' in connection.settings_dict['ENGINE']
+
+# Django v1.2 does not have a _get_test_db_name() function.
+if not hasattr(BaseDatabaseCreation, '_get_test_db_name'):
+    def _get_test_db_name(self):
+        TEST_DATABASE_PREFIX = 'test_'
+
+        if self.connection.settings_dict['TEST_NAME']:
+            return self.connection.settings_dict['TEST_NAME']
+        return TEST_DATABASE_PREFIX + self.connection.settings_dict['NAME']
+
+    BaseDatabaseCreation._get_test_db_name = _get_test_db_name
 
 
 def _get_plugins_from_settings():
