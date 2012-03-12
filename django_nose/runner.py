@@ -15,7 +15,7 @@ from django.core import exceptions
 from django.core.management.base import BaseCommand
 from django.core.management.color import no_style
 from django.core.management.commands.loaddata import Command
-from django.db import connections, DEFAULT_DB_ALIAS
+from django.db import connections, transaction, DEFAULT_DB_ALIAS
 from django.db.backends.creation import BaseDatabaseCreation
 from django.db.backends.mysql import creation as mysql
 from django.test.simple import DjangoTestSuiteRunner
@@ -192,7 +192,9 @@ class SkipDatabaseCreation(mysql.DatabaseCreation):
     def create_test_db(self, verbosity=1, autoclobber=False):
         # Notice that the DB supports transactions. Originally, this was done
         # in the method this overrides.
-        self.connection.features.confirm()
+        # Django v1.2 does not have the confirm function.  Added in https://code.djangoproject.com/ticket/12991.
+        if hasattr(self.connection.features, 'confirm') and callable(self.connection.features.confirm):
+            self.connection.features.confirm()
         return self._get_test_db_name()
 
 
@@ -275,7 +277,11 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 cursor = connection.cursor()
                 for statement in sql_reset_sequences(connection):
                     cursor.execute(statement)
-                connection.commit_unless_managed()  # which it is
+                # Django v1.3 (https://code.djangoproject.com/ticket/9964) starts
+                # using commit_unless_managed() for individual connections.
+                # Backwards compatibility for Django 1.2 is to use the generic
+                # transaction function.
+                transaction.commit_unless_managed(using=connection.alias)
 
                 creation.__class__ = SkipDatabaseCreation
 
