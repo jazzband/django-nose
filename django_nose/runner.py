@@ -96,7 +96,8 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
     """Facade that implements a nose runner in the guise of a Django runner
 
     You shouldn't have to use this directly unless the additions made by
-    ``NoseTestSuiteRunner`` really bother you.
+    ``NoseTestSuiteRunner`` really bother you. They shouldn't, because they're
+    all off by default.
 
     """
     __test__ = False
@@ -204,7 +205,7 @@ def _reusing_db():
 
 
 class NoseTestSuiteRunner(BasicNoseRunner):
-    """A runner that skips DB creation when possible
+    """A runner that optionally skips DB creation
 
     This test monkeypatches connection.creation to let you skip creating
     databases if they already exist. Your tests will run much faster.
