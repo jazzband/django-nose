@@ -8,6 +8,7 @@ in settings.py for arguments that you want always passed to nose.
 
 """
 import os
+import new
 import sys
 
 from django.conf import settings
@@ -182,7 +183,7 @@ def _foreign_key_ignoring_handle(self, *fixture_labels, **options):
             connection.close()
 
 
-class SkipDatabaseCreation(mysql.DatabaseCreation):
+def skip_create_test_db(self, verbosity=1, autoclobber=False):
     """Database creation class that skips both creation and flushing
 
     The idea is to re-use the perfectly good test DB already created by an
@@ -190,13 +191,17 @@ class SkipDatabaseCreation(mysql.DatabaseCreation):
     (depending on your I/O luck) down to 3.
 
     """
-    def create_test_db(self, verbosity=1, autoclobber=False):
-        # Notice that the DB supports transactions. Originally, this was done
-        # in the method this overrides.
-        # Django v1.2 does not have the confirm function.  Added in https://code.djangoproject.com/ticket/12991.
-        if hasattr(self.connection.features, 'confirm') and callable(self.connection.features.confirm):
-            self.connection.features.confirm()
-        return self._get_test_db_name()
+
+    # Notice that the DB supports transactions. Originally, this was done
+    # in the method this overrides.
+    # Django v1.2 does not have the confirm function.  Added in https://code.djangoproject.com/ticket/12991.
+    if hasattr(self.connection.features, 'confirm') and callable(self.connection.features.confirm):
+        self.connection.features.confirm()
+    else:
+        can_rollback = self._rollback_works()
+        self.connection.settings_dict["SUPPORTS_TRANSACTIONS"] = can_rollback
+
+    return self._get_test_db_name()
 
 
 def _reusing_db():
@@ -284,7 +289,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 # transaction function.
                 transaction.commit_unless_managed(using=connection.alias)
 
-                creation.__class__ = SkipDatabaseCreation
+                creation.create_test_db = new.instancemethod(skip_create_test_db, creation, creation.__class__)
 
         Command.handle = _foreign_key_ignoring_handle
 
