@@ -284,7 +284,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 if uses_mysql(connection):
                     reset_statements = mysql_reset_sequences(style, connection)
                 else:
-                    reset_statements = connection.ops.sql_reset_sequence(style, cache.get_models())
+                    reset_statements = connection.ops.sequence_reset_sql(style, cache.get_models())
 
                 for reset_statement in reset_statements:
                     cursor.execute(reset_statement)
