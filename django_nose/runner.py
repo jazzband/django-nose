@@ -244,10 +244,9 @@ class NoseTestSuiteRunner(BasicNoseRunner):
         def mysql_reset_sequences(style, connection):
             """Return a list of SQL statements needed to reset all sequences
             for Django tables."""
-            # TODO: This is MySQL-specific--see below. It should also work with
-            # SQLite but not Postgres. :-(
             tables = connection.introspection.django_table_names(only_existing=True)
-            flush_statements = connection.ops.sql_flush(style, tables, connection.introspection.sequence_list())
+            flush_statements = connection.ops.sql_flush(
+                    style, tables, connection.introspection.sequence_list())
 
             # connection.ops.sequence_reset_sql() is not implemented for MySQL,
             # and the base class just returns []. TODO: Implement it by pulling
@@ -284,7 +283,8 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 if uses_mysql(connection):
                     reset_statements = mysql_reset_sequences(style, connection)
                 else:
-                    reset_statements = connection.ops.sequence_reset_sql(style, cache.get_models())
+                    reset_statements = connection.ops.sequence_reset_sql(
+                            style, cache.get_models())
 
                 for reset_statement in reset_statements:
                     cursor.execute(reset_statement)
@@ -295,7 +295,8 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 # transaction function.
                 transaction.commit_unless_managed(using=connection.alias)
 
-                creation.create_test_db = new.instancemethod(skip_create_test_db, creation, creation.__class__)
+                creation.create_test_db = new.instancemethod(
+                    skip_create_test_db, creation, creation.__class__)
 
         Command.handle = _foreign_key_ignoring_handle
 
