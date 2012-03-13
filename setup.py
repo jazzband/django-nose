@@ -1,25 +1,22 @@
 import os
 from setuptools import setup, find_packages
 
-
 ROOT = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name='django-nose',
-    version='1.0',
-    description='Django test runner that uses nose',
+    version='0.2',
+    description='Django test runner that uses nose.',
     long_description=open(os.path.join(ROOT, 'README.rst')).read(),
     author='Jeff Balogh',
     author_email='me@jeffbalogh.org',
-    maintainer='Erik Rose',
-    maintainer_email='erikrose@grinchcentral.com',
     url='http://github.com/jbalogh/django-nose',
     license='BSD',
     packages=find_packages(exclude=['testapp','testapp/*']),
     include_package_data=True,
     zip_safe=False,
-    install_requires=['nose', 'Django'],
-    tests_require=['south'],
+    install_requires=['nose>=1.0'],
+    tests_require=['Django>=1.2', 'south>=0.7'],
     # This blows up tox runs that install django-nose into a virtualenv,
     # because it causes Nose to import django_nose.runner before the Django
     # settings are initialized, leading to a mess of errors. There's no reason
@@ -31,7 +28,7 @@ setup(
     #    fixture_bundler = django_nose.fixture_bundling:FixtureBundlingPlugin
     #    """,
     classifiers=[
-        'Development Status :: 5 - Production/Stable',
+        'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',
