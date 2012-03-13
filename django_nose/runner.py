@@ -286,12 +286,12 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 # We're not using _skip_create_test_db, so put the DB name back:
                 connection.settings_dict['NAME'] = orig_db_name
 
-                # Since we replaced the connection with the test DB, closing the connection
-                # will avoid pooling issues with SQLAlchemy.  The issue is trying
-                # to CREATE/DROP the test database using a connection to a DB that
-                # was established with that test DB.  MySQLdb doesn't allow it
-                # and SQLAlchemy attempts to reuse the existing connection from
-                # its pool.
+                # Since we replaced the connection with the test DB, closing
+                # the connection will avoid pooling issues with SQLAlchemy. The
+                # issue is trying to CREATE/DROP the test database using a
+                # connection to a DB that was established with that test DB.
+                # MySQLdb doesn't allow it, and SQLAlchemy attempts to reuse
+                # the existing connection from its pool.
                 connection.close()
             else:
                 # Reset auto-increment sequences. Apparently, SUMO's tests are
