@@ -1,5 +1,6 @@
 include LICENSE
 include README.rst
+include runtests.sh
 recursive-exclude django_nose *.py[co]
 recursive-include testapp *
 recursive-exclude testapp *.py[co]
