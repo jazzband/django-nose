@@ -8,8 +8,8 @@ Features
 * All the goodness of `nose`_ in your Django tests
 * Fast fixture bundling, an optional feature which speeds up your fixture-based
   tests by a factor of 4
-* Reuse of previously created test DBs, saving setup time
-
+* Reuse of previously created test DBs, cutting seconds off startup time
+* Support for various databases
 
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/
 
@@ -74,7 +74,7 @@ eliminating redundant setup of Django test fixtures. To use it...
 1. Subclass ``django_nose.FastFixtureTestCase`` instead of
    ``django.test.TestCase``. (I like to import it ``as TestCase`` in my
    project's ``tests/__init__.py`` and then import it from there into my actual
-   tests. Then it's easy to sub the base class in an out.)
+   tests. Then it's easy to sub the base class in and out.)
 2. Activate the plugin by passing the ``--with-fixture-bundling`` option to ``./manage.py test``.
 
 How Fixture Bundling Works
@@ -172,8 +172,8 @@ Django 1.2 switches to a `class-based test runner`_. To use django-nose
 with Django 1.2, change your ``TEST_RUNNER`` from ``django_nose.run_tests`` to
 ``django_nose.NoseTestSuiteRunner``.
 
-``django_nose.run_tests`` will continue to work in Django 1.2, but will raise a
-warning. In Django 1.3 it will stop working.
+``django_nose.run_tests`` will continue to work in Django 1.2 but will raise a
+warning. In Django 1.3, it will stop working.
 
 If you were using ``django_nose.run_gis_tests``, you should also switch to
 ``django_nose.NoseTestSuiteRunner`` and use one of the `spatial backends`_ in
@@ -188,3 +188,23 @@ Django 1.1
 If you want to use django-nose with Django 1.1, use
 https://github.com/jbalogh/django-nose/tree/django-1.1 or
 http://pypi.python.org/pypi/django-nose/0.0.3.
+
+
+Recent Version History
+----------------------
+
+1.0 (2012-03-12)
+  * New fixture-bundling plugin for avoiding needless fixture setup (Erik Rose)
+  * Moved FastFixtureTestCase in from test-utils, so now all the
+    fixture-bundling stuff is in one library. (Erik Rose)
+  * Added the REUSE_DB setting for faster startup and shutdown. (Erik Rose)
+  * Fixed a crash when printing options with certain verbosities. (Daniel Abel)
+  * Broke hard dependency on MySQL. Support PostgreSQL. (Roger Hu)
+  * Support SQLite, both memory- and disk-based. (Roger Hu and Erik Rose)
+
+0.1.3 (2010-04-15)
+
+  * Even better coverage support (rozza)
+  * README fixes (carljm and ionelmc)
+  * optparse OptionGroups are handled better (outofculture)
+  * nose plugins are loaded before listing options
