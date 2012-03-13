@@ -6,10 +6,11 @@ Features
 --------
 
 * All the goodness of `nose`_ in your Django tests
-* Fast fixture bundling, an optional feature which speeds up your fixture-based
+* Fixture bundling, an optional feature which speeds up your fixture-based
   tests by a factor of 4
-* Reuse of previously created test DBs, cutting seconds off startup time
-* Support for various databases
+* Reuse of previously created test DBs, cutting 10 seconds off startup time
+* Support for various databases. Tested with MySQL, PostgreSQL, and SQLite.
+  Others should work as well.
 
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/
 
@@ -208,3 +209,5 @@ Recent Version History
   * README fixes (carljm and ionelmc)
   * optparse OptionGroups are handled better (outofculture)
   * nose plugins are loaded before listing options
+
+See more in changelog.txt.
