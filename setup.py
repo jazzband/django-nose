@@ -6,7 +6,7 @@ ROOT = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name='django-nose',
-    version='1.0',
+    version='1.0.1',
     description='Django test runner that uses nose',
     long_description=open(os.path.join(ROOT, 'README.rst')).read(),
     author='Jeff Balogh',

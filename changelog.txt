@@ -1,18 +1,4 @@
-- 1.0
-  * New fixture-bundling plugin for avoiding needless fixture setup (Erik Rose)
-  * Moved FastFixtureTestCase in from test-utils, so now all the
-    fixture-bundling stuff is in one library. (Erik Rose)
-  * Added the REUSE_DB setting for faster startup and shutdown. (Erik Rose)
-  * Fixed a crash when printing options with certain verbosities. (Daniel Abel)
-  * Broke hard dependency on MySQL. Support PostgreSQL. (Roger Hu)
-  * Support SQLite, both memory- and disk-based. (Roger Hu and Erik Rose)
-  * Nail down versions of the package requirements. (Daniel Mizyrycki)
-
-- 0.1.3 (04-15-10)
-  * Even better coverage support (rozza)
-  * README fixes (carljm and ionelmc)
-  * optparse OptionGroups are handled better (outofculture)
-  * nose plugins are loaded before listing options
+(Later entries are in the readme.)
 
 - 0.1.2 (08-14-10)
   * run_tests API support (carjm)

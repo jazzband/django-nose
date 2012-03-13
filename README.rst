@@ -194,6 +194,10 @@ http://pypi.python.org/pypi/django-nose/0.0.3.
 Recent Version History
 ----------------------
 
+1.0.1
+  * Fixed an error that would surface when using SQLAlchemy with connection
+    pooling. (Roger Hu)
+
 1.0 (2012-03-12)
   * New fixture-bundling plugin for avoiding needless fixture setup (Erik Rose)
   * Moved FastFixtureTestCase in from test-utils, so now all the
