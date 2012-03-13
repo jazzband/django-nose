@@ -1,9 +1,12 @@
 - 1.0
-  * New fixture-bundling plugin for avoiding needless fixture setup (erikrose)
-  * FastFixtureTestCase from test_utils, so now all the fixture-bundling stuff
-    is in one place (erikrose)
-  * NoseTestSuiteRunner is now the DB-creation-skipping runner, brought over
-    from test_utils. (stolen by erikrose)
+  * New fixture-bundling plugin for avoiding needless fixture setup (Erik Rose)
+  * Moved FastFixtureTestCase in from test-utils, so now all the
+    fixture-bundling stuff is in one library. (Erik Rose)
+  * Added the REUSE_DB setting for faster startup and shutdown. (Erik Rose)
+  * Fixed a crash when printing options with certain verbosities. (Daniel Abel)
+  * Broke hard dependency on MySQL. Support PostgreSQL. (Roger Hu)
+  * Support SQLite, both memory- and disk-based. (Roger Hu and Erik Rose)
+  * Nail down versions of the package requirements. (Daniel Mizyrycki)
 
 - 0.1.3 (04-15-10)
   * Even better coverage support (rozza)

@@ -18,8 +18,8 @@ setup(
     packages=find_packages(exclude=['testapp','testapp/*']),
     include_package_data=True,
     zip_safe=False,
-    install_requires=['nose', 'Django'],
-    tests_require=['south'],
+    install_requires=['nose>=1.0', 'Django>=1.2'],
+    tests_require=['south>=0.7'],
     # This blows up tox runs that install django-nose into a virtualenv,
     # because it causes Nose to import django_nose.runner before the Django
     # settings are initialized, leading to a mess of errors. There's no reason
@@ -38,6 +38,9 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
+        'Topic :: Software Development :: Testing'
     ]
 )

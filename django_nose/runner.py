@@ -7,8 +7,8 @@ You can use... ::
 in settings.py for arguments that you want always passed to nose.
 
 """
-import os
 import new
+import os
 import sys
 
 from django.conf import settings
@@ -46,6 +46,7 @@ OPTION_TRANSLATION = {'--failfast': '-x'}
 
 def uses_mysql(connection):
     return 'mysql' in connection.settings_dict['ENGINE']
+
 
 # Django v1.2 does not have a _get_test_db_name() function.
 if not hasattr(BaseDatabaseCreation, '_get_test_db_name'):
@@ -159,8 +160,7 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
 
 _old_handle = Command.handle
 def _foreign_key_ignoring_handle(self, *fixture_labels, **options):
-    """Wrap the the stock loaddata to ignore foreign key checks so we can load
-    circular references from fixtures.
+    """Wrap the the stock loaddata to ignore foreign key checks so we can load circular references from fixtures.
 
     This is monkeypatched into place in setup_databases().
 
@@ -184,7 +184,7 @@ def _foreign_key_ignoring_handle(self, *fixture_labels, **options):
             connection.close()
 
 
-def skip_create_test_db(self, verbosity=1, autoclobber=False):
+def _skip_create_test_db(self, verbosity=1, autoclobber=False):
     """Database creation class that skips both creation and flushing
 
     The idea is to re-use the perfectly good test DB already created by an
@@ -192,10 +192,11 @@ def skip_create_test_db(self, verbosity=1, autoclobber=False):
     (depending on your I/O luck) down to 3.
 
     """
-    # Notice that the DB supports transactions. Originally, this was done
-    # in the method this overrides.
-    # Django v1.2 does not have the confirm function.  Added in https://code.djangoproject.com/ticket/12991.
-    if hasattr(self.connection.features, 'confirm') and callable(self.connection.features.confirm):
+    # Notice that the DB supports transactions. Originally, this was done in
+    # the method this overrides. Django v1.2 does not have the confirm
+    # function. Added in https://code.djangoproject.com/ticket/12991.
+    if hasattr(self.connection.features, 'confirm') and \
+       callable(self.connection.features.confirm):
         self.connection.features.confirm()
     else:
         can_rollback = self._rollback_works()
@@ -209,6 +210,52 @@ def _reusing_db():
     return (os.getenv('REUSE_DB', 'false').lower() in ('true', '1', ''))
 
 
+def _can_support_reuse_db(connection):
+    """Return whether it makes any sense to use REUSE_DB with the backend of a connection."""
+    # This is a SQLite in-memory DB. Those are created implicitly when
+    # you try to connect to them, so our test below doesn't work.
+    return not connection.creation._get_test_db_name() == ':memory:'
+
+
+def _should_create_database(connection):
+    """Return whether we should recreate the given DB.
+
+    This is true if the DB doesn't exist or the REUSE_DB env var isn't truthy.
+
+    """
+    # TODO: Notice when the Model classes change and return True. Worst case,
+    # we can generate sqlall and hash it, though it's a bit slow (2 secs) and
+    # hits the DB for no good reason. Until we find a faster way, I'm inclined
+    # to keep making people explicitly saying REUSE_DB if they want to reuse
+    # the DB.
+
+    if not _can_support_reuse_db(connection):
+        return True
+
+    # Notice whether the DB exists, and create it if it doesn't:
+    try:
+        connection.cursor()
+    except StandardError:  # TODO: Be more discerning but still DB agnostic.
+        return True
+    return not _reusing_db()
+
+
+def _mysql_reset_sequences(style, connection):
+    """Return a list of SQL statements needed to reset all sequences for Django tables."""
+    tables = connection.introspection.django_table_names(only_existing=True)
+    flush_statements = connection.ops.sql_flush(
+            style, tables, connection.introspection.sequence_list())
+
+    # connection.ops.sequence_reset_sql() is not implemented for MySQL,
+    # and the base class just returns []. TODO: Implement it by pulling
+    # the relevant bits out of sql_flush().
+    return [s for s in flush_statements if s.startswith('ALTER')]
+    # Being overzealous and resetting the sequences on non-empty tables
+    # like django_content_type seems to be fine in MySQL: adding a row
+    # afterward does find the correct sequence number rather than
+    # crashing into an existing row.
+
+
 class NoseTestSuiteRunner(BasicNoseRunner):
     """A runner that optionally skips DB creation
 
@@ -220,52 +267,6 @@ class NoseTestSuiteRunner(BasicNoseRunner):
 
     """
     def setup_databases(self):
-        def can_support_reuse_db(connection):
-            """Return whether it makes any sense to use REUSE_DB with the backend of a connection."""
-            # This is a SQLite in-memory DB. Those are created implicitly when
-            # you try to connect to them, so our test below doesn't work.
-            return not connection.creation._get_test_db_name() == ':memory:'
-
-        def should_create_database(connection):
-            """Return whether we should recreate the given DB.
-
-            This is true if the DB doesn't exist or the REUSE_DB env var
-            isn't truthy.
-
-            """
-            # TODO: Notice when the Model classes change and return True. Worst
-            # case, we can generate sqlall and hash it, though it's a bit slow
-            # (2 secs) and hits the DB for no good reason. Until we find a
-            # faster way, I'm inclined to keep making people explicitly saying
-            # REUSE_DB if they want to reuse the DB.
-
-            if not can_support_reuse_db(connection):
-                return True
-
-            # Notice whether the DB exists, and create it if it doesn't:
-            try:
-                connection.cursor()
-            except StandardError:  # TODO: Be more discerning but still DB
-                                   # agnostic.
-                return True
-            return not _reusing_db()
-
-        def mysql_reset_sequences(style, connection):
-            """Return a list of SQL statements needed to reset all sequences
-            for Django tables."""
-            tables = connection.introspection.django_table_names(only_existing=True)
-            flush_statements = connection.ops.sql_flush(
-                    style, tables, connection.introspection.sequence_list())
-
-            # connection.ops.sequence_reset_sql() is not implemented for MySQL,
-            # and the base class just returns []. TODO: Implement it by pulling
-            # the relevant bits out of sql_flush().
-            return [s for s in flush_statements if s.startswith('ALTER')]
-            # Being overzealous and resetting the sequences on non-empty tables
-            # like django_content_type seems to be fine in MySQL: adding a row
-            # afterward does find the correct sequence number rather than
-            # crashing into an existing row.
-
         for alias in connections:
             connection = connections[alias]
             creation = connection.creation
@@ -273,17 +274,22 @@ class NoseTestSuiteRunner(BasicNoseRunner):
 
             # Mess with the DB name so other things operate on a test DB
             # rather than the real one. This is done in create_test_db when
-            # we don't monkeypatch it away with skip_create_test_db.
+            # we don't monkeypatch it away with _skip_create_test_db.
             orig_db_name = connection.settings_dict['NAME']
             connection.settings_dict['NAME'] = test_db_name
 
-            if not _reusing_db() and can_support_reuse_db(connection):
+            if not _reusing_db() and _can_support_reuse_db(connection):
                 print ('To reuse old database "%s" for speed, set env var '
                        'REUSE_DB=1.' % test_db_name)
 
-            if should_create_database(connection):
-                # We're not using skip_create_test_db, so put the DB name back:
+            if _should_create_database(connection):
+                # We're not using _skip_create_test_db, so put the DB name back:
                 connection.settings_dict['NAME'] = orig_db_name
+
+                # Since we replaced the connection with the test DB, closing the connection
+                # will avoid pooling issues with SQLAlchemy when we attempt to reopen
+                # the connection with a different database.
+                connection.close()
             else:
                 # Reset auto-increment sequences. Apparently, SUMO's tests are
                 # horrid and coupled to certain numbers.
@@ -291,7 +297,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 style = no_style()
 
                 if uses_mysql(connection):
-                    reset_statements = mysql_reset_sequences(style, connection)
+                    reset_statements = _mysql_reset_sequences(style, connection)
                 else:
                     reset_statements = connection.ops.sequence_reset_sql(
                             style, cache.get_models())
@@ -306,7 +312,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 transaction.commit_unless_managed(using=connection.alias)
 
                 creation.create_test_db = new.instancemethod(
-                        skip_create_test_db, creation, creation.__class__)
+                        _skip_create_test_db, creation, creation.__class__)
 
         Command.handle = _foreign_key_ignoring_handle
 
