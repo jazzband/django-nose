@@ -18,7 +18,6 @@ from django.core.management.color import no_style
 from django.core.management.commands.loaddata import Command
 from django.db import connections, transaction, DEFAULT_DB_ALIAS
 from django.db.backends.creation import BaseDatabaseCreation
-from django.db.backends.mysql import creation as mysql
 from django.test.simple import DjangoTestSuiteRunner
 from django.utils.importlib import import_module
 
