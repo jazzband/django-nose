@@ -15,8 +15,8 @@ setup(
     packages=find_packages(exclude=['testapp','testapp/*']),
     include_package_data=True,
     zip_safe=False,
-    install_requires=['nose'],
-    tests_require=['Django', 'south'],
+    install_requires=['nose>=1.0'],
+    tests_require=['Django>=1.2', 'south>=0.7'],
     # This blows up tox runs that install django-nose into a virtualenv,
     # because it causes Nose to import django_nose.runner before the Django
     # settings are initialized, leading to a mess of errors. There's no reason

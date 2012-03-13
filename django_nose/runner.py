@@ -1,24 +1,30 @@
-"""
-Django test runner that invokes nose.
+"""Django test runner that invokes nose.
 
-You can use
+You can use... ::
 
     NOSE_ARGS = ['list', 'of', 'args']
 
-in settings.py for arguments that you always want passed to nose.
+in settings.py for arguments that you want always passed to nose.
+
 """
 import os
+import new
 import sys
+from optparse import make_option
 
 from django.conf import settings
+from django.core import exceptions
 from django.core.management.base import BaseCommand
+from django.core.management.color import no_style
+from django.core.management.commands.loaddata import Command
+from django.db import connections, transaction, DEFAULT_DB_ALIAS
+from django.db.backends.creation import BaseDatabaseCreation
+from django.db.backends.mysql import creation as mysql
 from django.test.simple import DjangoTestSuiteRunner
 from django.utils.importlib import import_module
-from django.core import exceptions
 
 import nose.core
 
-from django_nose.fixture_bundling import FixtureBundlingPlugin
 from django_nose.plugin import DjangoSetUpPlugin, ResultPlugin
 
 try:
@@ -30,9 +36,36 @@ except NameError:
                 return True
         return False
 
+
+__all__ = ['BasicNoseRunner', 'NoseTestSuiteRunner', 'uses_mysql']
+
+
 # This is a table of Django's "manage.py test" options which
 # correspond to nosetests options with a different name:
-OPTION_TRANSLATION = {'--failfast': '-x'}
+OPTION_TRANSLATION = {'--failfast': '-x',
+                      '--nose-verbosity': '--verbosity'}
+
+
+def translate_option(opt):
+    if '=' in opt:
+        long_opt, value = opt.split('=', 1)
+        return '%s=%s' % (translate_option(long_opt), value)
+    return OPTION_TRANSLATION.get(opt, opt)
+
+
+def uses_mysql(connection):
+    return 'mysql' in connection.settings_dict['ENGINE']
+
+# Django v1.2 does not have a _get_test_db_name() function.
+if not hasattr(BaseDatabaseCreation, '_get_test_db_name'):
+    def _get_test_db_name(self):
+        TEST_DATABASE_PREFIX = 'test_'
+
+        if self.connection.settings_dict['TEST_NAME']:
+            return self.connection.settings_dict['TEST_NAME']
+        return TEST_DATABASE_PREFIX + self.connection.settings_dict['NAME']
+
+    BaseDatabaseCreation._get_test_db_name = _get_test_db_name
 
 
 def _get_plugins_from_settings():
@@ -64,12 +97,30 @@ def _get_options():
     config = nose.core.Config(env=os.environ, files=cfg_files, plugins=manager)
     config.plugins.addPlugins(list(_get_plugins_from_settings()))
     options = config.getParser()._get_all_options()
+
+    # copy nose's --verbosity option and rename to --nose-verbosity
+    verbosity = [o for o in options if o.get_opt_string() == '--verbosity'][0]
+    verbosity_attrs = dict((attr, getattr(verbosity, attr))
+                           for attr in verbosity.ATTRS
+                           if attr not in ('dest', 'metavar'))
+    options.append(make_option('--nose-verbosity',
+                               dest='nose_verbosity',
+                               metavar='NOSE_VERBOSITY',
+                               **verbosity_attrs))
+
     django_opts = [opt.dest for opt in BaseCommand.option_list] + ['version']
     return tuple(o for o in options if o.dest not in django_opts and
                                        o.action != 'help')
 
 
-class NoseTestSuiteRunner(DjangoTestSuiteRunner):
+class BasicNoseRunner(DjangoTestSuiteRunner):
+    """Facade that implements a nose runner in the guise of a Django runner
+
+    You shouldn't have to use this directly unless the additions made by
+    ``NoseTestSuiteRunner`` really bother you. They shouldn't, because they're
+    all off by default.
+
+    """
     __test__ = False
 
     # Replace the builtin command options with the merged django/nose options:
@@ -102,8 +153,7 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
 
         Returns the number of tests that failed.
         """
-        nose_argv = (['nosetests', '--verbosity', str(self.verbosity)]
-                     + list(test_labels))
+        nose_argv = (['nosetests'] + list(test_labels))
         if hasattr(settings, 'NOSE_ARGS'):
             nose_argv.extend(settings.NOSE_ARGS)
 
@@ -113,10 +163,13 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
             django_opts.extend(opt._long_opts)
             django_opts.extend(opt._short_opts)
 
-        nose_argv.extend(
-            OPTION_TRANSLATION.get(opt, opt) for opt in sys.argv[1:]
+        nose_argv.extend(translate_option(opt) for opt in sys.argv[1:]
             if opt.startswith('-')
                and not any(opt.startswith(d) for d in django_opts))
+        # if --nose-verbosity was omitted, pass Django verbosity to nose
+        if ('--verbosity' not in nose_argv and
+                not any(opt.startswith('--verbosity=') for opt in nose_argv)):
+            nose_argv.append('--verbosity=%s' % str(self.verbosity))
 
         if self.verbosity >= 1:
             print ' '.join(nose_argv)
@@ -125,3 +178,150 @@ class NoseTestSuiteRunner(DjangoTestSuiteRunner):
         # suite_result expects the suite as the first argument.  Fake it.
         return self.suite_result({}, result)
 
+
+_old_handle = Command.handle
+def _foreign_key_ignoring_handle(self, *fixture_labels, **options):
+    """Wrap the the stock loaddata to ignore foreign key checks so we can load
+    circular references from fixtures.
+
+    This is monkeypatched into place in setup_databases().
+
+    """
+    using = options.get('database', DEFAULT_DB_ALIAS)
+    commit = options.get('commit', True)
+    connection = connections[using]
+
+    if uses_mysql(connection):
+        cursor = connection.cursor()
+        cursor.execute('SET foreign_key_checks = 0')
+
+    _old_handle(self, *fixture_labels, **options)
+
+    if uses_mysql(connection):
+        cursor = connection.cursor()
+        cursor.execute('SET foreign_key_checks = 1')
+
+        if commit:
+            connection.close()
+
+
+def skip_create_test_db(self, verbosity=1, autoclobber=False):
+    """Database creation class that skips both creation and flushing
+
+    The idea is to re-use the perfectly good test DB already created by an
+    earlier test run, cutting the time spent before any tests run from 5-13
+    (depending on your I/O luck) down to 3.
+
+    """
+
+    # Notice that the DB supports transactions. Originally, this was done
+    # in the method this overrides.
+    # Django v1.2 does not have the confirm function.  Added in https://code.djangoproject.com/ticket/12991.
+    if hasattr(self.connection.features, 'confirm') and callable(self.connection.features.confirm):
+        self.connection.features.confirm()
+    else:
+        can_rollback = self._rollback_works()
+        self.connection.settings_dict["SUPPORTS_TRANSACTIONS"] = can_rollback
+
+    return self._get_test_db_name()
+
+
+def _reusing_db():
+    """Return whether the ``REUSE_DB`` flag was passed"""
+    return (os.getenv('REUSE_DB', 'false').lower() in ('true', '1', ''))
+
+
+class NoseTestSuiteRunner(BasicNoseRunner):
+    """A runner that optionally skips DB creation
+
+    This test monkeypatches connection.creation to let you skip creating
+    databases if they already exist. Your tests will run much faster.
+
+    To opt into this behavior, set the environment variable ``REUSE_DB`` to
+    something that isn't "0" or "false" (case aside).
+
+    """
+    def setup_databases(self):
+        def should_create_database(connection):
+            """Return whether we should recreate the given DB.
+
+            This is true if the DB doesn't exist or the REUSE_DB env var
+            isn't truthy.
+
+            """
+            # TODO: Notice when the Model classes change and return True. Worst
+            # case, we can generate sqlall and hash it, though it's a bit slow
+            # (2 secs) and hits the DB for no good reason. Until we find a
+            # faster way, I'm inclined to keep making people explicitly saying
+            # REUSE_DB if they want to reuse the DB.
+
+            # Notice whether the DB exists, and create it if it doesn't:
+            try:
+                connection.cursor()
+            except StandardError:  # TODO: Be more discerning but still DB
+                                   # agnostic.
+                return True
+            return not _reusing_db()
+
+        def sql_reset_sequences(connection):
+            """Return a list of SQL statements needed to reset all sequences
+            for Django tables."""
+            # TODO: This is MySQL-specific--see below. It should also work with
+            # SQLite but not Postgres. :-(
+            tables = connection.introspection.django_table_names(
+                only_existing=True)
+            flush_statements = connection.ops.sql_flush(
+                no_style(), tables, connection.introspection.sequence_list())
+
+            # connection.ops.sequence_reset_sql() is not implemented for MySQL,
+            # and the base class just returns []. TODO: Implement it by pulling
+            # the relevant bits out of sql_flush().
+            return [s for s in flush_statements if s.startswith('ALTER')]
+            # Being overzealous and resetting the sequences on non-empty tables
+            # like django_content_type seems to be fine in MySQL: adding a row
+            # afterward does find the correct sequence number rather than
+            # crashing into an existing row.
+
+        for alias in connections:
+            connection = connections[alias]
+            creation = connection.creation
+            test_db_name = creation._get_test_db_name()
+
+            # Mess with the DB name so other things operate on a test DB
+            # rather than the real one. This is done in create_test_db when
+            # we don't monkeypatch it away with SkipDatabaseCreation.
+            orig_db_name = connection.settings_dict['NAME']
+            connection.settings_dict['NAME'] = test_db_name
+
+            if should_create_database(connection):
+                print ('To reuse old database "%s" for speed, set env var '
+                       'REUSE_DB=1' % test_db_name)
+                # We're not using SkipDatabaseCreation, so put the DB name
+                # back.
+                connection.settings_dict['NAME'] = orig_db_name
+            else:
+                # Reset auto-increment sequences. Apparently, SUMO's tests are
+                # horrid and coupled to certain numbers.
+                cursor = connection.cursor()
+                for statement in sql_reset_sequences(connection):
+                    cursor.execute(statement)
+                # Django v1.3 (https://code.djangoproject.com/ticket/9964) starts
+                # using commit_unless_managed() for individual connections.
+                # Backwards compatibility for Django 1.2 is to use the generic
+                # transaction function.
+                transaction.commit_unless_managed(using=connection.alias)
+
+                creation.create_test_db = new.instancemethod(skip_create_test_db, creation, creation.__class__)
+
+        Command.handle = _foreign_key_ignoring_handle
+
+        # With our class patch, does nothing but return some connection
+        # objects:
+        return super(NoseTestSuiteRunner, self).setup_databases()
+
+    def teardown_databases(self, *args, **kwargs):
+        """Leave those poor, reusable databases alone if REUSE_DB is true."""
+        if not _reusing_db():
+            return super(NoseTestSuiteRunner, self).teardown_databases(
+                    *args, **kwargs)
+        # else skip tearing down the DB so we can reuse it next time
