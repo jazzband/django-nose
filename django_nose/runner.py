@@ -7,8 +7,8 @@ You can use... ::
 in settings.py for arguments that you want always passed to nose.
 
 """
-import os
 import new
+import os
 import sys
 
 from django.conf import settings
@@ -46,6 +46,7 @@ OPTION_TRANSLATION = {'--failfast': '-x'}
 
 def uses_mysql(connection):
     return 'mysql' in connection.settings_dict['ENGINE']
+
 
 # Django v1.2 does not have a _get_test_db_name() function.
 if not hasattr(BaseDatabaseCreation, '_get_test_db_name'):

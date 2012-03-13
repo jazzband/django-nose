@@ -8,7 +8,24 @@ from django.db.models.loading import get_apps, load_app
 from django.test.testcases import TransactionTestCase
 
 
-class ResultPlugin(Plugin):
+class AlwaysOnPlugin(Plugin):
+    """A plugin that takes no options and is always enabled"""
+
+    def options(self, parser, env):
+        """Avoid adding a ``--with`` option for this plugin.
+
+        We don't have any options, and this plugin is always enabled, so we
+        don't want to use superclass's ``options()`` method which would add a
+        ``--with-*`` option.
+
+        """
+
+    def configure(self, *args, **kw_args):
+        super(AlwaysOnPlugin, self).configure(*args, **kw_args)
+        self.enabled = True  # Force this plugin to be always enabled.
+
+
+class ResultPlugin(AlwaysOnPlugin):
     """
     Captures the TestResult object for later inspection.
 
@@ -19,21 +36,11 @@ class ResultPlugin(Plugin):
 
     name = "result"
 
-    def options(self, parser, env):
-        # We don't have any options, and this plugin is always
-        # enabled, so we don't want to use superclass's options()
-        # method which would add a --with-* option.
-        pass
-
-    def configure(self, *args, **kw_args):
-        super(ResultPlugin, self).configure(*args, **kw_args)
-        self.enabled = True # force this plugin to be always enabled
-        
     def finalize(self, result):
         self.result = result
 
 
-class DjangoSetUpPlugin(Plugin):
+class DjangoSetUpPlugin(AlwaysOnPlugin):
     """
     Configures Django to setup and tear down the environment.
     This allows coverage to report on all code imported and used during the
@@ -46,16 +53,6 @@ class DjangoSetUpPlugin(Plugin):
         super(DjangoSetUpPlugin, self).__init__()
         self.runner = runner
         self.sys_stdout = sys.stdout
-
-    def options(self, parser, env):
-        # We don't have any options, and this plugin is always
-        # enabled, so we don't want to use superclass's options()
-        # method which would add a --with-* option.
-        pass
-
-    def configure(self, *args, **kw_args):
-        super(DjangoSetUpPlugin, self).configure(*args, **kw_args)
-        self.enabled = True # force this plugin to be always enabled
 
     def begin(self):
         sys_stdout = sys.stdout
