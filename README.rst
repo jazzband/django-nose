@@ -1,45 +1,33 @@
-============
-Requirements
-============
+===========
+django-nose
+===========
 
-This package is most useful when installed with:
+Features
+--------
 
-    * Django 1.2+
-    * nose
+* All the goodness of `nose`_ in your Django tests
+* Fast fixture bundling, an optional feature which speeds up your fixture-based
+  tests by a factor of 4
+* Reuse of previously created test DBs, saving setup time
+* A place to put special Django settings used only during tests
 
 
-===========================
-Upgrading from Django < 1.2
-===========================
-
-Django 1.2 switches to a `class-based test runner`_.  To use ``django-nose``
-with Django 1.2, change your ``TEST_RUNNER`` from ``django_nose.run_tests`` to
-``django_nose.NoseTestSuiteRunner``.
-
-``django_nose.run_tests`` will continue to work in Django 1.2, but will raise a
-warning.  In Django 1.3 it will stop working.
-
-If you were using ``django_nose.run_gis_tests``, you should also switch to
-``django_nose.NoseTestSuiteRunner`` and use one of the `spatial backends`_ in
-your ``DATABASES`` settings.
-
-.. _class-based test runner: http://docs.djangoproject.com/en/dev/releases/1.2/#function-based-test-runners
-.. _spatial backends: http://docs.djangoproject.com/en/dev/ref/contrib/gis/db-api/#id1
+.. _nose: http://somethingaboutorange.com/mrl/projects/nose/
 
 
 Installation
 ------------
 
-You can get django-nose from pypi with: ::
+You can get django-nose from PyPI with... ::
 
     pip install django-nose
 
-The development version can be installed with: ::
+The development version can be installed with... ::
 
     pip install -e git://github.com/jbalogh/django-nose.git#egg=django-nose
 
 Since django-nose extends Django's built-in test command, you should add it to
-your ``INSTALLED_APPS`` in ``settings.py``: ::
+your ``INSTALLED_APPS`` in ``settings.py``::
 
     INSTALLED_APPS = (
         ...
@@ -47,24 +35,45 @@ your ``INSTALLED_APPS`` in ``settings.py``: ::
         ...
     )
 
-Then set ``TEST_RUNNER`` in ``settings.py``: ::
+Then set ``TEST_RUNNER`` in ``settings.py``::
 
     TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 
-Usage
------
+Use
+---
 
-The use of django-nose is mostly transparent; just run ``./manage.py test`` as
-usual. See ``./manage.py help test`` for all the options nose provides, and
-look to the `nose docs`_ for more help with nose.
+The day-to-day use of django-nose is mostly transparent; just run ``./manage.py
+test`` as usual. The one new wrinkle is that, whenever your DB schema changes,
+you should set the ``FORCE_DB`` environment variable the next time you run
+tests. This will cue the test runner to reinitialize the database, which it
+usually avoids to save you time::
 
-Fixture Bundling
-----------------
+    FORCE_DB=1 ./manage.py test
 
-django-nose includes a nose plugin which can drastically speed up your tests by
-eliminating redundant setup of Django test fixtures. To activate the plugin,
-add the ``--with-fixture-bundling`` option when running tests.
+Alternatively, if you don't want to be bothered, you can use a slightly slower
+but maintenance-free test runner by saying so in ``settings.py``::
+
+    TEST_RUNNER = 'django_nose.BasicNoseRunner'
+
+
+See ``./manage.py help test`` for all the options nose provides, and look to
+the `nose docs`_ for more help with nose.
+
+.. _nose docs: http://somethingaboutorange.com/mrl/projects/nose/
+
+
+Enabling Fast Fixtures
+----------------------
+
+django-nose includes a nose plugin which drastically speeds up your tests by
+eliminating redundant setup of Django test fixtures. To use it...
+
+1. Subclass ``django_nose.FastFixtureTestCase`` instead of
+   ``django.test.TestCase``. (I like to import it ``as TestCase`` in my
+   project's ``tests/__init__.py`` and then import it from there into my actual
+   tests. Then it's easy to sub the base class in an out.)
+2. Activate the plugin by passing the ``--with-fixture-bundling`` option to ``./manage.py test``.
 
 How Fixture Bundling Works
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -92,7 +101,13 @@ sources of state leakage we have encountered:
 
 * Locale activation, which is maintained in a threadlocal variable. Be sure to
   reset your locale selection between tests.
-* memcached contents. Be sure to flush between tests.
+* memcached contents. Be sure to flush between tests. Many test superclasses do
+  this automatically.
+
+It's also possible that you have ``post_save`` signal handlers which create
+additional database rows while loading the fixtures. ``FastFixtureTestCase``
+isn't yet smart enough to notice this and clean up after it, so you'll have to
+go back to plain old ``TestCase`` for now.
 
 Exempting A Class From Bundling
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -105,19 +120,50 @@ some state outside the DB in ``setUpClass`` and tears it down in
 the advice of the fixture bundler. In such a case, simply set the
 ``exempt_from_fixture_bundling`` attribute of the test class to ``True``.
 
-Customization
--------------
+
+settings_test.py
+----------------
+
+django-nose allows you to create a ``settings_test`` module where you
+can provide configuration settings which are used solely in your
+testing environment.
+
+For example, if I wanted to make Celery always eager in my test environment,
+I could define ``CELERY_ALWAYS_EAGER`` like this:
+
+settings.py::
+
+    CELERY_ALWAYS_EAGER = False
+
+
+settings_test.py::
+
+    CELERY_ALWAYS_EAGER = True
+
+
+Using With South
+----------------
+
+`South`_ installs its own test command that turns off migrations during
+testing. Make sure that django-nose comes *after* ``south`` in
+``INSTALLED_APPS`` so that django_nose's test command is used.
+
+.. _South: http://south.aeracode.org/
+
 
 Always Passing The Same Options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 
 To always set the same command line options you can use a `nose.cfg or
 setup.cfg`_ (as usual) or you can specify them in settings.py like this::
 
     NOSE_ARGS = ['--failed', '--stop']
 
-Using Custom Plugins
-~~~~~~~~~~~~~~~~~~~~
+.. _nose.cfg or setup.cfg: http://somethingaboutorange.com/mrl/projects/nose/0.11.2/usage.html#configuration
+
+
+Custom Plugins
+--------------
 
 If you need to `make custom plugins`_, you can define each plugin class
 somewhere within your app and load them from settings.py like this::
@@ -127,26 +173,35 @@ somewhere within your app and load them from settings.py like this::
         # ...
     ]
 
-Just like middleware or anything else, each string must be a dot separated,
-importable path to an actual class.  Each plugin class will be instantiated and
+Just like middleware or anything else, each string must be a dot-separated,
+importable path to an actual class. Each plugin class will be instantiated and
 added to the Nose test runner.
 
-Caveats
--------
-
-`South`_ installs its own test command that turns off migrations during
-testing.  Make sure that ``django_nose`` comes *after* ``south`` in
-``INSTALLED_APPS`` so that django_nose's test command is used.
-
-.. _nose docs: http://somethingaboutorange.com/mrl/projects/nose/
-.. _nose.cfg or setup.cfg: http://somethingaboutorange.com/mrl/projects/nose/0.11.2/usage.html#configuration
 .. _make custom plugins: http://somethingaboutorange.com/mrl/projects/nose/0.11.2/plugins.html#writing-plugins
-.. _South: http://south.aeracode.org/
 
 
-======================
-Support for Django 1.1
-======================
+Older Versions of Django
+------------------------
+
+Upgrading from Django < 1.2
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Django 1.2 switches to a `class-based test runner`_. To use django-nose
+with Django 1.2, change your ``TEST_RUNNER`` from ``django_nose.run_tests`` to
+``django_nose.NoseTestSuiteRunner``.
+
+``django_nose.run_tests`` will continue to work in Django 1.2, but will raise a
+warning. In Django 1.3 it will stop working.
+
+If you were using ``django_nose.run_gis_tests``, you should also switch to
+``django_nose.NoseTestSuiteRunner`` and use one of the `spatial backends`_ in
+your ``DATABASES`` settings.
+
+.. _class-based test runner: http://docs.djangoproject.com/en/dev/releases/1.2/#function-based-test-runners
+.. _spatial backends: http://docs.djangoproject.com/en/dev/ref/contrib/gis/db-api/#id1
+
+Django 1.1
+~~~~~~~~~~
 
 If you want to use django-nose with Django 1.1, use
 https://github.com/jbalogh/django-nose/tree/django-1.1 or
