@@ -169,6 +169,7 @@ def _foreign_key_ignoring_handle(self, *fixture_labels, **options):
     commit = options.get('commit', True)
     connection = connections[using]
 
+    # MySQL stinks at loading circular references:
     if uses_mysql(connection):
         cursor = connection.cursor()
         cursor.execute('SET foreign_key_checks = 0')
@@ -191,7 +192,6 @@ def skip_create_test_db(self, verbosity=1, autoclobber=False):
     (depending on your I/O luck) down to 3.
 
     """
-
     # Notice that the DB supports transactions. Originally, this was done
     # in the method this overrides.
     # Django v1.2 does not have the confirm function.  Added in https://code.djangoproject.com/ticket/12991.
@@ -267,15 +267,14 @@ class NoseTestSuiteRunner(BasicNoseRunner):
 
             # Mess with the DB name so other things operate on a test DB
             # rather than the real one. This is done in create_test_db when
-            # we don't monkeypatch it away with SkipDatabaseCreation.
+            # we don't monkeypatch it away with skip_create_test_db.
             orig_db_name = connection.settings_dict['NAME']
             connection.settings_dict['NAME'] = test_db_name
 
             if should_create_database(connection):
                 print ('To reuse old database "%s" for speed, set env var '
                        'REUSE_DB=1' % test_db_name)
-                # We're not using SkipDatabaseCreation, so put the DB name
-                # back.
+                # We're not using skip_create_test_db, so put the DB name back:
                 connection.settings_dict['NAME'] = orig_db_name
             else:
                 # Reset auto-increment sequences. Apparently, SUMO's tests are
@@ -283,13 +282,14 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 cursor = connection.cursor()
                 for statement in sql_reset_sequences(connection):
                     cursor.execute(statement)
-                # Django v1.3 (https://code.djangoproject.com/ticket/9964) starts
-                # using commit_unless_managed() for individual connections.
-                # Backwards compatibility for Django 1.2 is to use the generic
-                # transaction function.
+                # Django v1.3 (https://code.djangoproject.com/ticket/9964)
+                # starts using commit_unless_managed() for individual
+                # connections. Backwards compatibility for Django 1.2 is to use
+                # the generic transaction function.
                 transaction.commit_unless_managed(using=connection.alias)
 
-                creation.create_test_db = new.instancemethod(skip_create_test_db, creation, creation.__class__)
+                creation.create_test_db = new.instancemethod(
+                        skip_create_test_db, creation, creation.__class__)
 
         Command.handle = _foreign_key_ignoring_handle
 
