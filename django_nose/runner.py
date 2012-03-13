@@ -233,6 +233,12 @@ class NoseTestSuiteRunner(BasicNoseRunner):
             # faster way, I'm inclined to keep making people explicitly saying
             # REUSE_DB if they want to reuse the DB.
 
+            if connection.creation._get_test_db_name() == ':memory:':
+                # This is a SQLite in-memory DB. Those are created implicitly
+                # when you try to connect to them, so our test below doesn't
+                # work.
+                return True
+
             # Notice whether the DB exists, and create it if it doesn't:
             try:
                 connection.cursor()
