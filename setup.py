@@ -42,6 +42,5 @@ setup(
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Topic :: Software Development :: Testing'
-        'Topic :: Software Development :: Libraries :: Python Modules',
     ]
 )
