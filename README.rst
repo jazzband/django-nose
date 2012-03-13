@@ -202,6 +202,7 @@ Recent Version History
   * Fixed a crash when printing options with certain verbosities. (Daniel Abel)
   * Broke hard dependency on MySQL. Support PostgreSQL. (Roger Hu)
   * Support SQLite, both memory- and disk-based. (Roger Hu and Erik Rose)
+  * Nail down versions of the package requirements. (Daniel Mizyrycki)
 
 0.1.3 (2010-04-15)
 
