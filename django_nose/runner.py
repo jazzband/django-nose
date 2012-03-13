@@ -18,6 +18,7 @@ from django.core.management.color import no_style
 from django.core.management.commands.loaddata import Command
 from django.db import connections, transaction, DEFAULT_DB_ALIAS
 from django.db.backends.creation import BaseDatabaseCreation
+from django.db.models.loading import cache
 from django.test.simple import DjangoTestSuiteRunner
 from django.utils.importlib import import_module
 
@@ -240,15 +241,13 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 return True
             return not _reusing_db()
 
-        def sql_reset_sequences(connection):
+        def mysql_reset_sequences(style, connection):
             """Return a list of SQL statements needed to reset all sequences
             for Django tables."""
             # TODO: This is MySQL-specific--see below. It should also work with
             # SQLite but not Postgres. :-(
-            tables = connection.introspection.django_table_names(
-                only_existing=True)
-            flush_statements = connection.ops.sql_flush(
-                no_style(), tables, connection.introspection.sequence_list())
+            tables = connection.introspection.django_table_names(only_existing=True)
+            flush_statements = connection.ops.sql_flush(style, tables, connection.introspection.sequence_list())
 
             # connection.ops.sequence_reset_sql() is not implemented for MySQL,
             # and the base class just returns []. TODO: Implement it by pulling
@@ -280,8 +279,16 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 # Reset auto-increment sequences. Apparently, SUMO's tests are
                 # horrid and coupled to certain numbers.
                 cursor = connection.cursor()
-                for statement in sql_reset_sequences(connection):
-                    cursor.execute(statement)
+                style = no_style()
+
+                if uses_mysql(connection):
+                    reset_statements = mysql_reset_sequences(style, connection)
+                else:
+                    reset_statements = connection.ops.sql_reset_sequence(style, cache.get_models())
+
+                for reset_statement in reset_statements:
+                    cursor.execute(reset_statement)
+
                 # Django v1.3 (https://code.djangoproject.com/ticket/9964) starts
                 # using commit_unless_managed() for individual connections.
                 # Backwards compatibility for Django 1.2 is to use the generic
