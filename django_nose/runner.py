@@ -285,6 +285,11 @@ class NoseTestSuiteRunner(BasicNoseRunner):
             if _should_create_database(connection):
                 # We're not using _skip_create_test_db, so put the DB name back:
                 connection.settings_dict['NAME'] = orig_db_name
+
+                # Since we replaced the connection with the test DB, closing the connection
+                # will avoid pooling issues with SQLAlchemy when we attempt to reopen
+                # the connection with a different database.
+                connection.close()
             else:
                 # Reset auto-increment sequences. Apparently, SUMO's tests are
                 # horrid and coupled to certain numbers.
