@@ -205,7 +205,6 @@ Recent Version History
   * Nail down versions of the package requirements. (Daniel Mizyrycki)
 
 0.1.3 (2010-04-15)
-
   * Even better coverage support (rozza)
   * README fixes (carljm and ionelmc)
   * optparse OptionGroups are handled better (outofculture)
