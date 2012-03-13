@@ -220,6 +220,12 @@ class NoseTestSuiteRunner(BasicNoseRunner):
 
     """
     def setup_databases(self):
+        def can_support_reuse_db(connection):
+            """Return whether it makes any sense to use REUSE_DB with the backend of a connection."""
+            # This is a SQLite in-memory DB. Those are created implicitly when
+            # you try to connect to them, so our test below doesn't work.
+            return not connection.creation._get_test_db_name() == ':memory:'
+
         def should_create_database(connection):
             """Return whether we should recreate the given DB.
 
@@ -233,10 +239,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
             # faster way, I'm inclined to keep making people explicitly saying
             # REUSE_DB if they want to reuse the DB.
 
-            if connection.creation._get_test_db_name() == ':memory:':
-                # This is a SQLite in-memory DB. Those are created implicitly
-                # when you try to connect to them, so our test below doesn't
-                # work.
+            if not can_support_reuse_db(connection):
                 return True
 
             # Notice whether the DB exists, and create it if it doesn't:
@@ -274,9 +277,11 @@ class NoseTestSuiteRunner(BasicNoseRunner):
             orig_db_name = connection.settings_dict['NAME']
             connection.settings_dict['NAME'] = test_db_name
 
-            if should_create_database(connection):
+            if not _reusing_db() and can_support_reuse_db(connection):
                 print ('To reuse old database "%s" for speed, set env var '
-                       'REUSE_DB=1' % test_db_name)
+                       'REUSE_DB=1.' % test_db_name)
+
+            if should_create_database(connection):
                 # We're not using skip_create_test_db, so put the DB name back:
                 connection.settings_dict['NAME'] = orig_db_name
             else:
