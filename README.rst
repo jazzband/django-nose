@@ -197,6 +197,11 @@ If you want to use django-nose with Django 1.1, use
 https://github.com/jbalogh/django-nose/tree/django-1.1 or
 http://pypi.python.org/pypi/django-nose/0.0.3.
 
+Django 1.0
+~~~~~~~~~~
+
+django-nose does not support Django 1.0.
+
 
 Recent Version History
 ----------------------
