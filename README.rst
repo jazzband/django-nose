@@ -5,7 +5,12 @@ django-nose
 Features
 --------
 
-* All the goodness of `nose`_ in your Django tests
+* All the goodness of `nose`_ in your Django tests, like...
+  * Testing just your apps by default, not all the standard ones that happen to
+    be in ``INSTALLED_APPS``
+  * Running the tests in one or more specific modules (or apps, or classes, or
+    running a specific test)
+  * Taking advantage of all the useful `nose plugins`_
 * Fixture bundling, an optional feature which speeds up your fixture-based
   tests by a factor of 4
 * Reuse of previously created test DBs, cutting 10 seconds off startup time
@@ -13,6 +18,7 @@ Features
   Others should work as well.
 
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/
+.. _nose plugins: http://nose-plugins.jottit.com/
 
 
 Installation
@@ -76,7 +82,8 @@ eliminating redundant setup of Django test fixtures. To use it...
    ``django.test.TestCase``. (I like to import it ``as TestCase`` in my
    project's ``tests/__init__.py`` and then import it from there into my actual
    tests. Then it's easy to sub the base class in and out.)
-2. Activate the plugin by passing the ``--with-fixture-bundling`` option to ``./manage.py test``.
+2. Activate the plugin by passing the ``--with-fixture-bundling`` option to
+   ``./manage.py test``.
 
 How Fixture Bundling Works
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

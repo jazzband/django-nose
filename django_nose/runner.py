@@ -119,8 +119,7 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
         return result_plugin.result
 
     def run_tests(self, test_labels, extra_tests=None):
-        """
-        Run the unit tests for all the test names in the provided list.
+        """Run the unit tests for all the test names in the provided list.
 
         Test names specified may be file or module names, and may optionally
         indicate the test case to run by separating the module or file name
@@ -133,6 +132,7 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
         runner.run_tests('/path/to/test/file.py:test_function')
 
         Returns the number of tests that failed.
+
         """
         nose_argv = (['nosetests', '--verbosity', str(self.verbosity)]
                      + list(test_labels))
