@@ -1,10 +1,12 @@
 from nose.plugins import Plugin
 from nose.suite import ContextSuite
 
+from django_nose.utils import process_tests
+
 
 class Bucketer(object):
     def __init__(self):
-        # { frozenset(['users.json']):
+        # { (frozenset(['users.json']), True):
         #      [ContextSuite(...), ContextSuite(...)] }
         self.buckets = {}
 
@@ -28,38 +30,11 @@ class FixtureBundlingPlugin(Plugin):
 
     """
     name = 'fixture-bundling'
+    score = 100  # For relationship with TransactionTestReorderer
 
     def prepareTest(self, test):
         """Reorder the tests in the suite so classes using identical sets of
         fixtures are contiguous."""
-
-        def process_tests(suite, base_callable):
-            """Given a nested disaster of [Lazy]Suites, traverse to the first
-            level that has setup or teardown routines, and do something to
-            them.
-
-            If we were to traverse all the way to the leaves (the Tests)
-            indiscriminately and return them, when the runner later calls them,
-            they'd run without reference to the suite that contained them, so
-            they'd miss their class-, module-, and package-wide setup and
-            teardown routines.
-
-            The nested suites form basically a double-linked tree, and suites
-            will call up to their containing suites to run their setups and
-            teardowns, but it would be hubris to assume that something you saw
-            fit to setup or teardown at the module level is less costly to
-            repeat than DB fixtures. Also, those sorts of setups and teardowns
-            are extremely rare in our code. Thus, we limit the granularity of
-            bucketing to the first level that has setups or teardowns.
-
-            """
-            if (not hasattr(suite, '_tests') or
-                (hasattr(suite, 'hasFixtures') and suite.hasFixtures())):
-                # We hit a Test or something with setup, so do the thing.
-                base_callable(suite)
-            else:
-                for t in suite._tests:
-                    process_tests(t, base_callable)
 
         def suite_sorted_by_fixtures(suite):
             """Flatten and sort a tree of Suites by the ``fixtures`` members of

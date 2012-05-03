@@ -2,10 +2,13 @@ import os.path
 import sys
 
 from nose.plugins.base import Plugin
+from nose.suite import ContextSuite
 
 from django.conf import settings
 from django.db.models.loading import get_apps, load_app
-from django.test.testcases import TransactionTestCase
+from django.test.testcases import TransactionTestCase, TestCase
+
+from django_nose.utils import process_tests
 
 
 class AlwaysOnPlugin(Plugin):
@@ -26,14 +29,13 @@ class AlwaysOnPlugin(Plugin):
 
 
 class ResultPlugin(AlwaysOnPlugin):
-    """
-    Captures the TestResult object for later inspection.
+    """Captures the TestResult object for later inspection
 
     nose doesn't return the full test result object from any of its runner
     methods.  Pass an instance of this plugin to the TestProgram and use
     ``result`` after running the tests to get the TestResult object.
-    """
 
+    """
     name = "result"
 
     def finalize(self, result):
@@ -41,10 +43,10 @@ class ResultPlugin(AlwaysOnPlugin):
 
 
 class DjangoSetUpPlugin(AlwaysOnPlugin):
-    """
-    Configures Django to setup and tear down the environment.
+    """Configures Django to set up and tear down the environment
+
     This allows coverage to report on all code imported and used during the
-    initialisation of the test runner.
+    initialization of the test runner.
 
     """
     name = "django setup"
@@ -66,3 +68,66 @@ class DjangoSetUpPlugin(AlwaysOnPlugin):
     def finalize(self, result):
         self.runner.teardown_databases(self.old_names)
         self.runner.teardown_test_environment()
+
+
+class TransactionTestReorderer(AlwaysOnPlugin):
+    """Runs TransactionTestCase-based tests last
+
+    Django has a weird design decision wherein TransactionTestCase doesn't
+    clean up after itself. Instead, it resets the DB to a clean state only at
+    the *beginning* of each test:
+    https://docs.djangoproject.com/en/dev/topics/testing/?from=olddocs#django.
+    test.TransactionTestCase. Thus, Django reorders tests so
+    TransactionTestCases all come last. Here we do the same.
+
+    "I think it's historical. We used to have doctests also, adding cleanup
+    after each unit test wouldn't necessarily clean up after doctests, so you'd
+    have to clean on entry to a test anyway." was once uttered on #django-dev.
+
+    """
+    name = 'transaction-test-reordering'
+    score = 90  # Come after fixture bundling.
+
+    def prepareTest(self, test):
+        """Reorder tests in the suite so TransactionTestCase-based tests come last."""
+        def cleans_up_after_itself(test):
+            """Return a comparand based on whether a test is guessed to clean
+            up after itself.
+
+            Django's TransactionTestCase doesn't clean up the DB on teardown,
+            but it's hard to guess whether subclasses (other than TestCase) do.
+            We will assume they don't, unless they have a
+            ``cleans_up_after_itself`` attr set to True. This is reasonable
+            because the odd behavior of TransactionTestCase is documented, so
+            subclasses should by default be assumed to preserve it.
+
+            Thus, things will get these comparands (and run in this order):
+
+            * 1: TestCase subclasses. These clean up after themselves.
+            * 2: TransactionTestCase subclasses with cleans_up_after_itself=True
+            * 3: TransactionTestCase subclasses. These leave a mess.
+            * 4: Anything else (including doctests, I hope). These don't care
+                 about the mess you left, because they don't hit the DB.
+
+            """
+            test_class = test.context
+            try:
+                if issubclass(test_class, TestCase):
+                    return 1
+            except TypeError:  # That wasn't a class at all.
+                pass
+            else:
+                if issubclass(test_class, TransactionTestCase):
+                    if getattr(test_class, 'cleans_up_after_itself', False):
+                        return 2
+                    else:
+                        return 3
+            return 4
+
+        flattened = []
+        process_tests(test, flattened.append)
+
+        # sort() is stable, so this won't ruin fixture bundling's work:
+        flattened.sort(key=cleans_up_after_itself)
+
+        return ContextSuite(flattened)

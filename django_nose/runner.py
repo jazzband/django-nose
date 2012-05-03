@@ -24,7 +24,8 @@ from django.utils.importlib import import_module
 
 import nose.core
 
-from django_nose.plugin import DjangoSetUpPlugin, ResultPlugin
+from django_nose.plugin import (DjangoSetUpPlugin, ResultPlugin,
+                                TransactionTestReorderer)
 
 try:
     any
@@ -109,7 +110,9 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
 
     def run_suite(self, nose_argv):
         result_plugin = ResultPlugin()
-        plugins_to_add = [DjangoSetUpPlugin(self), result_plugin]
+        plugins_to_add = [DjangoSetUpPlugin(self),
+                          result_plugin,
+                          TransactionTestReorderer()]
 
         for plugin in _get_plugins_from_settings():
             plugins_to_add.append(plugin)
@@ -124,7 +127,7 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
         Test names specified may be file or module names, and may optionally
         indicate the test case to run by separating the module or file name
         from the test case name with a colon. Filenames may be relative or
-        absolute.  Examples:
+        absolute. Examples:
 
         runner.run_tests('test.module')
         runner.run_tests('another.test:TestCase.test_method')

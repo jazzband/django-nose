@@ -32,6 +32,8 @@ class FastFixtureTestCase(test.TransactionTestCase):
     plugin from django-nose, which does it dynamically at test time.
 
     """
+    cleans_up_after_itself = True  # This is the good kind of puppy.
+
     @classmethod
     def setUpClass(cls):
         """Turn on manual commits. Load and commit the fixtures."""
