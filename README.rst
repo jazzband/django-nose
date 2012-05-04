@@ -81,9 +81,11 @@ eliminating redundant setup of Django test fixtures. To use it...
 1. Subclass ``django_nose.FastFixtureTestCase`` instead of
    ``django.test.TestCase``. (I like to import it ``as TestCase`` in my
    project's ``tests/__init__.py`` and then import it from there into my actual
-   tests. Then it's easy to sub the base class in and out.)
-2. Activate the plugin by passing the ``--with-fixture-bundling`` option to
-   ``./manage.py test``.
+   tests. Then it's easy to sub the base class in and out.) This alone will
+   cause fixtures to load once per class rather than once per test.
+2. Activate the fixture-bundling plugin by passing the
+   ``--with-fixture-bundling`` option to ``./manage.py test``. This loads each
+   unique set of fixtures only once, even beyond class boundaries.
 
 How Fixture Bundling Works
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -206,7 +208,14 @@ django-nose does not support Django 1.0.
 Recent Version History
 ----------------------
 
-1.0.1
+1.1
+  * Django TransactionTestCases don't clean up after themselves; they leave
+    junk in the DB and clean it up only on _pre_setup. Thus, Django makes sure
+    these tests run last. Now django-nose does too. This means one fewer source
+    of failures on existing projects. (Erik Rose)
+  * Made the fixture bundler more conservative, fixing some conceivable
+    situations in which fixtures would not appear as intended if a
+    TransactionTestCase found its way into the middle of a bundle. (Erik Rose)
   * Fixed an error that would surface when using SQLAlchemy with connection
     pooling. (Roger Hu)
 

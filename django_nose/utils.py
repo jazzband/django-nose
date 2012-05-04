@@ -29,3 +29,15 @@ def process_tests(suite, process):
     else:
         for t in suite._tests:
             process_tests(t, process)
+
+
+def is_subclass_at_all(cls, class_info):
+    """Return whether ``cls`` is a subclass of ``class_info``.
+
+    Even if ``cls`` is not a class, don't crash. Return False instead.
+
+    """
+    try:
+        return issubclass(cls, class_info)
+    except TypeError:
+        return False

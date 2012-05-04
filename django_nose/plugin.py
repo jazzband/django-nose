@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db.models.loading import get_apps, load_app
 from django.test.testcases import TransactionTestCase, TestCase
 
-from django_nose.utils import process_tests
+from django_nose.utils import process_tests, is_subclass_at_all
 
 
 class AlwaysOnPlugin(Plugin):
@@ -86,11 +86,15 @@ class TransactionTestReorderer(AlwaysOnPlugin):
 
     """
     name = 'transaction-test-reordering'
-    score = 90  # Come after fixture bundling.
+
+    # Come before fixture bundling. It probably doesn't matter, but they both
+    # mess with test order, so why leave it to chance?
+    score = 110
 
     def prepareTest(self, test):
         """Reorder tests in the suite so TransactionTestCase-based tests come last."""
-        def cleans_up_after_itself(test):
+
+        def filthiness(test):
             """Return a comparand based on whether a test is guessed to clean
             up after itself.
 
@@ -104,30 +108,27 @@ class TransactionTestReorderer(AlwaysOnPlugin):
             Thus, things will get these comparands (and run in this order):
 
             * 1: TestCase subclasses. These clean up after themselves.
-            * 2: TransactionTestCase subclasses with cleans_up_after_itself=True
-            * 3: TransactionTestCase subclasses. These leave a mess.
-            * 4: Anything else (including doctests, I hope). These don't care
-                 about the mess you left, because they don't hit the DB.
+            * 1: TransactionTestCase subclasses with
+                 cleans_up_after_itself=True. These include
+                 FastFixtureTestCases. If you're using the
+                 FixtureBundlingPlugin, it will pull the FFTCs out, reorder
+                 them, and run them first of all.
+            * 2: TransactionTestCase subclasses. These leave a mess.
+            * 2: Anything else (including doctests, I hope). These don't care
+                 about the mess you left, because they don't hit the DB or, if
+                 they do, are responsible for ensuring that it's clean (as per
+                 https://docs.djangoproject.com/en/dev/topics/testing/?from=
+                 olddocs#writing-doctests)
 
             """
             test_class = test.context
-            try:
-                if issubclass(test_class, TestCase):
-                    return 1
-            except TypeError:  # That wasn't a class at all.
-                pass
-            else:
-                if issubclass(test_class, TransactionTestCase):
-                    if getattr(test_class, 'cleans_up_after_itself', False):
-                        return 2
-                    else:
-                        return 3
-            return 4
+            if (is_subclass_at_all(test_class, TestCase) or
+                (is_subclass_at_all(test_class, TransactionTestCase) and
+                  getattr(test_class, 'cleans_up_after_itself', False))):
+                return 1
+            return 2
 
         flattened = []
         process_tests(test, flattened.append)
-
-        # sort() is stable, so this won't ruin fixture bundling's work:
-        flattened.sort(key=cleans_up_after_itself)
-
+        flattened.sort(key=filthiness)
         return ContextSuite(flattened)
