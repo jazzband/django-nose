@@ -41,3 +41,8 @@ def is_subclass_at_all(cls, class_info):
         return issubclass(cls, class_info)
     except TypeError:
         return False
+
+
+def uses_mysql(connection):
+    """Return whether the connection represents a MySQL DB."""
+    return 'mysql' in connection.settings_dict['ENGINE']

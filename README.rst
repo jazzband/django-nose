@@ -75,17 +75,17 @@ reinitialize the test database.
 Enabling Fast Fixtures
 ----------------------
 
-django-nose includes a nose plugin which drastically speeds up your tests by
-eliminating redundant setup of Django test fixtures. To use it...
+django-nose includes a fixture bundler which drastically speeds up your tests
+by eliminating redundant setup of Django test fixtures. To use it...
 
 1. Subclass ``django_nose.FastFixtureTestCase`` instead of
    ``django.test.TestCase``. (I like to import it ``as TestCase`` in my
    project's ``tests/__init__.py`` and then import it from there into my actual
    tests. Then it's easy to sub the base class in and out.) This alone will
    cause fixtures to load once per class rather than once per test.
-2. Activate the fixture-bundling plugin by passing the
-   ``--with-fixture-bundling`` option to ``./manage.py test``. This loads each
-   unique set of fixtures only once, even beyond class boundaries.
+2. Activate fixture bundling by passing the ``--with-fixture-bundling`` option
+   to ``./manage.py test``. This loads each unique set of fixtures only once,
+   even across class boundaries.
 
 How Fixture Bundling Works
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

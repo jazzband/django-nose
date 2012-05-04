@@ -24,8 +24,8 @@ from django.utils.importlib import import_module
 
 import nose.core
 
-from django_nose.plugin import (DjangoSetUpPlugin, ResultPlugin,
-                                TransactionTestReorderer)
+from django_nose.plugin import DjangoSetUpPlugin, ResultPlugin, TestReorderer
+from django_nose.utils import uses_mysql
 
 try:
     any
@@ -37,16 +37,12 @@ except NameError:
         return False
 
 
-__all__ = ['BasicNoseRunner', 'NoseTestSuiteRunner', 'uses_mysql']
+__all__ = ['BasicNoseRunner', 'NoseTestSuiteRunner']
 
 
 # This is a table of Django's "manage.py test" options which
 # correspond to nosetests options with a different name:
 OPTION_TRANSLATION = {'--failfast': '-x'}
-
-
-def uses_mysql(connection):
-    return 'mysql' in connection.settings_dict['ENGINE']
 
 
 # Django v1.2 does not have a _get_test_db_name() function.
@@ -62,7 +58,7 @@ if not hasattr(BaseDatabaseCreation, '_get_test_db_name'):
 
 
 def _get_plugins_from_settings():
-    for plg_path in list(getattr(settings, 'NOSE_PLUGINS', [])) + ['django_nose.fixture_bundling.FixtureBundlingPlugin']:
+    for plg_path in list(getattr(settings, 'NOSE_PLUGINS', [])) + ['django_nose.plugin.TestReorderer']:
         try:
             dot = plg_path.rindex('.')
         except ValueError:
@@ -112,7 +108,7 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
         result_plugin = ResultPlugin()
         plugins_to_add = [DjangoSetUpPlugin(self),
                           result_plugin,
-                          TransactionTestReorderer()]
+                          TestReorderer()]
 
         for plugin in _get_plugins_from_settings():
             plugins_to_add.append(plugin)

@@ -5,7 +5,7 @@ from django.core.management import call_command
 from django.db import connections, DEFAULT_DB_ALIAS, transaction
 
 from django_nose.fixture_tables import tables_used_by_fixtures
-from django_nose.runner import uses_mysql
+from django_nose.utils import uses_mysql
 
 
 __all__ = ['FastFixtureTestCase']
