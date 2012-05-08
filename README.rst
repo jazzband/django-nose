@@ -209,6 +209,8 @@ Recent Version History
 1.0.1
   * Fixed an error that would surface when using SQLAlchemy with connection
     pooling. (Roger Hu)
+  * Graciously ignore the new ``--liveserver`` option introduced in Django 1.4;
+    don't let it through to nose. (Adam DePue)
 
 1.0 (2012-03-12)
   * New fixture-bundling plugin for avoiding needless fixture setup (Erik Rose)
