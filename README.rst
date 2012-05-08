@@ -6,14 +6,17 @@ Features
 --------
 
 * All the goodness of `nose`_ in your Django tests, like...
+
   * Testing just your apps by default, not all the standard ones that happen to
     be in ``INSTALLED_APPS``
   * Running the tests in one or more specific modules (or apps, or classes, or
     running a specific test)
+  * Obviating the need to import all your tests into ``tests/__init__.py``
   * Taking advantage of all the useful `nose plugins`_
 * Fixture bundling, an optional feature which speeds up your fixture-based
   tests by a factor of 4
 * Reuse of previously created test DBs, cutting 10 seconds off startup time
+* Hygienic TransactionTestCases, which can save you a DB flush per test
 * Support for various databases. Tested with MySQL, PostgreSQL, and SQLite.
   Others should work as well.
 
@@ -133,6 +136,49 @@ the advice of the fixture bundler. In such a case, simply set the
 ``exempt_from_fixture_bundling`` attribute of the test class to ``True``.
 
 
+Speedy Hygienic TransactionTestCases
+------------------------------------
+
+Unlike the stock Django test runner, django-nose lets you write custom
+TransactionTestCase subclasses which expect to start with an unmarred DB,
+saving an entire DB flush per test.
+
+Background
+~~~~~~~~~~
+
+The default Django TransactionTestCases class `can leave the DB in an unclean
+state`_ when it's done. To compensate, TransactionTestCase does a
+time-consuming flush of the DB *before* each test to ensure it begins with a
+clean slate. Django's stock test runner then runs TransactionTestCases last so
+they don't wreck the environment for better-behaved tests, and django-nose
+replicates this behavior.
+
+Escaping the Grime
+~~~~~~~~~~~~~~~~~~
+
+Some people, however, have made subclasses of TransactionTestCase that clean up
+after themselves (and can do so efficiently, since they know what they've
+changed). Like TestCase, these may assume they start with a clean DB. However,
+any TransactionTestCases that run before them and leave a mess could cause them
+to fail spuriously.
+
+django-nose offers to fix this. If you include a special attribute on your
+well-behaved TransactionTestCase... ::
+
+    class MyNiceTestCase(TransactionTestCase):
+        cleans_up_after_itself = True
+
+...django-nose will run it before any of those nasty, trash-spewing test cases.
+You can thus enjoy a big speed boost any time you make a TransactionTestCase
+clean up after itself: skipping a whole DB flush before every test. With a
+large schema, this can save minutes of IO.
+
+django-nose's own FastFixtureTestCase uses this feature, even though it
+ultimately acts more like a TestCase than a TransactionTestCase.
+
+.. _can leave the DB in an unclean state: https://docs.djangoproject.com/en/dev/topics/testing/?from=olddocs#django.test.TransactionTestCase
+
+
 Using With South
 ----------------
 
@@ -213,6 +259,7 @@ Recent Version History
     junk in the DB and clean it up only on _pre_setup. Thus, Django makes sure
     these tests run last. Now django-nose does too. This means one fewer source
     of failures on existing projects. (Erik Rose)
+  * Add support for hygienic TransactionTestCases.
   * Made the fixture bundler more conservative, fixing some conceivable
     situations in which fixtures would not appear as intended if a
     TransactionTestCase found its way into the middle of a bundle. (Erik Rose)
