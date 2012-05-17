@@ -206,7 +206,7 @@ def _skip_create_test_db(self, verbosity=1, autoclobber=False):
 
 def _reusing_db():
     """Return whether the ``REUSE_DB`` flag was passed"""
-    return (os.getenv('REUSE_DB', 'false').lower() in ('true', '1', ''))
+    return os.getenv('REUSE_DB', 'false').lower() in ('true', '1', '')
 
 
 def _can_support_reuse_db(connection):

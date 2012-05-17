@@ -11,7 +11,9 @@ Features
     be in ``INSTALLED_APPS``
   * Running the tests in one or more specific modules (or apps, or classes, or
     running a specific test)
-  * Obviating the need to import all your tests into ``tests/__init__.py``
+  * Obviating the need to import all your tests into ``tests/__init__.py``.
+    This not only saves busy-work but also eliminates the possibility of
+    accidentally shadowing test classes.
   * Taking advantage of all the useful `nose plugins`_
 * Fixture bundling, an optional feature which speeds up your fixture-based
   tests by a factor of 4
@@ -88,7 +90,7 @@ by eliminating redundant setup of Django test fixtures. To use it...
    cause fixtures to load once per class rather than once per test.
 2. Activate fixture bundling by passing the ``--with-fixture-bundling`` option
    to ``./manage.py test``. This loads each unique set of fixtures only once,
-   even across class boundaries.
+   even across class, module, and app boundaries.
 
 How Fixture Bundling Works
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -179,6 +181,16 @@ ultimately acts more like a TestCase than a TransactionTestCase.
 .. _can leave the DB in an unclean state: https://docs.djangoproject.com/en/dev/topics/testing/?from=olddocs#django.test.TransactionTestCase
 
 
+Test-Only Models
+----------------
+
+If you have a model that is used only by tests (for example, to test an
+abstract model base class), you can put it in any file that's imported in the
+course of loading tests. For example, if the tests that need it are in
+``test_models.py``, you can put the model in there, too. django-nose will make
+sure its DB table gets created.
+
+
 Using With South
 ----------------
 
@@ -260,6 +272,8 @@ Recent Version History
     these tests run last. Now django-nose does too. This means one fewer source
     of failures on existing projects. (Erik Rose)
   * Add support for hygienic TransactionTestCases.
+  * Support models that are used for tests only. Just put them in any file
+    imported in the course of loading tests.
   * Made the fixture bundler more conservative, fixing some conceivable
     situations in which fixtures would not appear as intended if a
     TransactionTestCase found its way into the middle of a bundle. (Erik Rose)

@@ -37,7 +37,7 @@ class ResultPlugin(AlwaysOnPlugin):
     ``result`` after running the tests to get the TestResult object.
 
     """
-    name = "result"
+    name = 'result'
 
     def finalize(self, result):
         self.result = result
@@ -50,14 +50,27 @@ class DjangoSetUpPlugin(AlwaysOnPlugin):
     initialization of the test runner.
 
     """
-    name = "django setup"
+    name = 'django setup'
 
     def __init__(self, runner):
         super(DjangoSetUpPlugin, self).__init__()
         self.runner = runner
         self.sys_stdout = sys.stdout
 
-    def begin(self):
+    def prepareTest(self, test):
+        """Create the Django DB and model tables, and do other setup.
+
+        This isn't done in begin() because that's too early--the DB has to be
+        set up *after* the tests are imported so the model registry contains
+        models defined in tests.py modules. Models are registered at
+        declaration time by their metaclass.
+
+        prepareTestRunner() might also have been a sane choice, except that, if
+        some plugin returns something from it, none of the other ones get
+        called. I'd rather not dink with scores if I don't have to.
+
+        """
+        # What is this stdout switcheroo for?
         sys_stdout = sys.stdout
         sys.stdout = self.sys_stdout
 
