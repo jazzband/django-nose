@@ -270,7 +270,7 @@ django-nose does not support Django 1.0.
 Recent Version History
 ----------------------
 
-1.1
+1.1 (2012-05-19)
   * Django TransactionTestCases don't clean up after themselves; they leave
     junk in the DB and clean it up only on _pre_setup. Thus, Django makes sure
     these tests run last. Now django-nose does, too. This means one fewer
