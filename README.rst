@@ -274,14 +274,15 @@ Recent Version History
   * Django TransactionTestCases don't clean up after themselves; they leave
     junk in the DB and clean it up only on _pre_setup. Thus, Django makes sure
     these tests run last. Now django-nose does, too. This means one fewer
-    source of failure on existing projects. (Erik Rose)
-  * Add support for hygienic TransactionTestCases.
+    source of failures on existing projects. (Erik Rose)
+  * Add support for hygienic TransactionTestCases. (Erik Rose)
   * Support models that are used only for tests. Just put them in any file
     imported in the course of loading tests. No more crazy hacks necessary.
-  * Made the fixture bundler more conservative, fixing some conceivable
+    (Erik Rose)
+  * Make the fixture bundler more conservative, fixing some conceivable
     situations in which fixtures would not appear as intended if a
     TransactionTestCase found its way into the middle of a bundle. (Erik Rose)
-  * Fixed an error that would surface when using SQLAlchemy with connection
+  * Fix an error that would surface when using SQLAlchemy with connection
     pooling. (Roger Hu)
   * Gracefully ignore the new ``--liveserver`` option introduced in Django 1.4;
     don't let it through to nose. (Adam DePue)
