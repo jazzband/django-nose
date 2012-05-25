@@ -10,7 +10,7 @@ Features
   * Testing just your apps by default, not all the standard ones that happen to
     be in ``INSTALLED_APPS``
   * Running the tests in one or more specific modules (or apps, or classes, or
-    running a specific test)
+    folders, or just running a specific test)
   * Obviating the need to import all your tests into ``tests/__init__.py``.
     This not only saves busy-work but also eliminates the possibility of
     accidentally shadowing test classes.
@@ -272,8 +272,8 @@ Recent Version History
 
 1.1 (2012-05-19)
   * Django TransactionTestCases don't clean up after themselves; they leave
-    junk in the DB and clean it up only on _pre_setup. Thus, Django makes sure
-    these tests run last. Now django-nose does, too. This means one fewer
+    junk in the DB and clean it up only on ``_pre_setup``. Thus, Django makes
+    sure these tests run last. Now django-nose does, too. This means one fewer
     source of failures on existing projects. (Erik Rose)
   * Add support for hygienic TransactionTestCases. (Erik Rose)
   * Support models that are used only for tests. Just put them in any file

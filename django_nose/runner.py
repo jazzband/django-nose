@@ -199,7 +199,7 @@ def _skip_create_test_db(self, verbosity=1, autoclobber=False):
         self.connection.features.confirm()
     else:
         can_rollback = self._rollback_works()
-        self.connection.settings_dict["SUPPORTS_TRANSACTIONS"] = can_rollback
+        self.connection.settings_dict['SUPPORTS_TRANSACTIONS'] = can_rollback
 
     return self._get_test_db_name()
 
