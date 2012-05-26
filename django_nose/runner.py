@@ -277,9 +277,9 @@ class NoseTestSuiteRunner(BasicNoseRunner):
             orig_db_name = connection.settings_dict['NAME']
             connection.settings_dict['NAME'] = test_db_name
 
-            if not _reusing_db() and _can_support_reuse_db(connection):
-                print ('To reuse old database "%s" for speed, set env var '
-                       'REUSE_DB=1.' % test_db_name)
+            # if not _reusing_db() and _can_support_reuse_db(connection):
+            #     print ('To reuse old database "%s" for speed, set env var '
+            #            'REUSE_DB=1.' % test_db_name)
 
             if _should_create_database(connection):
                 # We're not using _skip_create_test_db, so put the DB name back:
