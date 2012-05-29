@@ -258,8 +258,8 @@ def _mysql_reset_sequences(style, connection):
 class NoseTestSuiteRunner(BasicNoseRunner):
     """A runner that optionally skips DB creation
 
-    This test monkeypatches connection.creation to let you skip creating
-    databases if they already exist. Your tests will run much faster.
+    Monkeypatches connection.creation to let you skip creating databases if they
+    already exist. Your tests will start up much faster.
 
     To opt into this behavior, set the environment variable ``REUSE_DB`` to
     something that isn't "0" or "false" (case aside).
@@ -276,10 +276,6 @@ class NoseTestSuiteRunner(BasicNoseRunner):
             # we don't monkeypatch it away with _skip_create_test_db.
             orig_db_name = connection.settings_dict['NAME']
             connection.settings_dict['NAME'] = test_db_name
-
-            # if not _reusing_db() and _can_support_reuse_db(connection):
-            #     print ('To reuse old database "%s" for speed, set env var '
-            #            'REUSE_DB=1.' % test_db_name)
 
             if _should_create_database(connection):
                 # We're not using _skip_create_test_db, so put the DB name back:

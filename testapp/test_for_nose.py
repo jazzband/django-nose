@@ -1,6 +1,4 @@
-"""
-Django's test runner won't find this, but nose will.
-"""
+"""Django's test runner won't find this, but nose will."""
 
 
 def test_addition():
