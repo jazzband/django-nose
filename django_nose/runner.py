@@ -265,6 +265,13 @@ class NoseTestSuiteRunner(BasicNoseRunner):
     something that isn't "0" or "false" (case aside).
 
     """
+
+    def _get_models_for_connection(self, connection):
+        """Get a list of models for connection."""
+        tables = connection.introspection.get_table_list(connection.cursor())
+        exists = lambda m: m._meta.db_table in tables
+        return filter(exists, cache.get_models())
+
     def setup_databases(self):
         for alias in connections:
             connection = connections[alias]
@@ -302,7 +309,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                     reset_statements = _mysql_reset_sequences(style, connection)
                 else:
                     reset_statements = connection.ops.sequence_reset_sql(
-                            style, cache.get_models())
+                            style, self._get_models_for_connection(connection))
 
                 for reset_statement in reset_statements:
                     cursor.execute(reset_statement)
