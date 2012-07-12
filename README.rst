@@ -236,6 +236,27 @@ added to the Nose test runner.
 
 Older Versions of Django
 ------------------------
+Upgrading from Django <= 1.3 to Django 1.4
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In versions of Django < 1.4 the project folder was infact a python package as 
+well (note the __init__.py in your project root). In Django 1.4, there is no 
+such file and this the project is not a python module.
+
+**When you upgrade your Django project to the Django 1.4 layout, you need to 
+remove the __init__.py file in the root of your project (and move any python 
+files that reside there other than the manage.py) otherwise you will get a 
+`ImportError: No module named urls` exception.**
+
+This happens because Nose will intelligently try to populate your sys.path, and 
+in this particular case includes your parent directory if your project has a 
+__init__.py file (see: https://github.com/nose-devs/nose/blob/release_1.1.2/nose/importer.py#L134).
+
+This means that even though you have set up your directory structure properly and
+set your `ROOT_URLCONF='my_project.urls'` to match the new structure, when running 
+django-nose's test runner it will try to find your urls.py file in `'my_project.my_project.urls'`.
+
+
+
 
 Upgrading from Django < 1.2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
