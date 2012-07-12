@@ -238,9 +238,9 @@ Older Versions of Django
 ------------------------
 Upgrading from Django <= 1.3 to Django 1.4
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-In versions of Django < 1.4 the project folder was infact a python package as 
+In versions of Django < 1.4 the project folder was in fact a python package as 
 well (note the __init__.py in your project root). In Django 1.4, there is no 
-such file and this the project is not a python module.
+such file and thus the project is not a python module.
 
 **When you upgrade your Django project to the Django 1.4 layout, you need to 
 remove the __init__.py file in the root of your project (and move any python 
