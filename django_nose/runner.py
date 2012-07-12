@@ -187,15 +187,14 @@ def _skip_create_test_db(self, verbosity=1, autoclobber=False):
     """Database creation class that skips both creation and flushing
 
     The idea is to re-use the perfectly good test DB already created by an
-    earlier test run, cutting the time spent before any tests run from 5-13
+    earlier test run, cutting the time spent before any tests run from 5-13s
     (depending on your I/O luck) down to 3.
 
     """
     # Notice that the DB supports transactions. Originally, this was done in
     # the method this overrides. Django v1.2 does not have the confirm
     # function. Added in https://code.djangoproject.com/ticket/12991.
-    if hasattr(self.connection.features, 'confirm') and \
-       callable(self.connection.features.confirm):
+    if callable(getattr(self.connection.features, 'confirm', None)):
         self.connection.features.confirm()
     else:
         can_rollback = self._rollback_works()
@@ -211,8 +210,8 @@ def _reusing_db():
 
 def _can_support_reuse_db(connection):
     """Return whether it makes any sense to use REUSE_DB with the backend of a connection."""
-    # This is a SQLite in-memory DB. Those are created implicitly when
-    # you try to connect to them, so our test below doesn't work.
+    # Perhaps this is a SQLite in-memory DB. Those are created implicitly when
+    # you try to connect to them, so our usual test doesn't work.
     return not connection.creation._get_test_db_name() == ':memory:'
 
 
@@ -258,11 +257,11 @@ def _mysql_reset_sequences(style, connection):
 class NoseTestSuiteRunner(BasicNoseRunner):
     """A runner that optionally skips DB creation
 
-    Monkeypatches connection.creation to let you skip creating databases if they
-    already exist. Your tests will start up much faster.
+    Monkeypatches connection.creation to let you skip creating databases if
+    they already exist. Your tests will start up much faster.
 
     To opt into this behavior, set the environment variable ``REUSE_DB`` to
-    something that isn't "0" or "false" (case aside).
+    something that isn't "0" or "false" (case insensitive).
 
     """
     def setup_databases(self):
@@ -309,6 +308,8 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 # the generic transaction function.
                 transaction.commit_unless_managed(using=connection.alias)
 
+                # Each connection has its own creation object, so this affects
+                # only a single connection:
                 creation.create_test_db = new.instancemethod(
                         _skip_create_test_db, creation, creation.__class__)
 
