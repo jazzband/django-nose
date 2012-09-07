@@ -58,24 +58,29 @@ if not hasattr(BaseDatabaseCreation, '_get_test_db_name'):
 
 
 def _get_plugins_from_settings():
-    for plg_path in list(getattr(settings, 'NOSE_PLUGINS', [])) + ['django_nose.plugin.TestReorderer']:
+    plugins = list(getattr(settings, 'NOSE_PLUGINS', []))
+    plugins += ['django_nose.plugin.TestReorderer']
+    for plg_path in plugins:
         try:
             dot = plg_path.rindex('.')
         except ValueError:
             raise exceptions.ImproperlyConfigured(
                     "%s isn't a Nose plugin module" % plg_path)
-        p_mod, p_classname = plg_path[:dot], plg_path[dot+1:]
+        p_mod, p_classname = plg_path[:dot], plg_path[dot + 1:]
+
         try:
             mod = import_module(p_mod)
         except ImportError, e:
             raise exceptions.ImproperlyConfigured(
                     'Error importing Nose plugin module %s: "%s"' % (p_mod, e))
+
         try:
             p_class = getattr(mod, p_classname)
         except AttributeError:
             raise exceptions.ImproperlyConfigured(
                     'Nose plugin module "%s" does not define a "%s"' %
                     (p_mod, p_classname))
+
         yield p_class()
 
 
@@ -158,8 +163,11 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
 
 
 _old_handle = Command.handle
+
+
 def _foreign_key_ignoring_handle(self, *fixture_labels, **options):
-    """Wrap the the stock loaddata to ignore foreign key checks so we can load circular references from fixtures.
+    """Wrap the the stock loaddata to ignore foreign key
+    checks so we can load circular references from fixtures.
 
     This is monkeypatched into place in setup_databases().
 
@@ -209,7 +217,8 @@ def _reusing_db():
 
 
 def _can_support_reuse_db(connection):
-    """Return whether it makes any sense to use REUSE_DB with the backend of a connection."""
+    """Return whether it makes any sense to
+    use REUSE_DB with the backend of a connection."""
     # Perhaps this is a SQLite in-memory DB. Those are created implicitly when
     # you try to connect to them, so our usual test doesn't work.
     return not connection.creation._get_test_db_name() == ':memory:'
@@ -239,7 +248,8 @@ def _should_create_database(connection):
 
 
 def _mysql_reset_sequences(style, connection):
-    """Return a list of SQL statements needed to reset all sequences for Django tables."""
+    """Return a list of SQL statements needed to
+    reset all sequences for Django tables."""
     tables = connection.introspection.django_table_names(only_existing=True)
     flush_statements = connection.ops.sql_flush(
             style, tables, connection.introspection.sequence_list())
@@ -277,7 +287,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
             connection.settings_dict['NAME'] = test_db_name
 
             if _should_create_database(connection):
-                # We're not using _skip_create_test_db, so put the DB name back:
+                # We're not using _skip_create_test_db, so put the DB name back
                 connection.settings_dict['NAME'] = orig_db_name
 
                 # Since we replaced the connection with the test DB, closing
@@ -294,7 +304,8 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 style = no_style()
 
                 if uses_mysql(connection):
-                    reset_statements = _mysql_reset_sequences(style, connection)
+                    reset_statements = _mysql_reset_sequences(
+                        style, connection)
                 else:
                     reset_statements = connection.ops.sequence_reset_sql(
                             style, cache.get_models())
