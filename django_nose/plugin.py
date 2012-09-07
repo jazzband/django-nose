@@ -1,11 +1,8 @@
-import os.path
 import sys
 
 from nose.plugins.base import Plugin
 from nose.suite import ContextSuite
 
-from django.conf import settings
-from django.db.models.loading import get_apps, load_app
 from django.test.testcases import TransactionTestCase, TestCase
 
 from django_nose.testcases import FastFixtureTestCase
@@ -101,7 +98,9 @@ class Bucketer(object):
             # We bucket even FFTCs that don't have any fixtures, but it
             # shouldn't matter.
             key = (frozenset(getattr(test.context, 'fixtures', [])),
-                   getattr(test.context, 'exempt_from_fixture_bundling', False))
+                   getattr(test.context,
+                           'exempt_from_fixture_bundling',
+                           False))
             self.buckets.setdefault(key, []).append(test)
         else:
             self.remainder.append(test)
@@ -183,19 +182,19 @@ class TestReorderer(AlwaysOnPlugin):
         return ContextSuite(flattened)
 
     def _bundle_fixtures(self, test):
-        """Reorder the tests in the suite so classes using identical sets of
-        fixtures are contiguous.
+        """Reorder the tests in the suite so classes using identical
+        sets of fixtures are contiguous.
 
-        I reorder FastFixtureTestCases so ones using identical sets of fixtures run
-        adjacently. I then put attributes on them to advise them to not reload the
-        fixtures for each class.
+        I reorder FastFixtureTestCases so ones using identical sets
+        of fixtures run adjacently. I then put attributes on them
+        to advise them to not reload the fixtures for each class.
 
         This takes support.mozilla.com's suite from 123s down to 94s.
 
-        FastFixtureTestCases are the only ones we care about, because nobody
-        else, in practice, pays attention to the ``_fb`` advisory bits. We
-        return those first, then any remaining tests in the order they were
-        received.
+        FastFixtureTestCases are the only ones we care about, because
+        nobody else, in practice, pays attention to the ``_fb`` advisory
+        bits. We return those first, then any remaining tests in the
+        order they were received.
 
         """
         def suite_sorted_by_fixtures(suite):
@@ -215,7 +214,8 @@ class TestReorderer(AlwaysOnPlugin):
             # Lay the bundles of common-fixture-having test classes end to end
             # in a single list so we can make a test suite out of them:
             flattened = []
-            for ((fixtures, is_exempt), fixture_bundle) in bucketer.buckets.iteritems():
+            for ((fixtures, is_exempt),
+                 fixture_bundle) in bucketer.buckets.iteritems():
                 # Advise first and last test classes in each bundle to set up
                 # and tear down fixtures and the rest not to:
                 if fixtures and not is_exempt:
@@ -223,14 +223,16 @@ class TestReorderer(AlwaysOnPlugin):
                     # they're sure to be ContextSuites with contexts.
 
                     # First class with this set of fixtures sets up:
-                    fixture_bundle[0].context._fb_should_setup_fixtures = True
+                    first = fixture_bundle[0].context
+                    first._fb_should_setup_fixtures = True
 
                     # Set all classes' 1..n should_setup to False:
                     for cls in fixture_bundle[1:]:
                         cls.context._fb_should_setup_fixtures = False
 
                     # Last class tears down:
-                    fixture_bundle[-1].context._fb_should_teardown_fixtures = True
+                    last = fixture_bundle[-1].context
+                    last._fb_should_teardown_fixtures = True
 
                     # Set all classes' 0..(n-1) should_teardown to False:
                     for cls in fixture_bundle[:-1]:
