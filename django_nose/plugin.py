@@ -1,11 +1,8 @@
-import os.path
 import sys
 
 from nose.plugins.base import Plugin
 from nose.suite import ContextSuite
 
-from django.conf import settings
-from django.db.models.loading import get_apps, load_app
 from django.test.testcases import TransactionTestCase, TestCase
 
 from django_nose.testcases import FastFixtureTestCase
