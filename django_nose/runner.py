@@ -248,7 +248,8 @@ def _should_create_database(connection):
 
 
 def _mysql_reset_sequences(style, connection):
-    """Return a list of SQL statements needed to reset all sequences for Django tables."""
+    """Return a list of SQL statements needed to
+    reset all sequences for Django tables."""
     tables = connection.introspection.django_table_names(only_existing=True)
     flush_statements = connection.ops.sql_flush(
             style, tables, connection.introspection.sequence_list())
@@ -286,7 +287,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
             connection.settings_dict['NAME'] = test_db_name
 
             if _should_create_database(connection):
-                # We're not using _skip_create_test_db, so put the DB name back:
+                # We're not using _skip_create_test_db, so put the DB name back
                 connection.settings_dict['NAME'] = orig_db_name
 
                 # Since we replaced the connection with the test DB, closing
@@ -303,7 +304,8 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 style = no_style()
 
                 if uses_mysql(connection):
-                    reset_statements = _mysql_reset_sequences(style, connection)
+                    reset_statements = _mysql_reset_sequences(
+                        style, connection)
                 else:
                     reset_statements = connection.ops.sequence_reset_sql(
                             style, cache.get_models())
