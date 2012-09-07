@@ -129,19 +129,6 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
     # Replace the builtin command options with the merged django/nose options:
     options = _get_options()
 
-    def run_suite(self, nose_argv):
-        result_plugin = ResultPlugin()
-        plugins_to_add = [DjangoSetUpPlugin(self),
-                          result_plugin,
-                          TestReorderer()]
-
-        for plugin in _get_plugins_from_settings():
-            plugins_to_add.append(plugin)
-
-        nose.core.TestProgram(argv=nose_argv, exit=False,
-                              addplugins=plugins_to_add)
-        return result_plugin.result
-
     def run_tests(self, test_labels, extra_tests=None):
         """Run the unit tests for all the test names in the provided list.
 
@@ -168,6 +155,7 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
             django_opts.extend(opt._long_opts)
             django_opts.extend(opt._short_opts)
 
+        # First element in sys.argv is the test command, so we don't need it
         nose_argv.extend(translate_option(opt) for opt in sys.argv[1:]
         if opt.startswith('-')
            and not any(opt.startswith(d) for d in django_opts))
@@ -184,6 +172,18 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
         # suite_result expects the suite as the first argument.  Fake it.
         return self.suite_result({}, result)
 
+    def run_suite(self, nose_argv):
+        result_plugin = ResultPlugin()
+        plugins_to_add = [DjangoSetUpPlugin(self),
+                          result_plugin,
+                          TestReorderer()]
+
+        for plugin in _get_plugins_from_settings():
+            plugins_to_add.append(plugin)
+
+        nose.core.TestProgram(argv=nose_argv, exit=False,
+                              addplugins=plugins_to_add)
+        return result_plugin.result
 
 _old_handle = Command.handle
 
