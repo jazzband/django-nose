@@ -148,12 +148,24 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
         Test names specified may be file or module names, and may optionally
         indicate the test case to run by separating the module or file name
         from the test case name with a colon. Filenames may be relative or
-        absolute. Examples:
+        absolute.
 
-        runner.run_tests('test.module')
-        runner.run_tests('another.test:TestCase.test_method')
-        runner.run_tests('a.test:TestCase')
-        runner.run_tests('/path/to/test/file.py:test_function')
+        N.B.: The test_labels argument *MUST* be a sequence of
+        strings, *NOT* just a string object.  (Or you will be
+        specifying tests for for each character in your string, and
+        not the whole string.
+
+        Examples:
+
+        runner.run_tests( ('test.module',) )
+        runner.run_tests(['another.test:TestCase.test_method'])
+        runner.run_tests(['a.test:TestCase'])
+        runner.run_tests(['/path/to/test/file.py:test_function'])
+        runner.run_tests( ('test.module', 'a.test:TestCase') )
+
+        Note: the extra_tests argument is currently ignored.  You can
+        run old non-nose code that uses it without totally breaking,
+        but the extra tests will not be run.  Maybe later.
 
         Returns the number of tests that failed.
 
