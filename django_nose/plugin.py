@@ -99,8 +99,8 @@ class Bucketer(object):
             # shouldn't matter.
             key = (frozenset(getattr(test.context, 'fixtures', [])),
                    getattr(test.context,
-                    'exempt_from_fixture_bundling',
-                    False))
+                           'exempt_from_fixture_bundling',
+                           False))
             self.buckets.setdefault(key, []).append(test)
         else:
             self.remainder.append(test)
@@ -214,8 +214,8 @@ class TestReorderer(AlwaysOnPlugin):
             # Lay the bundles of common-fixture-having test classes end to end
             # in a single list so we can make a test suite out of them:
             flattened = []
-            for ((fixtures, is_exempt), fixture_bundle) in \
-                bucketer.buckets.iteritems():
+            for ((fixtures, is_exempt),
+                 fixture_bundle) in bucketer.buckets.iteritems():
                 # Advise first and last test classes in each bundle to set up
                 # and tear down fixtures and the rest not to:
                 if fixtures and not is_exempt:

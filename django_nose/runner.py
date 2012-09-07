@@ -58,15 +58,15 @@ if not hasattr(BaseDatabaseCreation, '_get_test_db_name'):
 
 
 def _get_plugins_from_settings():
-    plugins = list(getattr(settings, 'NOSE_PLUGINS', []))
-    plugins += ['django_nose.plugin.TestReorderer']
-    for plg_path in plugins:
+    plugins = (list(getattr(settings, 'NOSE_PLUGINS', [])) +
+               ['django_nose.plugin.TestReorderer'])
+    for plug_path in plugins:
         try:
-            dot = plg_path.rindex('.')
+            dot = plug_path.rindex('.')
         except ValueError:
             raise exceptions.ImproperlyConfigured(
-                    "%s isn't a Nose plugin module" % plg_path)
-        p_mod, p_classname = plg_path[:dot], plg_path[dot + 1:]
+                    "%s isn't a Nose plugin module" % plug_path)
+        p_mod, p_classname = plug_path[:dot], plug_path[dot + 1:]
 
         try:
             mod = import_module(p_mod)
@@ -287,7 +287,8 @@ class NoseTestSuiteRunner(BasicNoseRunner):
             connection.settings_dict['NAME'] = test_db_name
 
             if _should_create_database(connection):
-                # We're not using _skip_create_test_db, so put the DB name back
+                # We're not using _skip_create_test_db, so put the DB name
+                # back:
                 connection.settings_dict['NAME'] = orig_db_name
 
                 # Since we replaced the connection with the test DB, closing
