@@ -155,10 +155,12 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
             django_opts.extend(opt._long_opts)
             django_opts.extend(opt._short_opts)
 
+        command_list = []
         # First element in sys.argv is the test command, so we don't need it
-        nose_argv.extend(translate_option(opt) for opt in sys.argv[1:]
-        if opt.startswith('-')
-           and not any(opt.startswith(d) for d in django_opts))
+        for opt in sys.argv[1:]:
+            if opt.startswith('-') and not any(opt.startswith(d) for d in django_opts):
+                command_list.append(translate_option(opt))
+        nose_argv.extend(command_list)
 
         # if --nose-verbosity was omitted, pass Django verbosity to nose
         if ('--verbosity' not in nose_argv and
