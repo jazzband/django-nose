@@ -155,9 +155,23 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
             django_opts.extend(opt._long_opts)
             django_opts.extend(opt._short_opts)
 
+        cursor = 1
+        option_list = []
+        arg_length = len(sys.argv)
+        # We don't need the command name, so we start from 1
+        for option in sys.argv[1:]:
+            # Parse the options with non equal sign
+            if option.startswith('-') and not '=' in option:
+                next = cursor + 1
+                if arg_length > next and not sys.argv[next].startswith('-'):
+                    option_list.append('%s=%s' % (option, sys.argv[next]))
+                    cursor += 1
+            else:
+                option_list.append(option)
+            cursor += 1
+
         command_list = []
-        # First element in sys.argv is the test command, so we don't need it
-        for opt in sys.argv[1:]:
+        for opt in option_list:
             if opt.startswith('-') and not any(opt.startswith(d) for d in django_opts):
                 command_list.append(translate_option(opt))
         nose_argv.extend(command_list)
