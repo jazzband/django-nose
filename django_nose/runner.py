@@ -16,9 +16,8 @@ from django.core import exceptions
 from django.core.management.base import BaseCommand
 from django.core.management.color import no_style
 from django.core.management.commands.loaddata import Command
-from django.db import connections, transaction, DEFAULT_DB_ALIAS
+from django.db import connections, transaction, DEFAULT_DB_ALIAS, models
 from django.db.backends.creation import BaseDatabaseCreation
-from django.db.models.loading import cache
 from django.test.simple import DjangoTestSuiteRunner
 from django.utils.importlib import import_module
 
@@ -267,10 +266,10 @@ class NoseTestSuiteRunner(BasicNoseRunner):
     """
 
     def _get_models_for_connection(self, connection):
-        """Get a list of models for connection."""
+        """Return a list of models for a connection."""
         tables = connection.introspection.get_table_list(connection.cursor())
-        exists = lambda m: m._meta.db_table in tables
-        return filter(exists, cache.get_models())
+        return [m for m in models.loading.cache.get_models() if
+                m._meta.db_table in tables]
 
     def setup_databases(self):
         for alias in connections:
