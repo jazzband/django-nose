@@ -17,9 +17,8 @@ from django.core import exceptions
 from django.core.management.base import BaseCommand
 from django.core.management.color import no_style
 from django.core.management.commands.loaddata import Command
-from django.db import connections, transaction, DEFAULT_DB_ALIAS
+from django.db import connections, transaction, DEFAULT_DB_ALIAS, models
 from django.db.backends.creation import BaseDatabaseCreation
-from django.db.models.loading import cache
 from django.test.simple import DjangoTestSuiteRunner
 from django.utils.importlib import import_module
 
@@ -309,6 +308,13 @@ class NoseTestSuiteRunner(BasicNoseRunner):
     something that isn't "0" or "false" (case insensitive).
 
     """
+
+    def _get_models_for_connection(self, connection):
+        """Return a list of models for a connection."""
+        tables = connection.introspection.get_table_list(connection.cursor())
+        return [m for m in models.loading.cache.get_models() if
+                m._meta.db_table in tables]
+
     def setup_databases(self):
         for alias in connections:
             connection = connections[alias]
@@ -344,7 +350,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                         style, connection)
                 else:
                     reset_statements = connection.ops.sequence_reset_sql(
-                            style, cache.get_models())
+                            style, self._get_models_for_connection(connection))
 
                 for reset_statement in reset_statements:
                     cursor.execute(reset_statement)
