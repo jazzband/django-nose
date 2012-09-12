@@ -226,7 +226,7 @@ def _foreign_key_ignoring_handle(self, *fixture_labels, **options):
 
 
 def _skip_create_test_db(self, verbosity=1, autoclobber=False):
-    """Database creation class that skips both creation and flushing
+    """``create_test_db`` implementation that skips both creation and flushing
 
     The idea is to re-use the perfectly good test DB already created by an
     earlier test run, cutting the time spent before any tests run from 5-13s
