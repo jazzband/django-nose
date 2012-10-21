@@ -437,6 +437,11 @@ def _should_create_database(connection):
 
     # Notice whether the DB exists, and create it if it doesn't:
     try:
+        # Connections are cached by some backends, if other code has connected
+        # to the database previously under a different database name the
+        # cached connection will be used and no exception will be raised.
+        # Setting to null here solves that problem.
+        connection.connection = None
         connection.cursor()
     except Exception:  # TODO: Be more discerning but still DB agnostic.
         return True
