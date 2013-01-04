@@ -7,7 +7,7 @@ from django_nose.runner import NoseTestSuiteRunner
 
 
 class GetModelsForConnectionTests(TestCase):
-    tables = ['test_table%d' % i for i in xrange(5)]
+    tables = ['test_table%d' % i for i in range(5)]
 
     def _connection_mock(self, tables):
         class FakeIntrospection(object):
