@@ -215,7 +215,7 @@ class TestReorderer(AlwaysOnPlugin):
             # in a single list so we can make a test suite out of them:
             flattened = []
             for ((fixtures, is_exempt),
-                 fixture_bundle) in bucketer.buckets.iteritems():
+                 fixture_bundle) in bucketer.buckets.items():
                 # Advise first and last test classes in each bundle to set up
                 # and tear down fixtures and the rest not to:
                 if fixtures and not is_exempt:
