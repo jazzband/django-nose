@@ -182,7 +182,7 @@ large schema, this can save minutes of IO.
 django-nose's own FastFixtureTestCase uses this feature, even though it
 ultimately acts more like a TestCase than a TransactionTestCase.
 
-.. _can leave the DB in an unclean state: https://docs.djangoproject.com/en/dev/topics/testing/?from=olddocs#django.test.TransactionTestCase
+.. _can leave the DB in an unclean state: https://docs.djangoproject.com/en/1.4/topics/testing/#django.test.TransactionTestCase
 
 
 Test-Only Models
