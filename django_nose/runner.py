@@ -77,9 +77,9 @@ def _get_plugins_from_settings():
 
         try:
             mod = import_module(p_mod)
-        except ImportError as e:
+        except ImportError:
             raise exceptions.ImproperlyConfigured(
-                    'Error importing Nose plugin module %s: "%s"' % (p_mod, e))
+                    'Error importing Nose plugin module %s' % (p_mod))
 
         try:
             p_class = getattr(mod, p_classname)
