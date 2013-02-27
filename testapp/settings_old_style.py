@@ -5,6 +5,8 @@ DATABASES = {
     }
 }
 
+SECRET_KEY="AuthenticIndianCuisine"
+
 INSTALLED_APPS = (
     'django_nose',
 )
