@@ -25,9 +25,13 @@ django_test() {
     fi
 }
 
-django_test 'django-admin.py test --settings=testapp.settings' '2' 'normal settings'
-django_test 'django-admin.py test --settings=testapp.settings_with_south' '2' 'with south in installed apps'
-django_test 'django-admin.py test --settings=testapp.settings_old_style' '2' 'django_nose.run_tests format'
-django_test 'testapp/runtests.py testapp.test_only_this' '1' 'via run_tests API'
-django_test 'django-admin.py test --settings=testapp.settings_with_plugins testapp/plugin_t' '1' 'with plugins'
-django_test 'django-admin.py test --settings=testapp.settings unittests' '4' 'unittests'
+# NOTE: As of 2013-02-27, South is not compatible with Python 3, so be sure to disable it when testing with Python 3 
+PYTHON=python
+DJANGO_ADMIN=`which django-admin.py`
+
+django_test "$PYTHON $DJANGO_ADMIN test --settings=testapp.settings" '2' 'normal settings'
+django_test "$PYTHON $DJANGO_ADMIN test --settings=testapp.settings_with_south" '2' 'with south in installed apps'
+django_test "$PYTHON $DJANGO_ADMIN test --settings=testapp.settings_old_style" '2' 'django_nose.run_tests format'
+django_test "$PYTHON testapp/runtests.py testapp.test_only_this" '1' 'via run_tests API'
+django_test "$PYTHON $DJANGO_ADMIN test --settings=testapp.settings_with_plugins testapp/plugin_t" '1' 'with plugins'
+django_test "$PYTHON $DJANGO_ADMIN test --settings=testapp.settings unittests" '4' 'unittests'

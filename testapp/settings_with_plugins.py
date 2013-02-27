@@ -1,4 +1,4 @@
-from settings import *
+from testapp.settings import *
 
 
 NOSE_PLUGINS = [
