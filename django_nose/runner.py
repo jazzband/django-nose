@@ -234,11 +234,15 @@ def _skip_create_test_db(self, verbosity=1, autoclobber=False):
 
     """
     # Notice that the DB supports transactions. Originally, this was done in
-    # the method this overrides. Django v1.2 does not have the confirm
-    # function. Added in https://code.djangoproject.com/ticket/12991.
+    # the method this overrides. The confirm method was added in Django v1.3
+    # (https://code.djangoproject.com/ticket/12991) but removed in Django v1.5
+    # (https://code.djangoproject.com/ticket/17760). In Django v1.5
+    # supports_transactions is a cached property evaluated on access.
     if callable(getattr(self.connection.features, 'confirm', None)):
+        # Django v1.3-4
         self.connection.features.confirm()
-    else:
+    elif hasattr(self, "_rollback_works"):
+        # Django v1.2 and lower
         can_rollback = self._rollback_works()
         self.connection.settings_dict['SUPPORTS_TRANSACTIONS'] = can_rollback
 
