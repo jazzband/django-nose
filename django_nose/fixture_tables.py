@@ -125,6 +125,12 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
                                     loaded_objects_in_fixture += 1
                                     tables.add(
                                         obj.object.__class__._meta.db_table)
+                                for m2m in obj.m2m_data:
+                                    m2m_obj = getattr(obj.object, m2m)
+                                    if router.allow_syncdb(using, m2m_obj.model):
+                                        loaded_object_in_fixture += 1
+                                        tables.add(
+                                            m2m.model._meta.db_table)
                             loaded_object_count += loaded_objects_in_fixture
                             fixture_object_count += objects_in_fixture
                             label_found = True
