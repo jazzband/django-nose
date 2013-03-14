@@ -7,3 +7,7 @@ from django_nose.testcases import *
 
 # Django < 1.2 compatibility.
 run_tests = run_gis_tests = NoseTestSuiteRunner
+
+
+# Replace the default test loader.
+import django_nose.loader
