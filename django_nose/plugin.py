@@ -251,3 +251,14 @@ class TestReorderer(AlwaysOnPlugin):
         if self.should_bundle:
             test = self._bundle_fixtures(test)
         return test
+
+
+class PrintRightPlugin(Plugin):
+    """
+    Prints out tests like path.to:TestClass.method
+    """
+    name = 'printright'
+
+    def describeTest(self, test):
+        address = test.address()
+        return "%s:%s" % (address[1], address[2])
