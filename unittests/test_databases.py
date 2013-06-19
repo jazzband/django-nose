@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 from unittest import TestCase
+from six.moves import xrange
 
 from django.db.models.loading import cache
 

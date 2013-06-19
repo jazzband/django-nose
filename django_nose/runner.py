@@ -7,10 +7,11 @@ You can use... ::
 in settings.py for arguments that you want always passed to nose.
 
 """
-import new
+from __future__ import print_function
 import os
 import sys
 from optparse import make_option
+from types import MethodType
 
 from django.conf import settings
 from django.core import exceptions
@@ -78,7 +79,7 @@ def _get_plugins_from_settings():
 
         try:
             mod = import_module(p_mod)
-        except ImportError, e:
+        except ImportError as e:
             raise exceptions.ImproperlyConfigured(
                     'Error importing Nose plugin module %s: "%s"' % (p_mod, e))
 
@@ -189,7 +190,7 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
             nose_argv.append('--verbosity=%s' % str(self.verbosity))
 
         if self.verbosity >= 1:
-            print ' '.join(nose_argv)
+            print(' '.join(nose_argv))
 
         result = self.run_suite(nose_argv)
         # suite_result expects the suite as the first argument.  Fake it.
@@ -280,7 +281,7 @@ def _should_create_database(connection):
     # Notice whether the DB exists, and create it if it doesn't:
     try:
         connection.cursor()
-    except StandardError:  # TODO: Be more discerning but still DB agnostic.
+    except Exception:  # TODO: Be more discerning but still DB agnostic.
         return True
     return not _reusing_db()
 
@@ -367,7 +368,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
 
                 # Each connection has its own creation object, so this affects
                 # only a single connection:
-                creation.create_test_db = new.instancemethod(
+                creation.create_test_db = MethodType(
                         _skip_create_test_db, creation, creation.__class__)
 
         Command.handle = _foreign_key_ignoring_handle

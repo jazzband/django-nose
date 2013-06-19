@@ -18,7 +18,7 @@ setup(
     packages=find_packages(exclude=['testapp', 'testapp/*']),
     include_package_data=True,
     zip_safe=False,
-    install_requires=['nose>=1.2.1', 'Django>=1.2'],
+    install_requires=['nose>=1.2.1', 'Django>=1.2', 'six>=1.3.0'],
     tests_require=['south>=0.7'],
     # This blows up tox runs that install django-nose into a virtualenv,
     # because it causes Nose to import django_nose.runner before the Django
@@ -41,6 +41,7 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.3',
         'Topic :: Software Development :: Testing'
     ]
 )
