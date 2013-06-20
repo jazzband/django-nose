@@ -7,7 +7,6 @@ from django.test.testcases import TransactionTestCase, TestCase
 
 from django_nose.testcases import FastFixtureTestCase
 from django_nose.utils import process_tests, is_subclass_at_all
-import six
 
 
 class AlwaysOnPlugin(Plugin):
@@ -215,8 +214,7 @@ class TestReorderer(AlwaysOnPlugin):
             # Lay the bundles of common-fixture-having test classes end to end
             # in a single list so we can make a test suite out of them:
             flattened = []
-            for ((fixtures, is_exempt),
-                 fixture_bundle) in six.iteritems(bucketer.buckets):
+            for ((fixtures, is_exempt), fixture_bundle) in bucketer.buckets.items():
                 # Advise first and last test classes in each bundle to set up
                 # and tear down fixtures and the rest not to:
                 if fixtures and not is_exempt:

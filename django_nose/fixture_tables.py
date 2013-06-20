@@ -11,7 +11,6 @@ from django.core import serializers
 from django.db import router, DEFAULT_DB_ALIAS
 from django.db.models import get_apps
 from django.utils.itercompat import product
-import six
 
 try:
     import bz2
@@ -64,7 +63,7 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
             compression_formats = [parts[-1]]
             parts = parts[:-1]
         else:
-            compression_formats = six.iterkeys(compression_types)
+            compression_formats = list(compression_types.keys())
 
         if len(parts) == 1:
             fixture_name = parts[0]
