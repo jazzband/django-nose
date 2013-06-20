@@ -10,3 +10,5 @@ INSTALLED_APPS = (
 )
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+SECRET_KEY = 'ssshhhh'
