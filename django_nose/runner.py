@@ -111,6 +111,11 @@ def _get_options():
                                metavar='NOSE_VERBOSITY',
                                **verbosity_attrs))
 
+    # Django 1.6 introduces a "--pattern" option, which is shortened into "-p"
+    # do not allow "-p" to collide with nose's "--plugins" option.
+    plugins_option = [o for o in options if o.get_opt_string() == '--plugins'][0]
+    plugins_option._short_opts.remove('-p')
+
     django_opts = [opt.dest for opt in BaseCommand.option_list] + ['version']
     return tuple(o for o in options if o.dest not in django_opts and
                                        o.action != 'help')
@@ -175,7 +180,7 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
             nose_argv.extend(settings.NOSE_ARGS)
 
         # Skip over 'manage.py test' and any arguments handled by django.
-        django_opts = ['--noinput', '--liveserver']
+        django_opts = ['--noinput', '--liveserver', '-p', '--pattern']
         for opt in BaseCommand.option_list:
             django_opts.extend(opt._long_opts)
             django_opts.extend(opt._short_opts)
