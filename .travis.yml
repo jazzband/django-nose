@@ -13,6 +13,9 @@ matrix:
       env: DJANGO=Django==1.5
     - python: "3.3"
       env: DJANGO=https://github.com/django/django/archive/master.zip
+  exclude:
+    - python: "2.6"
+      env: DJANGO=https://github.com/django/django/archive/master.zip
 before_install:
   - export PIP_USE_MIRRORS=true
   - export PIP_INDEX_URL=https://simple.crate.io/
