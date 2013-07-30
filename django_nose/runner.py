@@ -285,6 +285,11 @@ def _should_create_database(connection):
 
     # Notice whether the DB exists, and create it if it doesn't:
     try:
+        # Slight modification to fix proposed at
+        # https://github.com/jbalogh/django-nose/pull/101
+        # for bug https://github.com/jbalogh/django-nose/issues/76
+        for conn in connections.all():
+            conn.close()
         connection.cursor()
     except Exception:  # TODO: Be more discerning but still DB agnostic.
         return True
