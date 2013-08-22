@@ -4,7 +4,14 @@ export PYTHONPATH=.
 
 django_test() {
     TEST="$1"
-    $TEST 2>&1 | grep "Ran $2 test" > /dev/null
+    OUTPUT=$($TEST 2>&1)
+    if [ $? -gt 0 ]
+    then
+        echo FAIL: $3
+        $TEST
+        exit 1;
+    fi
+    echo $OUTPUT | grep "Ran $2 test" > /dev/null
     if [ $? -gt 0 ]
     then
         echo FAIL: $3
@@ -31,3 +38,4 @@ django_test 'django-admin.py test --settings=testapp.settings_old_style' '2' 'dj
 django_test 'testapp/runtests.py testapp.test_only_this' '1' 'via run_tests API'
 django_test 'django-admin.py test --settings=testapp.settings_with_plugins testapp/plugin_t' '1' 'with plugins'
 django_test 'django-admin.py test --settings=testapp.settings unittests' '4' 'unittests'
+django_test 'django-admin.py test --settings=testapp.settings --with-profile' '2' 'with profile plugin'
