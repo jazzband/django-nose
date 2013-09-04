@@ -267,7 +267,7 @@ added to the Nose test runner.
 Older Versions of Django
 ------------------------
 Upgrading from Django <= 1.3 to Django 1.4
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 In versions of Django < 1.4 the project folder was in fact a python package as
 well (note the __init__.py in your project root). In Django 1.4, there is no
 such file and thus the project is not a python module.
