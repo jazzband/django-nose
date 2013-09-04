@@ -321,6 +321,10 @@ django-nose does not support Django 1.0.
 Recent Version History
 ----------------------
 
+1.2 (2013-07-23)
+  * Python 3 support (melinath and jonashaag)
+  * Django 1.5 compat (fabiosantoscode)
+
 1.1 (2012-05-19)
   * Django TransactionTestCases don't clean up after themselves; they leave
     junk in the DB and clean it up only on ``_pre_setup``. Thus, Django makes
