@@ -71,7 +71,7 @@ class DjangoTemplates(base.Plugin):
 
                 generatedDjangoTemplateTest.__doc__ = (
                     "The {0!r} template compiles".format(file_path))
-                test_name = 'test_django_template_{}'.format(
+                test_name = 'test_django_template_{0}'.format(
                     self.test_name_pattern.sub('_', filename))
                 generatedDjangoTemplateTest.func_name = test_name
                 tests[test_name] = generatedDjangoTemplateTest
