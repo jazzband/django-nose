@@ -27,6 +27,7 @@ import nose.core
 
 from django_nose.plugin import DjangoSetUpPlugin, ResultPlugin, TestReorderer
 from django_nose.utils import uses_mysql
+from django_nose.templates import DjangoTemplates
 
 try:
     any
@@ -68,7 +69,8 @@ if not hasattr(BaseDatabaseCreation, '_get_test_db_name'):
 
 def _get_plugins_from_settings():
     plugins = (list(getattr(settings, 'NOSE_PLUGINS', [])) +
-               ['django_nose.plugin.TestReorderer'])
+               ['django_nose.plugin.TestReorderer',
+                'django_nose.templates.DjangoTemplates'])
     for plug_path in plugins:
         try:
             dot = plug_path.rindex('.')
@@ -138,7 +140,8 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
         result_plugin = ResultPlugin()
         plugins_to_add = [DjangoSetUpPlugin(self),
                           result_plugin,
-                          TestReorderer()]
+                          TestReorderer(),
+                          DjangoTemplates()]
 
         for plugin in _get_plugins_from_settings():
             plugins_to_add.append(plugin)
