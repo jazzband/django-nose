@@ -70,7 +70,8 @@ class DjangoTemplates(base.Plugin):
                         callable(getattr(template, 'render', None)))
 
                 generatedDjangoTemplateTest.__doc__ = (
-                    "The {0!r} template compiles".format(file_path))
+                    "Template compiles: {0!r}".format(
+                        os.path.relpath(file_path)))
                 test_name = 'test_django_template_{0}'.format(
                     self.test_name_pattern.sub('_', filename))
                 generatedDjangoTemplateTest.func_name = test_name
