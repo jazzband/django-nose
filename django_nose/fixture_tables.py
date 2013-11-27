@@ -18,6 +18,12 @@ try:
 except ImportError:
     has_bz2 = False
 
+try:
+    file
+except NameError:
+    import io
+    file = io.IOBase
+
 
 def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
     """Act like Django's stock loaddata command, but, instead of loading data,
