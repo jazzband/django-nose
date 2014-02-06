@@ -2,8 +2,8 @@
 django-nose
 ===========
 
-.. image:: https://travis-ci.org/jbalogh/django-nose.png
-  :target: https://travis-ci.org/jbalogh/django-nose
+.. image:: https://travis-ci.org/django-nose/django-nose.png
+  :target: https://travis-ci.org/django-nose/django-nose
 
 Features
 --------
@@ -38,7 +38,7 @@ You can get django-nose from PyPI with... ::
 
 The development version can be installed with... ::
 
-    pip install -e git://github.com/jbalogh/django-nose.git#egg=django-nose
+    pip install -e git://github.com/django-nose/django-nose.git#egg=django-nose
 
 Since django-nose extends Django's built-in test command, you should add it to
 your ``INSTALLED_APPS`` in ``settings.py``::
@@ -309,7 +309,7 @@ Django 1.1
 ~~~~~~~~~~
 
 If you want to use django-nose with Django 1.1, use
-https://github.com/jbalogh/django-nose/tree/django-1.1 or
+https://github.com/django-nose/django-nose/tree/django-1.1 or
 http://pypi.python.org/pypi/django-nose/0.0.3.
 
 Django 1.0
