@@ -6,7 +6,7 @@ ROOT = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name='django-nose',
-    version='1.2',
+    version='1.3',
     description='Makes your Django tests simple and snappy',
     long_description=open(os.path.join(ROOT, 'README.rst')).read(),
     author='Jeff Balogh',
@@ -29,6 +29,7 @@ setup(
     #entry_points="""
     #    [nose.plugins.0.10]
     #    fixture_bundler = django_nose.fixture_bundling:FixtureBundlingPlugin
+    #    django_templates = django_nose.templates:DjangoTemplates
     #    """,
     classifiers=[
         'Development Status :: 5 - Production/Stable',

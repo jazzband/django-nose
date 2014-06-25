@@ -24,6 +24,7 @@ Features
 * Hygienic TransactionTestCases, which can save you a DB flush per test
 * Support for various databases. Tested with MySQL, PostgreSQL, and SQLite.
   Others should work as well.
+* Support for automatically validating Django templates by compiling them.
 
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/
 .. _nose plugins: http://nose-plugins.jottit.com/
@@ -320,6 +321,9 @@ django-nose does not support Django 1.0.
 
 Recent Version History
 ----------------------
+
+1.3 (Unreleased)
+  * Support validating Django templates by compiling them (rpatterson)
 
 1.2 (2013-07-23)
   * Python 3 support (melinath and jonashaag)
