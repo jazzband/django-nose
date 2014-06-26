@@ -33,6 +33,12 @@ django_test() {
 }
 
 django_test 'django-admin.py test --settings=testapp.settings' '2' 'normal settings'
+django_test 'django-admin.py test --settings=testapp.settings --verbosity=1' '2' 'option: verbosity'
+django_test 'django-admin.py test --settings=testapp.settings --verbosity 1' '2' 'option: verbosity no equals sign'
+django_test 'django-admin.py test --settings=testapp.settings --nose-verbosity=2' '2' 'option: nose-verbosity'
+django_test 'django-admin.py test --settings=testapp.settings --nose-verbosity 2' '2' 'option: nose-verbosity no equals sign'
+django_test 'django-admin.py test --settings=testapp.settings --verbosity 3 --nose-verbosity=3' '2' 'option: verbosity, nose-verbosity'
+django_test 'django-admin.py test --settings=testapp.settings --verbosity 3 --nose-verbosity 3' '2' 'option: verbosity, nose-verbosity no equals sign'
 django_test 'django-admin.py test --settings=testapp.settings_with_south' '2' 'with south in installed apps'
 django_test 'django-admin.py test --settings=testapp.settings_old_style' '2' 'django_nose.run_tests format'
 django_test 'testapp/runtests.py testapp.test_only_this' '1' 'via run_tests API'

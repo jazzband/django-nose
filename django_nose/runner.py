@@ -134,19 +134,6 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
     # Replace the builtin command options with the merged django/nose options:
     options = _get_options()
 
-    def run_suite(self, nose_argv):
-        result_plugin = ResultPlugin()
-        plugins_to_add = [DjangoSetUpPlugin(self),
-                          result_plugin,
-                          TestReorderer()]
-
-        for plugin in _get_plugins_from_settings():
-            plugins_to_add.append(plugin)
-
-        nose.core.TestProgram(argv=nose_argv, exit=False,
-                              addplugins=plugins_to_add)
-        return result_plugin.result
-
     def run_tests(self, test_labels, extra_tests=None):
         """Run the unit tests for all the test names in the provided list.
 
@@ -185,9 +172,26 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
             django_opts.extend(opt._long_opts)
             django_opts.extend(opt._short_opts)
 
-        nose_argv.extend(translate_option(opt) for opt in sys.argv[1:]
-        if opt.startswith('-')
-           and not any(opt.startswith(d) for d in django_opts))
+        cursor = 1
+        option_list = []
+        arg_length = len(sys.argv)
+        # We don't need the command name, so we start from 1
+        for option in sys.argv[1:]:
+            # Parse the options with non equal sign
+            if option.startswith('-') and not '=' in option:
+                next = cursor + 1
+                if arg_length > next and not sys.argv[next].startswith('-'):
+                    option_list.append('%s=%s' % (option, sys.argv[next]))
+                    cursor += 1
+            else:
+                option_list.append(option)
+            cursor += 1
+
+        command_list = []
+        for opt in option_list:
+            if opt.startswith('-') and not any(opt.startswith(d) for d in django_opts):
+                command_list.append(translate_option(opt))
+        nose_argv.extend(command_list)
 
         # if --nose-verbosity was omitted, pass Django verbosity to nose
         if ('--verbosity' not in nose_argv and
@@ -201,6 +205,18 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
         # suite_result expects the suite as the first argument.  Fake it.
         return self.suite_result({}, result)
 
+    def run_suite(self, nose_argv):
+        result_plugin = ResultPlugin()
+        plugins_to_add = [DjangoSetUpPlugin(self),
+                          result_plugin,
+                          TestReorderer()]
+
+        for plugin in _get_plugins_from_settings():
+            plugins_to_add.append(plugin)
+
+        nose.core.TestProgram(argv=nose_argv, exit=False,
+                              addplugins=plugins_to_add)
+        return result_plugin.result
 
 _old_handle = Command.handle
 
