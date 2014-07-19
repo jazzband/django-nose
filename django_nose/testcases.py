@@ -88,6 +88,7 @@ class FastFixtureTestCase(test.TransactionTestCase):
                 if tables:
                     connection = connections[db]
                     cursor = connection.cursor()
+                    qn = connection.ops.quote_name
 
                     # TODO: Rather than assuming that anything added to by a
                     # fixture can be emptied, remove only what the fixture
@@ -104,7 +105,7 @@ class FastFixtureTestCase(test.TransactionTestCase):
                         cursor.execute('SET FOREIGN_KEY_CHECKS=1')
                     else:
                         for table in tables:
-                            cursor.execute('DELETE FROM %s' % table)
+                            cursor.execute('DELETE FROM %s' % qn(table))
 
                 transaction.commit(using=db)
                 # cursor.close()  # Should be unnecessary, since we committed
