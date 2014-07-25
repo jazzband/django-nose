@@ -13,6 +13,7 @@ import sys
 from optparse import make_option
 from types import MethodType
 
+import django.db.models.loading
 from django.conf import settings
 from django.core import exceptions
 from django.core.management.base import BaseCommand
@@ -20,13 +21,19 @@ from django.core.management.color import no_style
 from django.core.management.commands.loaddata import Command
 from django.db import connections, transaction, DEFAULT_DB_ALIAS, models
 from django.db.backends.creation import BaseDatabaseCreation
-from django.test.simple import DjangoTestSuiteRunner
 from django.utils.importlib import import_module
 
 import nose.core
 
 from django_nose.plugin import DjangoSetUpPlugin, ResultPlugin, TestReorderer
 from django_nose.utils import uses_mysql
+
+
+# Use DiscoverRunner if available, as DjangoTestSuiteRunner is deprecated in 1.7
+try:
+    from django.test.runner import DiscoverRunner as BaseRunner
+except ImportError:
+    from django.test.simple import DjangoTestSuiteRunner as BaseRunner
 
 try:
     any
@@ -121,7 +128,7 @@ def _get_options():
                                        o.action != 'help')
 
 
-class BasicNoseRunner(DjangoTestSuiteRunner):
+class BasicNoseRunner(BaseRunner):
     """Facade that implements a nose runner in the guise of a Django runner
 
     You shouldn't have to use this directly unless the additions made by
@@ -231,7 +238,7 @@ def _foreign_key_ignoring_handle(self, *fixture_labels, **options):
             connection.close()
 
 
-def _skip_create_test_db(self, verbosity=1, autoclobber=False):
+def _skip_create_test_db(self, verbosity=1, autoclobber=False, serialize=None):
     """``create_test_db`` implementation that skips both creation and flushing
 
     The idea is to re-use the perfectly good test DB already created by an
@@ -322,7 +329,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
     def _get_models_for_connection(self, connection):
         """Return a list of models for a connection."""
         tables = connection.introspection.get_table_list(connection.cursor())
-        return [m for m in models.loading.cache.get_models() if
+        return [m for m in django.db.models.loading.cache.get_models() if
                 m._meta.db_table in tables]
 
     def setup_databases(self):
