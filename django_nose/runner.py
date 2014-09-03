@@ -13,6 +13,7 @@ import sys
 from optparse import make_option
 from types import MethodType
 
+import django
 from django.conf import settings
 from django.core import exceptions
 from django.core.management.base import BaseCommand
@@ -20,7 +21,6 @@ from django.core.management.color import no_style
 from django.core.management.commands.loaddata import Command
 from django.db import connections, transaction, DEFAULT_DB_ALIAS, models
 from django.db.backends.creation import BaseDatabaseCreation
-from django.test.simple import DjangoTestSuiteRunner
 from django.utils.importlib import import_module
 
 import nose.core
@@ -36,6 +36,12 @@ except NameError:
             if element:
                 return True
         return False
+
+try:
+    from django.test.runner import DiscoverRunner
+except ImportError:
+    # Django < 1.8
+    from django.test.simple import DjangoTestSuiteRunner as DiscoverRunner
 
 
 __all__ = ['BasicNoseRunner', 'NoseTestSuiteRunner']
@@ -121,7 +127,7 @@ def _get_options():
                                        o.action != 'help')
 
 
-class BasicNoseRunner(DjangoTestSuiteRunner):
+class BasicNoseRunner(DiscoverRunner):
     """Facade that implements a nose runner in the guise of a Django runner
 
     You shouldn't have to use this directly unless the additions made by
@@ -142,6 +148,12 @@ class BasicNoseRunner(DjangoTestSuiteRunner):
 
         for plugin in _get_plugins_from_settings():
             plugins_to_add.append(plugin)
+
+        try:
+            django.setup()
+        except AttributeError:
+            # Setup isn't necessary in Django < 1.7
+            pass
 
         nose.core.TestProgram(argv=nose_argv, exit=False,
                               addplugins=plugins_to_add)

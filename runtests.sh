@@ -33,7 +33,10 @@ django_test() {
 }
 
 django_test 'django-admin.py test --settings=testapp.settings' '2' 'normal settings'
-django_test 'django-admin.py test --settings=testapp.settings_with_south' '2' 'with south in installed apps'
+if [ "$DJANGO" != "https://github.com/django/django/archive/master.zip" ]
+then
+    django_test 'django-admin.py test --settings=testapp.settings_with_south' '2' 'with south in installed apps'
+fi
 django_test 'django-admin.py test --settings=testapp.settings_old_style' '2' 'django_nose.run_tests format'
 django_test 'testapp/runtests.py testapp.test_only_this' '1' 'via run_tests API'
 django_test 'django-admin.py test --settings=testapp.settings_with_plugins testapp/plugin_t' '1' 'with plugins'
