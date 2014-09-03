@@ -33,7 +33,7 @@ django_test() {
 }
 
 django_test 'django-admin.py test --settings=testapp.settings' '2' 'normal settings'
-if [ "$DJANGO" != "https://github.com/django/django/archive/master.zip" ]
+if [ $DJANGO = 'Django==1.4.1' -o $DJANGO = 'Django==1.5' -o $DJANGO = 'Django==1.6' ]
 then
     django_test 'django-admin.py test --settings=testapp.settings_with_south' '2' 'with south in installed apps'
 fi
