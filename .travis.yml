@@ -7,7 +7,6 @@ env:
   - DJANGO=Django==1.5
   - DJANGO=Django==1.6
   - DJANGO=Django==1.7
-  - DJANGO=https://github.com/django/django/archive/master.zip
 matrix:
   include:
     - python: "3.4"
@@ -16,11 +15,7 @@ matrix:
       env: DJANGO=Django==1.6
     - python: "3.4"
       env: DJANGO=Django==1.7
-    - python: "3.4"
-      env: DJANGO=https://github.com/django/django/archive/master.zip
   exclude:
-    - python: "2.6"
-      env: DJANGO=https://github.com/django/django/archive/master.zip
     - python: "2.6"
       env: DJANGO=Django==1.7
 install:
