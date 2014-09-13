@@ -41,4 +41,3 @@ django_test 'django-admin.py test --settings=testapp.settings_old_style' '2' 'dj
 django_test 'testapp/runtests.py testapp.test_only_this' '1' 'via run_tests API'
 django_test 'django-admin.py test --settings=testapp.settings_with_plugins testapp/plugin_t' '1' 'with plugins'
 django_test 'django-admin.py test --settings=testapp.settings unittests' '4' 'unittests'
-django_test 'django-admin.py test --settings=testapp.settings --with-profile' '2' 'with profile plugin'
