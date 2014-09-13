@@ -10,9 +10,13 @@ env:
   - DJANGO=https://github.com/django/django/archive/master.zip
 matrix:
   include:
-    - python: "3.3"
+    - python: "3.4"
       env: DJANGO=Django==1.5
-    - python: "3.3"
+    - python: "3.4"
+      env: DJANGO=Django==1.6
+    - python: "3.4"
+      env: DJANGO=Django==1.7
+    - python: "3.4"
       env: DJANGO=https://github.com/django/django/archive/master.zip
   exclude:
     - python: "2.6"
