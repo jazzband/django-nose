@@ -14,12 +14,13 @@ from optparse import make_option
 from types import MethodType
 
 import django
+from django.apps import apps
 from django.conf import settings
 from django.core import exceptions
 from django.core.management.base import BaseCommand
 from django.core.management.color import no_style
 from django.core.management.commands.loaddata import Command
-from django.db import connections, transaction, DEFAULT_DB_ALIAS, models
+from django.db import connections, transaction, DEFAULT_DB_ALIAS
 from django.db.backends.creation import BaseDatabaseCreation
 from django.utils.importlib import import_module
 
@@ -243,7 +244,7 @@ def _foreign_key_ignoring_handle(self, *fixture_labels, **options):
             connection.close()
 
 
-def _skip_create_test_db(self, verbosity=1, autoclobber=False):
+def _skip_create_test_db(self, verbosity=1, autoclobber=False, serialize=True):
     """``create_test_db`` implementation that skips both creation and flushing
 
     The idea is to re-use the perfectly good test DB already created by an
@@ -334,7 +335,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
     def _get_models_for_connection(self, connection):
         """Return a list of models for a connection."""
         tables = connection.introspection.get_table_list(connection.cursor())
-        return [m for m in models.loading.cache.get_models() if
+        return [m for m in apps.get_models() if
                 m._meta.db_table in tables]
 
     def setup_databases(self):
