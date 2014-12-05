@@ -286,8 +286,6 @@ set your `ROOT_URLCONF='my_project.urls'` to match the new structure, when runni
 django-nose's test runner it will try to find your urls.py file in `'my_project.my_project.urls'`.
 
 
-
-
 Upgrading from Django < 1.2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -320,6 +318,10 @@ django-nose does not support Django 1.0.
 
 Recent Version History
 ----------------------
+
+1.3 (2014-12-05)
+  * Django 1.6 and 1.7 support (conrado, co3k, Nepherhotep, mbertheau)
+  * Python 3.3 and 3.4 testing and support (frewsxcv, jsocol)
 
 1.2 (2013-07-23)
   * Python 3 support (melinath and jonashaag)
