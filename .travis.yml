@@ -2,26 +2,26 @@ language: python
 python:
   - "2.6"
   - "2.7"
+  - "3.2"
+  - "3.3"
+  - "3.4"
 env:
-  - DJANGO=Django==1.4.1
-  - DJANGO=Django==1.5
-  - DJANGO=Django==1.6
-  - DJANGO=Django==1.7
-  - DJANGO=https://github.com/django/django/archive/master.zip
+  - DJANGO="Django>=1.4,<1.5"
+  - DJANGO="Django>=1.6,<1.7"
+  - DJANGO="Django>=1.7,<1.8"
 matrix:
-  include:
-    - python: "3.3"
-      env: DJANGO=Django==1.5
-    - python: "3.3"
-      env: DJANGO=https://github.com/django/django/archive/master.zip
   exclude:
+    - python: "3.2"
+      env: DJANGO="Django>=1.4,<1.5"
+    - python: "3.3"
+      env: DJANGO="Django>=1.4,<1.5"
+    - python: "3.4"
+      env: DJANGO="Django>=1.4,<1.5"
     - python: "2.6"
-      env: DJANGO=https://github.com/django/django/archive/master.zip
-    - python: "2.6"
-      env: DJANGO=Django==1.7
+      env: DJANGO="Django>=1.7,<1.8"
 install:
-  - if [ $DJANGO = 'Django==1.4.1' -o $DJANGO = 'Django==1.5' -o $DJANGO = 'Django==1.6' ]; then pip install south; fi
-  - pip install $DJANGO
+  - if [ $DJANGO = 'Django>=1.4,<1.5' -o $DJANGO = 'Django>=1.6,<1.7' ]; then pip install south; fi
+  - pip install "$DJANGO"
   - pip install -e .
 script:
   - ./runtests.sh

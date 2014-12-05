@@ -47,8 +47,8 @@ django_test 'django-admin.py test --settings=testapp.settings_old_style' '2' 'dj
 django_test 'testapp/runtests.py testapp.test_only_this' '1' 'via run_tests API'
 django_test 'django-admin.py test --settings=testapp.settings_with_plugins testapp/plugin_t' '1' 'with plugins'
 django_test 'django-admin.py test --settings=testapp.settings unittests' '4' 'unittests'
-if ! [ "$DJANGO" = 'Django==1.5' -a $(version $PYTHONVERSION) \> $(version 3.0.0) ]
+if ! [ $(version $PYTHONVERSION) \> $(version 3.0.0) ]
 then
-# Django 1.5 doesn't support profiling for Python3
+# Python 3 doesn't support the hotshot profiler. See nose#842.
 django_test 'django-admin.py test --settings=testapp.settings --with-profile' '2' 'with profile plugin'
 fi
