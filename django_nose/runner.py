@@ -14,6 +14,7 @@ from optparse import make_option
 from types import MethodType
 
 import django
+from django.apps import apps
 from django.conf import settings
 from django.core import exceptions
 from django.core.management.base import BaseCommand
