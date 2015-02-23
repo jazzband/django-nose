@@ -20,8 +20,18 @@ from django.core.management.base import BaseCommand
 from django.core.management.color import no_style
 from django.core.management.commands.loaddata import Command
 from django.db import connections, transaction, DEFAULT_DB_ALIAS
-from django.db.backends.creation import BaseDatabaseCreation
-from django.utils.importlib import import_module
+
+try:
+    from django.db.backends.base.creation import BaseDatabaseCreation
+except ImportError:
+    # Django < 1.7
+    from django.db.backends.creation import BaseDatabaseCreation    
+
+try:
+    from importlib import import_module
+except ImportError:
+    # Django < 1.7 and Python < 2.7
+    from django.utils.importlib import import_module
 
 try:
     from django.apps import apps
