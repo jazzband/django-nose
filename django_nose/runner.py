@@ -440,7 +440,9 @@ def _should_create_database(connection):
         # Connections are cached by some backends, if other code has connected
         # to the database previously under a different database name the
         # cached connection will be used and no exception will be raised.
-        # Setting to null here solves that problem.
+        # Avoiding this by closing connections and setting to null
+        for connection in connections.all():
+            connection.close()
         connection.connection = None
         connection.cursor()
     except Exception:  # TODO: Be more discerning but still DB agnostic.
