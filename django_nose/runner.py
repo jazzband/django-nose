@@ -156,6 +156,10 @@ class BasicNoseRunner(DiscoverRunner):
     # Replace the builtin command options with the merged django/nose options:
     options = _get_options()
 
+    # Not add following options to nosetests
+    django_opts = ['--noinput', '--liveserver', '-p', '--pattern',
+        '--testrunner']
+
     def run_suite(self, nose_argv):
         result_plugin = ResultPlugin()
         plugins_to_add = [DjangoSetUpPlugin(self),
@@ -208,7 +212,7 @@ class BasicNoseRunner(DiscoverRunner):
             nose_argv.extend(settings.NOSE_ARGS)
 
         # Skip over 'manage.py test' and any arguments handled by django.
-        django_opts = ['--noinput', '--liveserver', '-p', '--pattern']
+        django_opts = self.django_opts[:]
         for opt in BaseCommand.option_list:
             django_opts.extend(opt._long_opts)
             django_opts.extend(opt._short_opts)
