@@ -138,7 +138,7 @@ def _get_options():
     plugins_option = [o for o in options if o.get_opt_string() == '--plugins'][0]
     plugins_option._short_opts.remove('-p')
 
-    django_opts = [opt.dest for opt in BaseCommand.option_list] + ['version']
+    django_opts = [opt.dest for opt in BaseCommand.option_list] + ['version', 'verbosity']
     return tuple(o for o in options if o.dest not in django_opts and
                                        o.action != 'help')
 
