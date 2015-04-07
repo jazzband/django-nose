@@ -146,13 +146,39 @@ def _get_options():
 if hasattr(BaseCommand, 'use_argparse'):
     # Django 1.8 and later uses argparse.ArgumentParser
     # Translate nose optparse arguments to argparse
-    from argparse import ArgumentError
-
     class BaseRunner(DiscoverRunner):
 
-        # Not add following options to nosetests
+        # Don't pass following options to nosetests
         django_opts = ['--noinput', '--liveserver', '-p', '--pattern',
             '--testrunner', '--settings']
+
+        # For optparse -> argparse conversion
+
+        # Option strings to remove from Django options if found
+        _argparse_remove_options = (
+            '-p', # Short arg for nose's --plugins, not Django's --patterns
+            '-d', # Short arg for nose's --detailed-errors, not Django's
+                  #  --debug-sql
+        )
+
+        # Convert nose optparse options to argparse options
+        _argparse_type = {
+            'int': int,
+            'float': float,
+            'complex': complex,
+            'string': str,
+        }
+        # If optparse has a None argument, omit from call to add_argument
+        _argparse_omit_if_none = (
+            'action', 'nargs', 'const', 'default', 'type', 'choices', 'required',
+            'help', 'metavar', 'dest', 'callback', 'callback_args',
+            'callback_kwargs')
+
+        # Translating callbacks is not supported, because none of the built-in
+        # plugins uses one.  If you have a plugin that uses a callback, please
+        # submit a working implementation.
+        _argparse_fail_if_not_none = (
+            'callback', 'callback_args', 'callback_kwargs')
 
         @classmethod
         def add_arguments(cls, parser):
@@ -161,7 +187,6 @@ if hasattr(BaseCommand, 'use_argparse'):
             The -p option is nose's --plugins, not Django's --patterns.
             The -d option is nose's --detailed-errors, not Django's --debug-sql
             """
-
             super(BaseRunner, cls).add_arguments(parser)
             cfg_files = nose.core.all_config_files()
             manager = nose.core.DefaultPluginManager()
@@ -173,27 +198,14 @@ if hasattr(BaseCommand, 'use_argparse'):
             # Also, remove -d from --debug-sql, -p from --patterns, so they
             # can be used with --detailed-errors and --plugins
             django_options = set()
-            django_override = ('-p', '-d')
             for action in parser._actions:
-                for override in django_override:
+                for override in cls._argparse_remove_options:
                     if override in action.option_strings:
                         # Emulate conflict_handler='resolve'
                         parser._handle_conflict_resolve(None, ((override, action),))
                 django_options.update(action.option_strings)
 
-            # Convert optparse type strings to types
-            type_to_type = {
-                'int': int,
-                'float': float,
-                'complex': complex,
-                'string': str,
-            }
-            # If optparse has a None argument, omit from call to add_argument
-            omit_if_none = (
-                'action', 'nargs', 'const', 'default', 'type', 'choices', 'required',
-                'help', 'metavar', 'dest')
-
-            # Convert optparse attributes to argparse attributes
+            # Process nose optparse options
             for option in options:
                 # Skip any options also in Django options
                 opt_long = option.get_opt_string()
@@ -210,20 +222,10 @@ if hasattr(BaseCommand, 'use_argparse'):
                 if opt_long == '--verbosity':
                     opt_long = '--nose-verbosity'
 
+                # Convert optparse attributes to argparse attributes
                 option_attrs = {}
                 for attr in option.ATTRS:
                     value = getattr(option, attr)
-
-                    # Translating callbacks is not supported
-                    if attr in ('callback', 'callback_args', 'callback_kwargs'):
-                        assert value is None, 'Callback options are not supported'
-                        continue
-
-                    if attr in omit_if_none and value is None:
-                        continue
-
-                    if attr == 'type':
-                        value = type_to_type[value]
 
                     # Rename options for nose's --verbosity
                     if opt_long == '--nose-verbosity':
@@ -231,41 +233,32 @@ if hasattr(BaseCommand, 'use_argparse'):
                             value = 'nose_verbosity'
                         elif attr == 'metavar':
                             value = 'NOSE_VERBOSITY'
+
+                    # Omit arguments that are None, use default
+                    if attr in cls._argparse_omit_if_none and value is None:
+                        continue
+
+                    # Translating callbacks is not supported
+                    if attr in cls._argparse_fail_if_not_none:
+                        assert value is None, (
+                            'argparse option %s=%s is not supported' %
+                            (attr, value))
+                        continue
+
+                    # Convert type from optparse string to argparse type
+                    if attr == 'type':
+                        value = cls._argparse_type[value]
+
+                    # Pass converted attribute to optparse option
                     option_attrs[attr] = value
 
+                # Add the optparse argument
                 if opt_short:
                     parser.add_argument(opt_short, opt_long, **option_attrs)
                 else:
                     parser.add_argument(opt_long, **option_attrs)
-            return
-
-            # copy nose's --verbosity option and rename to --nose-verbosity
-            verbosity = [o for o in options if o.get_opt_string() == '--verbosity'][0]
-            verbosity_attrs = dict((attr, getattr(verbosity, attr))
-                                for attr in verbosity.ATTRS
-                                if attr not in ('dest', 'metavar'))
-            for attr in ('callback', 'callback_args', 'callback_kwargs'):
-                assert verbosity_attrs[attr] is None
-                del verbosity_attrs[attr]
-            assert verbosity_attrs['type'] == 'int'
-            verbosity_attrs['type'] = int
-            parser.add_argument('--nose-verbosity',
-                dest='nose_verbosity', metavar='NOSE_VERBOSITY', **verbosity_attrs)
-            return
-
-            # Django 1.6 introduces a "--pattern" option, which is shortened into "-p"
-            # do not allow "-p" to collide with nose's "--plugins" option.
-            plugins_option = [o for o in options if o.get_opt_string() == '--plugins'][0]
-            plugins_option._short_opts.remove('-p')
-
-            django_opts = [opt.dest for opt in BaseCommand.option_list] + ['version']
-            return tuple(o for o in options if o.dest not in django_opts and
-                                            o.action != 'help')
-
-
 else:
     # Django 1.7 and earlier use optparse
-
     class BaseRunner(DiscoverRunner):
         # Replace the builtin command options with the merged django/nose options:
         options = _get_options()
