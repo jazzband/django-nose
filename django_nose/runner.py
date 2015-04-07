@@ -143,7 +143,141 @@ def _get_options():
                                        o.action != 'help')
 
 
-class BasicNoseRunner(DiscoverRunner):
+if hasattr(BaseCommand, 'use_argparse'):
+    # Django 1.8 and later uses argparse.ArgumentParser
+    # Translate nose optparse arguments to argparse
+    from argparse import ArgumentError
+
+    class BaseRunner(DiscoverRunner):
+
+        # Not add following options to nosetests
+        django_opts = ['--noinput', '--liveserver', '-p', '--pattern',
+            '--testrunner', '--settings']
+
+        @classmethod
+        def add_arguments(cls, parser):
+            """Convert nose's optparse arguments to argparse
+
+            The -p option is nose's --plugins, not Django's --patterns.
+            The -d option is nose's --detailed-errors, not Django's --debug-sql
+            """
+
+            super(BaseRunner, cls).add_arguments(parser)
+            cfg_files = nose.core.all_config_files()
+            manager = nose.core.DefaultPluginManager()
+            config = nose.core.Config(env=os.environ, files=cfg_files, plugins=manager)
+            config.plugins.addPlugins(list(_get_plugins_from_settings()))
+            options = config.getParser()._get_all_options()
+
+            # Gather existing option strings`
+            # Also, remove -d from --debug-sql, -p from --patterns, so they
+            # can be used with --detailed-errors and --plugins
+            django_options = set()
+            django_override = ('-p', '-d')
+            for action in parser._actions:
+                for override in django_override:
+                    if override in action.option_strings:
+                        # Emulate conflict_handler='resolve'
+                        parser._handle_conflict_resolve(None, ((override, action),))
+                django_options.update(action.option_strings)
+
+            # Convert optparse type strings to types
+            type_to_type = {
+                'int': int,
+                'float': float,
+                'complex': complex,
+                'string': str,
+            }
+            # If optparse has a None argument, omit from call to add_argument
+            omit_if_none = (
+                'action', 'nargs', 'const', 'default', 'type', 'choices', 'required',
+                'help', 'metavar', 'dest')
+
+            # Convert optparse attributes to argparse attributes
+            for option in options:
+                # Skip any options also in Django options
+                opt_long = option.get_opt_string()
+                if opt_long in django_options:
+                    print("Skipping %s" % opt_long)
+                    continue
+                if option._short_opts:
+                    opt_short = option._short_opts[0]
+                    if opt_short in django_options:
+                        print("Skipping %s (%s)" % (opt_short, opt_long))
+                        continue
+                else:
+                    opt_short = None
+
+                # Rename nose's --verbosity to --nose-verbosity
+                if opt_long == '--verbosity':
+                    opt_long = '--nose-verbosity'
+
+                option_attrs = {}
+                for attr in option.ATTRS:
+                    value = getattr(option, attr)
+
+                    # Translating callbacks is not supported
+                    if attr in ('callback', 'callback_args', 'callback_kwargs'):
+                        assert value is None, 'Callback options are not supported'
+                        continue
+
+                    if attr in omit_if_none and value is None:
+                        continue
+
+                    if attr == 'type':
+                        value = type_to_type[value]
+
+                    # Rename options for nose's --verbosity
+                    if opt_long == '--nose-verbosity':
+                        if attr == 'dest':
+                            value = 'nose_verbosity'
+                        elif attr == 'metavar':
+                            value = 'NOSE_VERBOSITY'
+                    option_attrs[attr] = value
+
+                if opt_short:
+                    parser.add_argument(opt_short, opt_long, **option_attrs)
+                else:
+                    parser.add_argument(opt_long, **option_attrs)
+            return
+
+            # copy nose's --verbosity option and rename to --nose-verbosity
+            verbosity = [o for o in options if o.get_opt_string() == '--verbosity'][0]
+            verbosity_attrs = dict((attr, getattr(verbosity, attr))
+                                for attr in verbosity.ATTRS
+                                if attr not in ('dest', 'metavar'))
+            for attr in ('callback', 'callback_args', 'callback_kwargs'):
+                assert verbosity_attrs[attr] is None
+                del verbosity_attrs[attr]
+            assert verbosity_attrs['type'] == 'int'
+            verbosity_attrs['type'] = int
+            parser.add_argument('--nose-verbosity',
+                dest='nose_verbosity', metavar='NOSE_VERBOSITY', **verbosity_attrs)
+            return
+
+            # Django 1.6 introduces a "--pattern" option, which is shortened into "-p"
+            # do not allow "-p" to collide with nose's "--plugins" option.
+            plugins_option = [o for o in options if o.get_opt_string() == '--plugins'][0]
+            plugins_option._short_opts.remove('-p')
+
+            django_opts = [opt.dest for opt in BaseCommand.option_list] + ['version']
+            return tuple(o for o in options if o.dest not in django_opts and
+                                            o.action != 'help')
+
+
+else:
+    # Django 1.7 and earlier use optparse
+
+    class BaseRunner(DiscoverRunner):
+        # Replace the builtin command options with the merged django/nose options:
+        options = _get_options()
+
+        # Not add following options to nosetests
+        django_opts = ['--noinput', '--liveserver', '-p', '--pattern',
+            '--testrunner']
+
+
+class BasicNoseRunner(BaseRunner):
     """Facade that implements a nose runner in the guise of a Django runner
 
     You shouldn't have to use this directly unless the additions made by
@@ -152,13 +286,6 @@ class BasicNoseRunner(DiscoverRunner):
 
     """
     __test__ = False
-
-    # Replace the builtin command options with the merged django/nose options:
-    options = _get_options()
-
-    # Not add following options to nosetests
-    django_opts = ['--noinput', '--liveserver', '-p', '--pattern',
-        '--testrunner']
 
     def run_suite(self, nose_argv):
         result_plugin = ResultPlugin()
