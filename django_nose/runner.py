@@ -198,12 +198,10 @@ if hasattr(BaseCommand, 'use_argparse'):
                 # Skip any options also in Django options
                 opt_long = option.get_opt_string()
                 if opt_long in django_options:
-                    print("Skipping %s" % opt_long)
                     continue
                 if option._short_opts:
                     opt_short = option._short_opts[0]
                     if opt_short in django_options:
-                        print("Skipping %s (%s)" % (opt_short, opt_long))
                         continue
                 else:
                     opt_short = None
