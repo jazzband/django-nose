@@ -67,6 +67,7 @@ class FastFixtureTestCase(test.TransactionTestCase):
                 getattr(cls, '_fb_should_setup_fixtures', True)):
                 # Iff the fixture-bundling test runner tells us we're the first
                 # suite having these fixtures, set them up:
+                cls._fixture_teardown() # deal with case of first time run, clearing out any fixtures/data loaded via migrations
                 call_command('loaddata', *cls.fixtures, **{'verbosity': 0,
                                                            'commit': False,
                                                            'database': db})
