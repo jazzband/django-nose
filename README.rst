@@ -91,7 +91,8 @@ django-nose includes a fixture bundler which drastically speeds up your tests
 by eliminating redundant setup of Django test fixtures. To use it...
 
 1. Subclass ``django_nose.FastFixtureTestCase`` instead of
-   ``django.test.TestCase``. (I like to import it ``as TestCase`` in my
+   ``django.test.TestCase`` or ``django_nose.FastFixtureLiveServerTestCase`` instead of
+   ``django.test.LiveServerTestCase``. (I like to import it ``as TestCase`` in my
    project's ``tests/__init__.py`` and then import it from there into my actual
    tests. Then it's easy to sub the base class in and out.) This alone will
    cause fixtures to load once per class rather than once per test.
@@ -129,9 +130,9 @@ sources of state leakage we have encountered:
   this automatically.
 
 It's also possible that you have ``post_save`` signal handlers which create
-additional database rows while loading the fixtures. ``FastFixtureTestCase``
-isn't yet smart enough to notice this and clean up after it, so you'll have to
-go back to plain old ``TestCase`` for now.
+additional database rows while loading the fixtures. ``FastFixtureTestCase`` and 
+``FastFixtureLiveServerTestCase`` aren't yet smart enough to notice this and 
+clean up after it, so you'll have to go back to plain old ``TestCase`` for now.
 
 Exempting A Class From Bundling
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -182,7 +183,7 @@ You can thus enjoy a big speed boost any time you make a TransactionTestCase
 clean up after itself: skipping a whole DB flush before every test. With a
 large schema, this can save minutes of IO.
 
-django-nose's own FastFixtureTestCase uses this feature, even though it
+django-nose's own FastFixtureTestCase and FastFixtureLiveServerTestCase uses this feature, even though it
 ultimately acts more like a TestCase than a TransactionTestCase.
 
 .. _can leave the DB in an unclean state: https://docs.djangoproject.com/en/1.4/topics/testing/#django.test.TransactionTestCase
