@@ -63,7 +63,7 @@ class FastFixtureTestCase(test.TransactionTestCase):
     def _fixture_setup(cls):
         """Load fixture data, and commit."""
         for db in cls._databases():
-            if (hasattr(cls, 'fixtures') and
+            if (getattr(cls, 'fixtures', None) and
                 getattr(cls, '_fb_should_setup_fixtures', True)):
                 # Iff the fixture-bundling test runner tells us we're the first
                 # suite having these fixtures, set them up:
@@ -77,7 +77,7 @@ class FastFixtureTestCase(test.TransactionTestCase):
     @classmethod
     def _fixture_teardown(cls):
         """Empty (only) the tables we loaded fixtures into, then commit."""
-        if hasattr(cls, 'fixtures') and \
+        if getattr(cls, 'fixtures', None) and \
            getattr(cls, '_fb_should_teardown_fixtures', True):
             # If the fixture-bundling test runner advises us that the next test
             # suite is going to reuse these fixtures, don't tear them down.
