@@ -98,7 +98,8 @@ class Bucketer(object):
         if is_subclass_at_all(test.context, FastFixtureTestCase):
             # We bucket even FFTCs that don't have any fixtures, but it
             # shouldn't matter.
-            key = (frozenset(getattr(test.context, 'fixtures', [])),
+            fixtures = getattr(test.context, 'fixtures', None) or []
+            key = (frozenset(fixtures),
                    getattr(test.context,
                            'exempt_from_fixture_bundling',
                            False))
