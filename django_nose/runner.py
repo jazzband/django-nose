@@ -524,7 +524,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 # Each connection has its own creation object, so this affects
                 # only a single connection:
                 creation.create_test_db = MethodType(
-                        _skip_create_test_db, creation, creation.__class__)
+                        _skip_create_test_db, creation)
 
         Command.handle = _foreign_key_ignoring_handle
 
