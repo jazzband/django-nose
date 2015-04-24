@@ -169,6 +169,7 @@ if hasattr(BaseCommand, 'use_argparse'):
             'float': float,
             'complex': complex,
             'string': str,
+            'choice': str,
         }
         # If optparse has a None argument, omit from call to add_argument
         _argparse_omit_if_none = (
