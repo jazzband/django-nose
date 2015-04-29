@@ -38,7 +38,7 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
             return zipfile.ZipFile.read(self, self.namelist()[0])
 
     compression_types = {
-        None:   file,
+        None:   open,
         'gz':   gzip.GzipFile,
         'zip':  SingleZipReader
     }
@@ -125,6 +125,8 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
                                     loaded_objects_in_fixture += 1
                                     tables.add(
                                         obj.object.__class__._meta.db_table)
+                                    for x in obj.object.__class__._meta.local_many_to_many:
+                                        tables.add(x.m2m_db_table())
                             loaded_object_count += loaded_objects_in_fixture
                             fixture_object_count += objects_in_fixture
                             label_found = True
