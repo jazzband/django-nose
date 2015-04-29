@@ -7,21 +7,14 @@ from __future__ import unicode_literals
 import glob
 import gzip
 import os
-import six
 import warnings
 import zipfile
-from optparse import make_option
 
 from django.apps import apps
 from django.conf import settings
 from django.core import serializers
-from django.core.management.base import BaseCommand, CommandError
-from django.core.management.color import no_style
-from django.db import (connections, router, transaction, DEFAULT_DB_ALIAS,
-      IntegrityError, DatabaseError)
+from django.db import (connections, DEFAULT_DB_ALIAS)
 from django.utils import lru_cache
-from django.utils.encoding import force_text
-from django.utils.functional import cached_property
 from django.utils._os import upath
 from django.utils.deprecation import RemovedInDjango19Warning
 from itertools import product
@@ -89,6 +82,7 @@ def get_models(fixture_label, using):
 
     return models
 
+
 @lru_cache.lru_cache(maxsize=None)
 def find_fixtures(fixture_label, using):
     """
@@ -124,7 +118,7 @@ def find_fixtures(fixture_label, using):
         # Check kept for backwards-compatibility; it isn't clear why
         # duplicates are only allowed in different directories.
         if len(fixture_files_in_dir) > 1:
-            raise CommandError(
+            raise RuntimeError(
                 "Multiple fixtures named '%s' in %s. Aborting." %
                 (fixture_name, humanize(fixture_dir)))
         fixture_files.extend(fixture_files_in_dir)
@@ -139,6 +133,7 @@ def find_fixtures(fixture_label, using):
         )
 
     return fixture_files
+
 
 @lru_cache.lru_cache(maxsize=None)
 def fixture_dirs():
@@ -159,6 +154,7 @@ def fixture_dirs():
     dirs = [upath(os.path.abspath(os.path.realpath(d))) for d in dirs]
     return dirs
 
+
 def parse_name(fixture_name):
     """
     Splits fixture name in name, serialization format, compression format.
@@ -176,8 +172,8 @@ def parse_name(fixture_name):
             ser_fmt = parts[-1]
             parts = parts[:-1]
         else:
-            raise CommandError(
-                "Problem installing fixture '%s': %s is not a known "
+            raise RuntimeError(
+                "Problem loading fixture '%s': %s is not a known "
                 "serialization format." % (''.join(parts[:-1]), parts[-1]))
     else:
         ser_fmt = None
