@@ -318,6 +318,10 @@ django-nose does not support Django 1.0.
 
 Recent Version History
 ----------------------
+1.4 (2015-04-23)
+  * Django 1.8 support (timc3, adepue, jwhitlock)
+  * Support --testrunner option (st3lk)
+  * Fix REUSE_DB second run in py3k (edrmp)
 
 1.3 (2014-12-05)
   * Django 1.6 and 1.7 support (conrado, co3k, Nepherhotep, mbertheau)
