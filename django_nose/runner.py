@@ -25,7 +25,7 @@ try:
     from django.db.backends.base.creation import BaseDatabaseCreation
 except ImportError:
     # Django < 1.7
-    from django.db.backends.creation import BaseDatabaseCreation    
+    from django.db.backends.creation import BaseDatabaseCreation
 
 try:
     from importlib import import_module
@@ -381,7 +381,8 @@ def _foreign_key_ignoring_handle(self, *fixture_labels, **options):
             connection.close()
 
 
-def _skip_create_test_db(self, verbosity=1, autoclobber=False, serialize=True):
+def _skip_create_test_db(self, verbosity=1, autoclobber=False, serialize=True,
+                         keepdb=True):
     """``create_test_db`` implementation that skips both creation and flushing
 
     The idea is to re-use the perfectly good test DB already created by an
@@ -512,14 +513,15 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                     reset_statements = connection.ops.sequence_reset_sql(
                             style, self._get_models_for_connection(connection))
 
-                for reset_statement in reset_statements:
-                    cursor.execute(reset_statement)
-
-                # Django v1.3 (https://code.djangoproject.com/ticket/9964)
-                # starts using commit_unless_managed() for individual
-                # connections. Backwards compatibility for Django 1.2 is to use
-                # the generic transaction function.
-                transaction.commit_unless_managed(using=connection.alias)
+                if hasattr(transaction, "atomic"):
+                    with transaction.atomic(using=connection.alias):
+                        for reset_statement in reset_statements:
+                            cursor.execute(reset_statement)
+                else:
+                    # Django < 1.6
+                    for reset_statement in reset_statements:
+                        cursor.execute(reset_statement)
+                    transaction.commit_unless_managed(using=connection.alias)
 
                 # Each connection has its own creation object, so this affects
                 # only a single connection:
