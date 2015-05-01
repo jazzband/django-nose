@@ -3,6 +3,7 @@
 from datetime import datetime
 
 from django.test import TestCase
+from django_nose.testcases import FastFixtureTestCase
 from testapp.models import Question, Choice
 
 
@@ -37,6 +38,32 @@ class UsesDatabaseTestCase(TestCase):
 
 
 class UsesFixtureTestCase(TestCase):
+
+    """Tests that use a test fixture."""
+
+    fixtures = ["testdata.json"]
+
+    def test_fixture_loaded(self):
+        """Test that fixture was loaded."""
+        question = Question.objects.get()
+        self.assertEqual(
+            'What is your favorite color?', question.question_text)
+        self.assertEqual(datetime(1975, 4, 9), question.pub_date)
+        choice = question.choice_set.get()
+        self.assertEqual("Blue.", choice.choice_text)
+        self.assertEqual(3, choice.votes)
+
+
+class NoFixtureFastFixtureTestCase(FastFixtureTestCase):
+
+    """Tests that use a test fixture."""
+
+    def test_fixture_not_loaded(self):
+        """Test that no fixture was loaded, but test runs."""
+        self.assertEqual(Question.objects.count(), 0)
+
+
+class UsesFastFixtureTestCase(FastFixtureTestCase):
 
     """Tests that use a test fixture."""
 
