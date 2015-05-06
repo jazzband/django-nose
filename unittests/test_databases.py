@@ -1,7 +1,10 @@
 from contextlib import contextmanager
 from unittest import TestCase
 
-from django.db.models.loading import cache
+try:
+    from django.db.models.loading import cache as apps
+except:
+    from django.apps import apps
 
 from django_nose.runner import NoseTestSuiteRunner
 
@@ -31,10 +34,10 @@ class GetModelsForConnectionTests(TestCase):
         def get_models(*args, **kwargs):
             return [self._model_mock(t) for t in tables]
 
-        old = cache.get_models
-        cache.get_models = get_models
+        old = apps.get_models
+        apps.get_models = get_models
         yield
-        cache.get_models = old
+        apps.get_models = old
 
     def setUp(self):
         self.runner = NoseTestSuiteRunner()

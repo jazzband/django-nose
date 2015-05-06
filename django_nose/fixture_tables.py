@@ -10,7 +10,12 @@ from itertools import product
 from django.conf import settings
 from django.core import serializers
 from django.db import router, DEFAULT_DB_ALIAS
-from django.db.models import get_apps
+
+try:
+    from django.db.models import get_apps
+except ImportError:
+    from django.apps import apps
+    get_apps = lambda: [a.models_module for a in apps.get_app_configs()]
 
 try:
     import bz2
