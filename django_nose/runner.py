@@ -25,7 +25,7 @@ try:
     from django.db.backends.base.creation import BaseDatabaseCreation
 except ImportError:
     # Django < 1.7
-    from django.db.backends.creation import BaseDatabaseCreation    
+    from django.db.backends.creation import BaseDatabaseCreation
 
 try:
     from importlib import import_module
@@ -503,24 +503,34 @@ class NoseTestSuiteRunner(BasicNoseRunner):
             else:
                 # Reset auto-increment sequences. Apparently, SUMO's tests are
                 # horrid and coupled to certain numbers.
-                cursor = connection.cursor()
-                style = no_style()
+                def reset_auto_increment():
+                    cursor = connection.cursor()
+                    style = no_style()
 
-                if uses_mysql(connection):
-                    reset_statements = _mysql_reset_sequences(
-                        style, connection)
-                else:
-                    reset_statements = connection.ops.sequence_reset_sql(
-                            style, self._get_models_for_connection(connection))
+                    if uses_mysql(connection):
+                        reset_statements = _mysql_reset_sequences(
+                            style, connection)
+                    else:
+                        reset_statements = connection.ops.sequence_reset_sql(
+                                style, self._get_models_for_connection(connection))
 
-                for reset_statement in reset_statements:
-                    cursor.execute(reset_statement)
+                    for reset_statement in reset_statements:
+                        cursor.execute(reset_statement)
 
-                # Django v1.3 (https://code.djangoproject.com/ticket/9964)
-                # starts using commit_unless_managed() for individual
-                # connections. Backwards compatibility for Django 1.2 is to use
-                # the generic transaction function.
-                transaction.commit_unless_managed(using=connection.alias)
+                # Transaction management was overhauled in Django 1.6 and Django
+                # 1.8 has now removed the support to the old functions.
+                # see https://docs.djangoproject.com/en/1.8/releases/1.6/#features-deprecated-in-1-6
+                # and https://docs.djangoproject.com/en/1.8/internals/deprecation/#deprecation-removed-in-1-8
+                try:
+                    reset_auto_increment()
+                    # Django v1.3 (https://code.djangoproject.com/ticket/9964)
+                    # starts using commit_unless_managed() for individual
+                    # connections. Backwards compatibility for Django 1.2 is to use
+                    # the generic transaction function.
+                    transaction.commit_unless_managed(using=connection.alias)
+                except AttributeError:
+                    with transaction.atomic():
+                        reset_auto_increment()
 
                 # Each connection has its own creation object, so this affects
                 # only a single connection:
