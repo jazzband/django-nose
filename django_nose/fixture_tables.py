@@ -125,6 +125,8 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
                                     loaded_objects_in_fixture += 1
                                     tables.add(
                                         obj.object.__class__._meta.db_table)
+                                    for m2m in obj.object.__class__._meta.many_to_many:
+                                        tables.add(m2m.m2m_db_table())
                             loaded_object_count += loaded_objects_in_fixture
                             fixture_object_count += objects_in_fixture
                             label_found = True
