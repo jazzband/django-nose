@@ -4,6 +4,8 @@
 Provides Nose and Django test case assert functions
 """
 
+from __future__ import unicode_literals
+
 from django.test.testcases import TransactionTestCase
 
 from django.core import mail

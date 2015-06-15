@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import sys
 
 from nose.plugins.base import Plugin

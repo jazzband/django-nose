@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+
+
 def process_tests(suite, process):
     """Given a nested disaster of [Lazy]Suites, traverse to the first level
     that has setup or teardown, and do something to them.
