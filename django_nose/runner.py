@@ -1,3 +1,4 @@
+# coding: utf-8
 """Django test runner that invokes nose.
 
 You can use... ::

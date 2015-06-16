@@ -1,3 +1,4 @@
+# coding: utf-8
 """
 Add extra options from the test runner to the ``test`` command, so that you can
 browse all the nose options from the command line.
