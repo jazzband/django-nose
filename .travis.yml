@@ -1,30 +1,39 @@
+sudo: false
 language: python
+
 python:
   - "2.6"
   - "2.7"
   - "3.2"
   - "3.3"
   - "3.4"
+
 env:
-  - DJANGO="Django>=1.4,<1.5"
-  - DJANGO="Django>=1.6,<1.7"
-  - DJANGO="Django>=1.7,<1.8"
-  - DJANGO="Django>=1.8,<1.9"
+  - REQUIREMENTS=django-14
+  - REQUIREMENTS=django-16
+  - REQUIREMENTS=django-17
+  - REQUIREMENTS=django-18
+  - REQUIREMENTS=django-master
+
 matrix:
+  allow_failures:
+    - env: REQUIREMENTS=django-master
   exclude:
     - python: "3.2"
-      env: DJANGO="Django>=1.4,<1.5"
+      env: REQUIREMENTS=django-14
     - python: "3.3"
-      env: DJANGO="Django>=1.4,<1.5"
+      env: REQUIREMENTS=django-14
     - python: "3.4"
-      env: DJANGO="Django>=1.4,<1.5"
+      env: REQUIREMENTS=django-14
     - python: "2.6"
-      env: DJANGO="Django>=1.7,<1.8"
+      env: REQUIREMENTS=django-17
     - python: "2.6"
-      env: DJANGO="Django>=1.8,<1.9"
+      env: REQUIREMENTS=django-18
+    - python: "2.6"
+      env: REQUIREMENTS=django-master
+
 install:
-  - if [ $DJANGO = 'Django>=1.4,<1.5' -o $DJANGO = 'Django>=1.6,<1.7' ]; then pip install south; fi
-  - pip install "$DJANGO"
-  - pip install -e .
+  - pip install tox
+
 script:
-  - ./runtests.sh
+  - tox -e py-$REQUIREMENTS
