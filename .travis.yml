@@ -7,6 +7,7 @@ python:
   - "3.2"
   - "3.3"
   - "3.4"
+  - "3.5"
 
 env:
   - REQUIREMENTS=django-14
@@ -19,18 +20,30 @@ matrix:
   allow_failures:
     - env: REQUIREMENTS=django-master
   exclude:
-    - python: "3.2"
-      env: REQUIREMENTS=django-14
-    - python: "3.3"
-      env: REQUIREMENTS=django-14
-    - python: "3.4"
-      env: REQUIREMENTS=django-14
     - python: "2.6"
       env: REQUIREMENTS=django-17
     - python: "2.6"
       env: REQUIREMENTS=django-18
     - python: "2.6"
       env: REQUIREMENTS=django-master
+    - python: "3.2"
+      env: REQUIREMENTS=django-14
+    - python: "3.2"
+      env: REQUIREMENTS=django-master
+    - python: "3.3"
+      env: REQUIREMENTS=django-14
+    - python: "3.3"
+      env: REQUIREMENTS=django-master
+    - python: "3.4"
+      env: REQUIREMENTS=django-14
+    - python: "3.5"
+      env: REQUIREMENTS=django-14
+    - python: "3.5"
+      env: REQUIREMENTS=django-16
+    - python: "3.5"
+      env: REQUIREMENTS=django-17
+    - python: "3.5"
+      env: REQUIREMENTS=django-18
 
 install:
   - pip install tox
