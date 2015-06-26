@@ -1,8 +1,11 @@
+# coding: utf-8
 # vim: tabstop=4 expandtab autoindent shiftwidth=4 fileencoding=utf-8
 
 """
 Provides Nose and Django test case assert functions
 """
+
+from __future__ import unicode_literals
 
 from django.test.testcases import TransactionTestCase
 

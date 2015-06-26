@@ -1,3 +1,4 @@
+# coding: utf-8
 """Django test runner that invokes nose.
 
 You can use... ::
@@ -7,7 +8,7 @@ You can use... ::
 in settings.py for arguments that you want always passed to nose.
 
 """
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 import os
 import sys
 from optparse import make_option
@@ -25,7 +26,7 @@ try:
     from django.db.backends.base.creation import BaseDatabaseCreation
 except ImportError:
     # Django < 1.7
-    from django.db.backends.creation import BaseDatabaseCreation    
+    from django.db.backends.creation import BaseDatabaseCreation
 
 try:
     from importlib import import_module
