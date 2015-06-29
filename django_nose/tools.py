@@ -9,7 +9,6 @@ from __future__ import unicode_literals
 
 from django.test.testcases import TransactionTestCase
 
-from django.core import mail
 
 import re
 
@@ -17,16 +16,25 @@ import re
 
 from nose import tools
 for t in dir(tools):
-    if t.startswith('assert_'):
+    if t.startswith('assert_') or t in ('ok_', 'eq_'):
         vars()[t] = getattr(tools, t)
+
+del tools
+del t
 
 ## Django
 
-caps = re.compile('([A-Z])')
+camelcase = re.compile('([a-z][A-Z]|[A-Z][a-z])')
+
+def insert_underscore(m):
+    a, b = m.group(0)
+    if b.islower():
+        return '_{}{}'.format(a, b)
+    else:
+        return '{}_{}'.format(a, b)
 
 def pep8(name):
-    return caps.sub(lambda m: '_' + m.groups()[0].lower(), name)
-
+    return camelcase.sub(insert_underscore, name).lower()
 
 class Dummy(TransactionTestCase):
     def nop():
@@ -38,9 +46,15 @@ for at in [ at for at in dir(_t)
     pepd = pep8(at)
     vars()[pepd] = getattr(_t, at)
 
+del re
+del insert_underscore
+del camelcase
 del Dummy
+del TransactionTestCase
 del _t
+del at
 del pep8
+del pepd
 
 ## New
 
@@ -66,6 +80,7 @@ def assert_mail_count(count, msg=None):
     The message here tends to be long, so allow for replacing the whole
     thing instead of prefixing.
     """
+    from django.core import mail
 
     if msg is None:
         msg = ', '.join([e.subject for e in mail.outbox])
@@ -73,5 +88,4 @@ def assert_mail_count(count, msg=None):
     assert_equals(len(mail.outbox), count, msg)
 
 # EOF
-
 
