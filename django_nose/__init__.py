@@ -1,7 +1,7 @@
 # coding: utf-8
 from __future__ import unicode_literals
 
-VERSION = (1, 4, 0)
+VERSION = (1, 4, 1)
 __version__ = '.'.join(map(str, VERSION))
 
 from django_nose.runner import *

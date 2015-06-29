@@ -6,7 +6,7 @@ ROOT = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name='django-nose',
-    version='1.4',
+    version='1.4.1',
     description='Makes your Django tests simple and snappy',
     long_description=open(os.path.join(ROOT, 'README.rst')).read(),
     author='Jeff Balogh',
@@ -26,7 +26,7 @@ setup(
     # we need FixtureBundlingPlugin declared as an entrypoint anyway, since you
     # need to be using django-nose to find the it useful, and django-nose knows
     # about it intrinsically.
-    #entry_points="""
+    # entry_points="""
     #    [nose.plugins.0.10]
     #    fixture_bundler = django_nose.fixture_bundling:FixtureBundlingPlugin
     #    """,

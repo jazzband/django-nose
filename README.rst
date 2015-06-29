@@ -318,6 +318,13 @@ django-nose does not support Django 1.0.
 
 Recent Version History
 ----------------------
+1.4.1 (2015-06-29)
+ * Fix version number (ezarowny)
+ * Fix choice options, unbreaking nose-cover (aamirtharaj-rpx, jwhitlock)
+ * Support 1.8 app loading system (dgladkov)
+ * Support non-ASCII file names (singingwolfboy)
+ * Better PEP8'd assertion names (roganov)
+
 1.4 (2015-04-23)
   * Django 1.8 support (timc3, adepue, jwhitlock)
   * Support --testrunner option (st3lk)
