@@ -1,52 +1,26 @@
 sudo: false
 language: python
-
-python:
-  - "2.6"
-  - "2.7"
-  - "3.2"
-  - "3.3"
-  - "3.4"
-  - "3.5"
-
 env:
-  - REQUIREMENTS=django-14
-  - REQUIREMENTS=django-16
-  - REQUIREMENTS=django-17
-  - REQUIREMENTS=django-18
-  - REQUIREMENTS=django-master
-
+    - TOXENV=py26-django-14
+    - TOXENV=py26-django-16
+    - TOXENV=py27-django-16
+    - TOXENV=py27-django-17
+    - TOXENV=py27-django-18
+    - TOXENV=py32-django-16
+    - TOXENV=py32-django-17
+    - TOXENV=py32-django-18
+    - TOXENV=py33-django-16
+    - TOXENV=py33-django-17
+    - TOXENV=py33-django-18
+    - TOXENV=py34-django-16
+    - TOXENV=py34-django-17
+    - TOXENV=py34-django-18
+    - TOXENV=py27-django-master
+    - TOXENV=py34-django-master
+    - TOXENV=flake8
 matrix:
-  allow_failures:
-    - env: REQUIREMENTS=django-master
-  exclude:
-    - python: "2.6"
-      env: REQUIREMENTS=django-17
-    - python: "2.6"
-      env: REQUIREMENTS=django-18
-    - python: "2.6"
-      env: REQUIREMENTS=django-master
-    - python: "3.2"
-      env: REQUIREMENTS=django-14
-    - python: "3.2"
-      env: REQUIREMENTS=django-master
-    - python: "3.3"
-      env: REQUIREMENTS=django-14
-    - python: "3.3"
-      env: REQUIREMENTS=django-master
-    - python: "3.4"
-      env: REQUIREMENTS=django-14
-    - python: "3.5"
-      env: REQUIREMENTS=django-14
-    - python: "3.5"
-      env: REQUIREMENTS=django-16
-    - python: "3.5"
-      env: REQUIREMENTS=django-17
-    - python: "3.5"
-      env: REQUIREMENTS=django-18
-
-install:
-  - pip install tox
-
-script:
-  - tox -e py-$REQUIREMENTS
+    allow_failures:
+        - env: TOXENV=py27-django-master
+        - env: TOXENV=py34-django-master
+install: pip install tox
+script: tox
