@@ -1,7 +1,11 @@
+include .coveragerc
 include LICENSE
+include Makefile
 include README.rst
-include runtests.sh
 include changelog.txt
+include manage.py
+include requirements.txt
+include runtests.sh
 exclude contribute.json
 recursive-include django_nose *.py
 recursive-include testapp *.py

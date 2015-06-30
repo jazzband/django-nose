@@ -21,6 +21,7 @@ setup(
     zip_safe=False,
     install_requires=['nose>=1.2.1', 'Django>=1.4'],
     tests_require=['south>=0.7'],
+    test_suite='testapp.runtests.runtests',
     # This blows up tox runs that install django-nose into a virtualenv,
     # because it causes Nose to import django_nose.runner before the Django
     # settings are initialized, leading to a mess of errors. There's no reason
@@ -31,6 +32,7 @@ setup(
     #    [nose.plugins.0.10]
     #    fixture_bundler = django_nose.fixture_bundling:FixtureBundlingPlugin
     #    """,
+    keywords='django nose django-nose',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
