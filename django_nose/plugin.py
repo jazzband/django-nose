@@ -1,4 +1,5 @@
 # coding: utf-8
+"""Included django-nose plugins."""
 from __future__ import unicode_literals
 
 import sys
@@ -13,7 +14,8 @@ from django_nose.utils import process_tests, is_subclass_at_all
 
 
 class AlwaysOnPlugin(Plugin):
-    """A plugin that takes no options and is always enabled"""
+
+    """A base plugin that takes no options and is always enabled."""
 
     def options(self, parser, env):
         """Avoid adding a ``--with`` option for this plugin.
@@ -21,39 +23,43 @@ class AlwaysOnPlugin(Plugin):
         We don't have any options, and this plugin is always enabled, so we
         don't want to use superclass's ``options()`` method which would add a
         ``--with-*`` option.
-
         """
 
     def configure(self, *args, **kw_args):
+        """Configure and enable this plugin."""
         super(AlwaysOnPlugin, self).configure(*args, **kw_args)
-        self.enabled = True  # Force this plugin to be always enabled.
+        self.enabled = True
 
 
 class ResultPlugin(AlwaysOnPlugin):
-    """Captures the TestResult object for later inspection
+
+    """Captures the TestResult object for later inspection.
 
     nose doesn't return the full test result object from any of its runner
     methods.  Pass an instance of this plugin to the TestProgram and use
     ``result`` after running the tests to get the TestResult object.
-
     """
+
     name = 'result'
 
     def finalize(self, result):
+        """Finalize test run by capturing the result."""
         self.result = result
 
 
 class DjangoSetUpPlugin(AlwaysOnPlugin):
-    """Configures Django to set up and tear down the environment
+
+    """Configures Django to set up and tear down the environment.
 
     This allows coverage to report on all code imported and used during the
     initialization of the test runner.
-
     """
+
     name = 'django setup'
     score = 150
 
     def __init__(self, runner):
+        """Initialize the plugin with the test runner."""
         super(DjangoSetUpPlugin, self).__init__()
         self.runner = runner
         self.sys_stdout = sys.stdout
@@ -81,12 +87,17 @@ class DjangoSetUpPlugin(AlwaysOnPlugin):
         sys.stdout = sys_stdout
 
     def finalize(self, result):
+        """Finalize test run by cleaning up databases and environment."""
         self.runner.teardown_databases(self.old_names)
         self.runner.teardown_test_environment()
 
 
 class Bucketer(object):
+
+    """Collect tests into buckets with similar setup requirements."""
+
     def __init__(self):
+        """Initialize the test buckets."""
         # { (frozenset(['users.json']), True):
         #      [ContextSuite(...), ContextSuite(...)] }
         self.buckets = {}
@@ -96,8 +107,11 @@ class Bucketer(object):
         self.remainder = []
 
     def add(self, test):
-        """Put a test into a bucket according to its set of fixtures and the
-        value of its exempt_from_fixture_bundling attr."""
+        """Add test into an initialization bucket.
+
+        Tests are bucketed according to its set of fixtures and the
+        value of its exempt_from_fixture_bundling attr.
+        """
         if is_subclass_at_all(test.context, FastFixtureTestCase):
             # We bucket even FFTCs that don't have any fixtures, but it
             # shouldn't matter.
@@ -111,10 +125,13 @@ class Bucketer(object):
 
 
 class TestReorderer(AlwaysOnPlugin):
+
     """Reorder tests for various reasons."""
+
     name = 'django-nose-test-reorderer'
 
     def options(self, parser, env):
+        """Add --with-fixture-bundling to options."""
         super(TestReorderer, self).options(parser, env)  # pointless
         parser.add_option('--with-fixture-bundling',
                           action='store_true',
@@ -125,12 +142,12 @@ class TestReorderer(AlwaysOnPlugin):
                                '[NOSE_WITH_FIXTURE_BUNDLING]')
 
     def configure(self, options, conf):
+        """Configure plugin, reading the with_fixture_bundling option."""
         super(TestReorderer, self).configure(options, conf)
         self.should_bundle = options.with_fixture_bundling
 
     def _put_transaction_test_cases_last(self, test):
-        """Reorder tests in the suite so TransactionTestCase-based tests come
-        last.
+        """Reorder test suite so TransactionTestCase-based tests come last.
 
         Django has a weird design decision wherein TransactionTestCase doesn't
         clean up after itself. Instead, it resets the DB to a clean state only
@@ -143,12 +160,9 @@ class TestReorderer(AlwaysOnPlugin):
         after each unit test wouldn't necessarily clean up after doctests, so
         you'd have to clean on entry to a test anyway." was once uttered on
         #django-dev.
-
         """
-
         def filthiness(test):
-            """Return a comparand based on whether a test is guessed to clean
-            up after itself.
+            """Return a score of how messy a test leaves the environment.
 
             Django's TransactionTestCase doesn't clean up the DB on teardown,
             but it's hard to guess whether subclasses (other than TestCase) do.
@@ -176,7 +190,7 @@ class TestReorderer(AlwaysOnPlugin):
             test_class = test.context
             if (is_subclass_at_all(test_class, TestCase) or
                 (is_subclass_at_all(test_class, TransactionTestCase) and
-                  getattr(test_class, 'cleans_up_after_itself', False))):
+                 getattr(test_class, 'cleans_up_after_itself', False))):
                 return 1
             return 2
 
@@ -186,8 +200,7 @@ class TestReorderer(AlwaysOnPlugin):
         return ContextSuite(flattened)
 
     def _bundle_fixtures(self, test):
-        """Reorder the tests in the suite so classes using identical
-        sets of fixtures are contiguous.
+        """Reorder tests to minimize fixture loading.
 
         I reorder FastFixtureTestCases so ones using identical sets
         of fixtures run adjacently. I then put attributes on them
@@ -199,11 +212,9 @@ class TestReorderer(AlwaysOnPlugin):
         nobody else, in practice, pays attention to the ``_fb`` advisory
         bits. We return those first, then any remaining tests in the
         order they were received.
-
         """
         def suite_sorted_by_fixtures(suite):
-            """Flatten and sort a tree of Suites by the ``fixtures`` members of
-            their contexts.
+            """Flatten and sort a tree of Suites by fixture.
 
             Add ``_fb_should_setup_fixtures`` and
             ``_fb_should_teardown_fixtures`` attrs to each test class to advise
@@ -218,7 +229,8 @@ class TestReorderer(AlwaysOnPlugin):
             # Lay the bundles of common-fixture-having test classes end to end
             # in a single list so we can make a test suite out of them:
             flattened = []
-            for ((fixtures, is_exempt), fixture_bundle) in bucketer.buckets.items():
+            for (key, fixture_bundle) in bucketer.buckets.items():
+                fixtures, is_exempt = key
                 # Advise first and last test classes in each bundle to set up
                 # and tear down fixtures and the rest not to:
                 if fixtures and not is_exempt:

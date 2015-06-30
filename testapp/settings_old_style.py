@@ -1,3 +1,4 @@
+"""Django configuration using a test running function."""
 DATABASES = {
     'default': {
         'NAME': 'django_master',

@@ -1,3 +1,5 @@
+"""A basic Django configuration."""
+
 DATABASES = {
     'default': {
         'NAME': 'django_master',

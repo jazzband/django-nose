@@ -1,18 +1,15 @@
 # coding: utf-8
 # vim: tabstop=4 expandtab autoindent shiftwidth=4 fileencoding=utf-8
-
-"""
-Provides Nose and Django test case assert functions
-"""
+"""Provides Nose and Django test case assert functions."""
 
 from __future__ import unicode_literals
 
 from django.test.testcases import TransactionTestCase
 
 
-import re
-
-## Python
+#
+# Python
+#
 
 from nose import tools
 for t in dir(tools):
@@ -22,61 +19,72 @@ for t in dir(tools):
 del tools
 del t
 
-## Django
 
-camelcase = re.compile('([a-z][A-Z]|[A-Z][a-z])')
-
-def insert_underscore(m):
-    a, b = m.group(0)
-    if b.islower():
-        return '_{}{}'.format(a, b)
-    else:
-        return '{}_{}'.format(a, b)
+#
+# Django
+#
 
 def pep8(name):
-    return camelcase.sub(insert_underscore, name).lower()
+    """Replace camelcase name with PEP8 equivalent."""
+    import re
+    camelcase = re.compile('([a-z][A-Z]|[A-Z][a-z])')
+
+    def insert_underscore(m):
+        """Insert an appropriate underscore into the name."""
+        a, b = m.group(0)
+        if b.islower():
+            return '_{}{}'.format(a, b)
+        else:
+            return '{}_{}'.format(a, b)
+
+    return camelcase.sub(insert_underscore, name).lower().encode('ascii')
+
 
 class Dummy(TransactionTestCase):
+
+    """A dummy test case for gathering current assertion helpers."""
+
     def nop():
+        """A dummy test to get an initialized test case."""
         pass
-_t = Dummy('nop')
+dummy_test = Dummy('nop')
 
-for at in [ at for at in dir(_t)
-            if at.startswith('assert') and not '_' in at ]:
-    pepd = pep8(at)
-    vars()[pepd] = getattr(_t, at)
+for assert_name in [at for at in dir(dummy_test)
+                    if at.startswith('assert') and '_' not in at]:
+    pepd = pep8(assert_name)
+    vars()[pepd] = getattr(dummy_test, assert_name)
 
-del re
-del insert_underscore
-del camelcase
 del Dummy
 del TransactionTestCase
-del _t
+del dummy_test
+del assert_name
 del at
 del pep8
 del pepd
 
-## New
+
+#
+# New
+#
 
 def assert_code(response, status_code, msg_prefix=''):
-    """Asserts the response was returned with the given status code
-    """
-
+    """Assert the response was returned with the given status code."""
     if msg_prefix:
         msg_prefix = '%s: ' % msg_prefix
 
     assert response.status_code == status_code, \
-        'Response code was %d (expected %d)' % \
-            (response.status_code, status_code)
+        'Response code was %d (expected %d)' % (
+            response.status_code, status_code)
+
 
 def assert_ok(response, msg_prefix=''):
-    """Asserts the response was returned with status 200 (OK)
-    """
-
+    """Assert the response was returned with status 200 (OK)."""
     return assert_code(response, 200, msg_prefix=msg_prefix)
+
 
 def assert_mail_count(count, msg=None):
     """Assert the number of emails sent.
+
     The message here tends to be long, so allow for replacing the whole
     thing instead of prefixing.
     """
@@ -85,7 +93,5 @@ def assert_mail_count(count, msg=None):
     if msg is None:
         msg = ', '.join([e.subject for e in mail.outbox])
         msg = '%d != %d %s' % (len(mail.outbox), count, msg)
-    assert_equals(len(mail.outbox), count, msg)
-
-# EOF
-
+    # assert_equals is dynamicaly added above
+    assert_equals(len(mail.outbox), count, msg)  # nopep8

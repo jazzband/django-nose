@@ -2,4 +2,5 @@
 
 
 def test_multiplication():
+    """Check some advanced maths."""
     assert 2 * 2 == 4

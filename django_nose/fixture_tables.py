@@ -1,6 +1,9 @@
-"""A copy of Django 1.3.0's stock loaddata.py, adapted so that, instead of
+"""Unload fixtures by truncating tables rather than rebuilding.
+
+A copy of Django 1.3.0's stock loaddata.py, adapted so that, instead of
 loading any data, it returns the tables referenced by a set of fixtures so we
-can truncate them (and no others) quickly after we're finished with them."""
+can truncate them (and no others) quickly after we're finished with them.
+"""
 
 import os
 import gzip
@@ -25,9 +28,12 @@ except ImportError:
 
 
 def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
-    """Act like Django's stock loaddata command, but, instead of loading data,
+    """Get tables used by a fixture.
+
+    Acts like Django's stock loaddata command, but, instead of loading data,
     return an iterable of the names of the tables into which data would be
-    loaded."""
+    loaded.
+    """
     # Keep a count of the installed objects and fixtures
     fixture_count = 0
     loaded_object_count = 0
@@ -38,7 +44,9 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
         def __init__(self, *args, **kwargs):
             zipfile.ZipFile.__init__(self, *args, **kwargs)
             if settings.DEBUG:
-                assert len(self.namelist()) == 1, "Zip-compressed fixtures must contain only one file."
+                assert len(self.namelist()) == 1, \
+                    "Zip-compressed fixtures must contain only one file."
+
         def read(self):
             return zipfile.ZipFile.read(self, self.namelist()[0])
 
@@ -60,7 +68,9 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
             # It's a models.py module
             app_module_paths.append(app.__file__)
 
-    app_fixtures = [os.path.join(os.path.dirname(path), 'fixtures') for path in app_module_paths]
+    app_fixtures = [
+        os.path.join(os.path.dirname(path), 'fixtures')
+        for path in app_module_paths]
     for fixture_label in fixture_labels:
         parts = fixture_label.split('.')
 
@@ -123,13 +133,14 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
                         # stdout.write("Installing %s fixture '%s' from %s.\n"
                         # % (format, fixture_name, humanize(fixture_dir)))
                         try:
-                            objects = serializers.deserialize(format, fixture, using=using)
+                            objects = serializers.deserialize(
+                                format, fixture, using=using)
                             for obj in objects:
                                 objects_in_fixture += 1
-                                if router.allow_syncdb(using, obj.object.__class__):
+                                cls = obj.object.__class__
+                                if router.allow_syncdb(using, cls):
                                     loaded_objects_in_fixture += 1
-                                    tables.add(
-                                        obj.object.__class__._meta.db_table)
+                                    tables.add(cls._meta.db_table)
                             loaded_object_count += loaded_objects_in_fixture
                             fixture_object_count += objects_in_fixture
                             label_found = True
@@ -144,8 +155,8 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
                             return set()
                         fixture.close()
 
-                        # If the fixture we loaded contains 0 objects, assume that an
-                        # error was encountered during fixture loading.
+                        # If the fixture we loaded contains 0 objects, assume
+                        # that an error was encountered during fixture loading.
                         if objects_in_fixture == 0:
                             # stderr.write( style.ERROR("No fixture data found
                             # for '%s'. (File format may be invalid.)\n" %

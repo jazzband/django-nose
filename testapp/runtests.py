@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Configure enough Django to run the test suite."""
 import sys
 
 from django.conf import settings
@@ -13,7 +14,9 @@ if not settings.configured:
 
 from django_nose import NoseTestSuiteRunner
 
+
 def runtests(*test_labels):
+    """Run the selected tests, or all tests if none selected."""
     runner = NoseTestSuiteRunner(verbosity=1, interactive=True)
     failures = runner.run_tests(test_labels)
     sys.exit(failures)
