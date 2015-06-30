@@ -6,3 +6,6 @@
 build/
 dist/
 .tox/
+South-*.egg/
+.coverage
+htmlcov

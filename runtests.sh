@@ -8,7 +8,12 @@ PYTHONVERSION=${PYTHONVERSION##Python }
 function version { echo $@ | gawk -F. '{ printf("%d.%d.%d\n", $1,$2,$3); }'; }
 
 django_test() {
-    TEST="$1"
+    if [ -n "$COVERAGE" ]
+    then
+        TEST="coverage run -p $1"
+    else
+        TEST="$1"
+    fi
     OUTPUT=$($TEST 2>&1)
     if [ $? -gt 0 ]
     then
@@ -36,20 +41,19 @@ django_test() {
         echo PASS: $3 '(--help)'
     fi
 }
-
-django_test 'django-admin.py test --settings=testapp.settings' '2' 'normal settings'
+django_test './manage.py test --settings=testapp.settings' '2' 'normal settings'
 if [ "$DJANGO" = "Django==1.4.1" -o "$DJANGO" = "Django==1.5" -o "$DJANGO" = "Django==1.6" ]
 then
-    django_test 'django-admin.py test --settings=testapp.settings_with_south' '2' 'with south in installed apps'
+    django_test './manage.py test --settings=testapp.settings_with_south' '2' 'with south in installed apps'
 fi
 
-django_test 'django-admin.py test --settings=testapp.settings_old_style' '2' 'django_nose.run_tests format'
+django_test './manage.py test --settings=testapp.settings_old_style' '2' 'django_nose.run_tests format'
 django_test 'testapp/runtests.py testapp.test_only_this' '1' 'via run_tests API'
-django_test 'django-admin.py test --settings=testapp.settings_with_plugins testapp/plugin_t' '1' 'with plugins'
-django_test 'django-admin.py test --settings=testapp.settings unittests' '4' 'unittests'
-django_test 'django-admin.py test --settings=testapp.settings unittests  --testrunner=testapp.custom_runner.CustomNoseTestSuiteRunner' '4' 'unittests'
+django_test './manage.py test --settings=testapp.settings_with_plugins testapp/plugin_t' '1' 'with plugins'
+django_test './manage.py test --settings=testapp.settings unittests' '4' 'unittests'
+django_test './manage.py test --settings=testapp.settings unittests  --testrunner=testapp.custom_runner.CustomNoseTestSuiteRunner' '4' 'unittests'
 if ! [ $(version $PYTHONVERSION) \> $(version 3.0.0) ]
 then
 # Python 3 doesn't support the hotshot profiler. See nose#842.
-django_test 'django-admin.py test --settings=testapp.settings --with-profile' '2' 'with profile plugin'
+django_test './manage.py test --settings=testapp.settings --with-profile' '2' 'with profile plugin'
 fi

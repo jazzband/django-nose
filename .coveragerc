@@ -1,0 +1,6 @@
+[run]
+branch = True
+source = django_nose,testapp,unittests
+
+[report]
+source = django_nose,testapp,unittests
