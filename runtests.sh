@@ -7,53 +7,82 @@ PYTHONVERSION=${PYTHONVERSION##Python }
 
 function version { echo $@ | gawk -F. '{ printf("%d.%d.%d\n", $1,$2,$3); }'; }
 
+reset_env() {
+    export USE_SOUTH=
+    export TEST_RUNNER=
+    export NOSE_PLUGINS=
+}
+
 django_test() {
+    COMMAND=$1
+    TEST_COUNT=$2
+    DESCRIPTION=$3
+
     if [ -n "$COVERAGE" ]
     then
-        TEST="coverage run -p $1"
+        TEST="coverage run -p $COMMAND"
     else
-        TEST="$1"
+        TEST="$COMMAND"
     fi
     OUTPUT=$($TEST 2>&1)
     if [ $? -gt 0 ]
     then
-        echo FAIL: $3
+        echo FAIL: $DESCRIPTION
         $TEST
         exit 1;
     fi
-    echo $OUTPUT | grep "Ran $2 test" > /dev/null
+    echo $OUTPUT | grep "Ran $TEST_COUNT test" > /dev/null
     if [ $? -gt 0 ]
     then
-        echo FAIL: $3
+        echo FAIL: $DESCRIPTION
         $TEST
         exit 1;
     else
-        echo PASS: $3
+        echo PASS: $DESCRIPTION
     fi
 
     # Check that we're hijacking the help correctly.
     $TEST --help 2>&1 | grep 'NOSE_DETAILED_ERRORS' > /dev/null
     if [ $? -gt 0 ]
     then
-        echo FAIL: $3 '(--help)'
+        echo FAIL: $DESCRIPTION '(--help)'
         exit 1;
     else
-        echo PASS: $3 '(--help)'
+        echo PASS: $DESCRIPTION '(--help)'
     fi
 }
-django_test './manage.py test --settings=testapp.settings' '2' 'normal settings'
-if [ "$DJANGO" = "Django==1.4.1" -o "$DJANGO" = "Django==1.5" -o "$DJANGO" = "Django==1.6" ]
+
+reset_env
+django_test './manage.py test' 2 'normal settings'
+
+DJANGO_VERSION=`./manage.py version | cut -d. -f1-2`
+if [ "$DJANGO_VERSION" = "1.4" -o "$DJANGO_VERSION" = "1.5" -o "$DJANGO_VERSION" = "1.6" ]
 then
-    django_test './manage.py test --settings=testapp.settings_with_south' '2' 'with south in installed apps'
+    reset_env
+    export USE_SOUTH=1
+    django_test './manage.py test' 2 'with south in installed apps'
 fi
 
-django_test './manage.py test --settings=testapp.settings_old_style' '2' 'django_nose.run_tests format'
-django_test 'testapp/runtests.py testapp.test_only_this' '1' 'via run_tests API'
-django_test './manage.py test --settings=testapp.settings_with_plugins testapp/plugin_t' '1' 'with plugins'
-django_test './manage.py test --settings=testapp.settings unittests' '4' 'unittests'
-django_test './manage.py test --settings=testapp.settings unittests  --testrunner=testapp.custom_runner.CustomNoseTestSuiteRunner' '4' 'unittests'
+reset_env
+TEST_RUNNER="django_nose.run_tests"
+django_test './manage.py test' 2 'django_nose.run_tests format'
+
+reset_env
+django_test 'testapp/runtests.py testapp.test_only_this' 1 'via run_tests API'
+
+reset_env
+NOSE_PLUGINS="testapp.plugins.SanityCheckPlugin"
+django_test './manage.py test testapp/plugin_t' 1 'with plugins'
+
+reset_env
+django_test './manage.py test unittests' 4 'unittests'
+
+reset_env
+django_test './manage.py test unittests --testrunner=testapp.custom_runner.CustomNoseTestSuiteRunner' 4 'unittests with testrunner'
+
 if ! [ $(version $PYTHONVERSION) \> $(version 3.0.0) ]
 then
-# Python 3 doesn't support the hotshot profiler. See nose#842.
-django_test './manage.py test --settings=testapp.settings --with-profile' '2' 'with profile plugin'
+    # Python 3 doesn't support the hotshot profiler. See nose#842.
+    reset_env
+    django_test './manage.py test --with-profile' 2 'with profile plugin'
 fi
