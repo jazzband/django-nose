@@ -5,6 +5,9 @@ django-nose
 .. image:: https://travis-ci.org/django-nose/django-nose.png
   :target: https://travis-ci.org/django-nose/django-nose
 
+.. image:: https://coveralls.io/repos/django-nose/django-nose/badge.svg?branch=master
+  :target: https://coveralls.io/r/django-nose/django-nose?branch=master
+
 Features
 --------
 
