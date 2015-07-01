@@ -4,67 +4,61 @@
 
 from __future__ import unicode_literals
 
-from django.test.testcases import TransactionTestCase
+
+def _get_nose_vars():
+    """Collect assert_*, ok_, and eq_ from nose.tools."""
+    from nose import tools
+    new_names = {}
+    for t in dir(tools):
+        if t.startswith('assert_') or t in ('ok_', 'eq_'):
+            new_names[t] = getattr(tools, t)
+    return new_names
+
+for _name, _value in _get_nose_vars().items():
+    vars()[_name] = _value
 
 
-#
-# Python
-#
-
-from nose import tools
-for t in dir(tools):
-    if t.startswith('assert_') or t in ('ok_', 'eq_'):
-        vars()[t] = getattr(tools, t)
-
-del tools
-del t
-
-
-#
-# Django
-#
-
-def pep8(name):
-    """Replace camelcase name with PEP8 equivalent."""
+def _get_django_vars():
+    """Collect assert_* methods from Django's TransactionTestCase."""
     import re
+    from django.test.testcases import TransactionTestCase
     camelcase = re.compile('([a-z][A-Z]|[A-Z][a-z])')
 
     def insert_underscore(m):
-        """Insert an appropriate underscore into the name."""
-        a, b = m.group(0)
-        if b.islower():
-            return '_{}{}'.format(a, b)
-        else:
-            return '{}_{}'.format(a, b)
+            """Insert an appropriate underscore into the name."""
+            a, b = m.group(0)
+            if b.islower():
+                return '_{}{}'.format(a, b)
+            else:
+                return '{}_{}'.format(a, b)
 
-    return camelcase.sub(insert_underscore, name).lower().encode('ascii')
+    def pep8(name):
+        """Replace camelcase name with PEP8 equivalent."""
+        return str(camelcase.sub(insert_underscore, name).lower())
+
+    class Dummy(TransactionTestCase):
+
+        """A dummy test case for gathering current assertion helpers."""
+
+        def nop():
+            """A dummy test to get an initialized test case."""
+            pass
+    dummy_test = Dummy('nop')
+
+    new_names = {}
+    for assert_name in [at for at in dir(dummy_test)
+                        if at.startswith('assert') and '_' not in at]:
+        pepd = pep8(assert_name)
+        new_names[pepd] = getattr(dummy_test, assert_name)
+    return new_names
 
 
-class Dummy(TransactionTestCase):
-
-    """A dummy test case for gathering current assertion helpers."""
-
-    def nop():
-        """A dummy test to get an initialized test case."""
-        pass
-dummy_test = Dummy('nop')
-
-for assert_name in [at for at in dir(dummy_test)
-                    if at.startswith('assert') and '_' not in at]:
-    pepd = pep8(assert_name)
-    vars()[pepd] = getattr(dummy_test, assert_name)
-
-del Dummy
-del TransactionTestCase
-del dummy_test
-del assert_name
-del at
-del pep8
-del pepd
+for _name, _value in _get_django_vars().items():
+    vars()[_name] = _value
 
 
 #
-# New
+# Additional assertions
 #
 
 def assert_code(response, status_code, msg_prefix=''):

@@ -51,7 +51,7 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
             return zipfile.ZipFile.read(self, self.namelist()[0])
 
     compression_types = {
-        None:   file,
+        None:   open,
         'gz':   gzip.GzipFile,
         'zip':  SingleZipReader
     }
