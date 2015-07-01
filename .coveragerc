@@ -4,3 +4,6 @@ source = django_nose,testapp,unittests
 
 [report]
 source = django_nose,testapp,unittests
+omit =
+    testapp/south_migrations/*.py
+    testapp/migrations/*.py

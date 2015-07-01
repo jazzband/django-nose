@@ -8,4 +8,6 @@ dist/
 .tox/
 South-*.egg/
 .coverage
+.coverage.*
 htmlcov
+testapp.sqlite3

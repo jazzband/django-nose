@@ -9,4 +9,5 @@ include runtests.sh
 exclude contribute.json
 recursive-include django_nose *.py
 recursive-include testapp *.py
+recursive-include testapp/fixtures *.json
 recursive-include unittests *.py

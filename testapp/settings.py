@@ -23,13 +23,14 @@ def rel_path(*subpaths):
 DATABASES = {
     'default':
         dj_database_url.config(
-            default='sqlite:///' + rel_path('django_master.sqlite3'))
+            default='sqlite:///' + rel_path('testapp.sqlite3'))
 }
 
 MIDDLEWARE_CLASSES = ()
 
 INSTALLED_APPS = [
     'django_nose',
+    'testapp',
 ]
 if environ.get('USE_SOUTH', '0') in (1, '1'):
     import south  # Raise ImportError if not installed
