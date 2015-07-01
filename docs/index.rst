@@ -13,6 +13,11 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   installation
+   usage
+   upgrading
+   contributing
+   authors
    changelog
 
 Indices and tables

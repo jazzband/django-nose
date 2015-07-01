@@ -12,7 +12,7 @@ Changelog
 1.4 (2015-04-23)
 ~~~~~~~~~~~~~~~~
 * Django 1.8 support (timc3, adepue, jwhitlock)
-* Support --testrunner option (st3lk)
+* Support --testrunner option (st4lk)
 * Fix REUSE_DB second run in py3k (edrmp)
 
 1.3 (2014-12-05)

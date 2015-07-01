@@ -1,12 +1,14 @@
 include .coveragerc
+include AUTHORS.rst
+include CONTRIBUTING.rst
 include LICENSE
 include Makefile
 include README.rst
 include changelog.rst
+include contribute.json
 include manage.py
 include requirements.txt
 include runtests.sh
-include contribute.json
 
 recursive-include docs Makefile conf.py *.rst make.bat .keep
 recursive-include django_nose *.py
