@@ -1,5 +1,36 @@
 #!/bin/bash
 
+# Parse command line
+VERBOSE=0
+HELP=0
+ERR=0
+while [[ $# > 0 ]]
+do
+    key="$1"
+    case $key in
+        -h|--help)
+            HELP=1
+            ;;
+        -v|--verbose)
+            VERBOSE=1
+            ;;
+        *)
+            echo "Unknown option '$key'"
+            ERR=1
+            HELP=1
+            ;;
+    esac
+    shift
+done
+
+if [ $HELP -eq 1 ]
+then
+    echo "$0 [-vh] - Run django-nose integration tests."
+    echo " -v/--verbose - Print output of test commands."
+    echo " -h/--help    - Print this help message."
+    exit $ERR
+fi
+
 export PYTHONPATH=.
 
 PYTHONVERSION=$(python --version 2>&1)
@@ -14,6 +45,22 @@ reset_env() {
     export REUSE_DB=
 }
 
+echo_output() {
+    if [ $VERBOSE -ne 1 ]
+    then
+        STDOUT=$1
+        STDERR=$2
+        echo "stdout"
+        echo "======"
+        cat $STDOUT
+        echo
+        echo "stderr"
+        echo "======"
+        cat $STDERR
+    fi
+    rm $STDOUT $STDERR
+}
+
 django_test() {
     COMMAND=$1
     TEST_COUNT=$2
@@ -25,22 +72,33 @@ django_test() {
     else
         TEST="$COMMAND"
     fi
-    OUTPUT=$($TEST 2>&1)
+    # Temp files on Linux / OSX
+    TMP_OUT=`mktemp 2>/dev/null || mktemp -t 'django-nose-runtests'`
+    TMP_ERR=`mktemp 2>/dev/null || mktemp -t 'django-nose-runtests'`
+    RETURN=0
+    if [ $VERBOSE -eq 1 ]
+    then
+        $TEST > >(tee $TMP_OUT) 2> >(tee $TMP_ERR >&2)
+    else
+        $TEST >$TMP_OUT 2>$TMP_ERR
+    fi
+    OUTPUT=`cat $TMP_OUT $TMP_ERR`
     if [ $? -gt 0 ]
     then
         echo "FAIL (test failure): $DESCRIPTION"
-        $TEST
+        echo_output $TMP_OUT $TMP_ERR
         exit 1;
     fi
     echo $OUTPUT | grep "Ran $TEST_COUNT test" > /dev/null
     if [ $? -gt 0 ]
     then
         echo "FAIL (count!=$TEST_COUNT): $DESCRIPTION"
-        $TEST
+        echo_output $TMP_OUT $TMP_ERR
         exit 1;
     else
         echo "PASS (count==$TEST_COUNT): $DESCRIPTION"
     fi
+    rm $TMP_OUT $TMP_ERR
 
     # Check that we're hijacking the help correctly.
     $TEST --help 2>&1 | grep 'NOSE_DETAILED_ERRORS' > /dev/null

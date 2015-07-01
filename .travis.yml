@@ -1,26 +1,31 @@
 sudo: false
 language: python
 env:
-    - TOXENV=py26-django-14
-    - TOXENV=py26-django-16
-    - TOXENV=py27-django-16
-    - TOXENV=py27-django-17
-    - TOXENV=py27-django-18
-    - TOXENV=py32-django-16
-    - TOXENV=py32-django-17
-    - TOXENV=py32-django-18
-    - TOXENV=py33-django-16
-    - TOXENV=py33-django-17
-    - TOXENV=py33-django-18
-    - TOXENV=py34-django-16
-    - TOXENV=py34-django-17
-    - TOXENV=py34-django-18
-    - TOXENV=py27-django-master
-    - TOXENV=py34-django-master
-    - TOXENV=flake8
+    global:
+        - COVERAGE=1 RUNTEST_ARGS=-v
+    matrix:
+        - TOXENV=py26-django-14
+        - TOXENV=py26-django-16
+        - TOXENV=py27-django-16
+        - TOXENV=py27-django-17
+        - TOXENV=py27-django-18
+        - TOXENV=py32-django-16
+        - TOXENV=py32-django-17
+        - TOXENV=py32-django-18
+        - TOXENV=py33-django-16
+        - TOXENV=py33-django-17
+        - TOXENV=py33-django-18
+        - TOXENV=py34-django-16
+        - TOXENV=py34-django-17
+        - TOXENV=py34-django-18
+        - TOXENV=py27-django-master
+        - TOXENV=py34-django-master
+        - TOXENV=flake8
 matrix:
     allow_failures:
         - env: TOXENV=py27-django-master
         - env: TOXENV=py34-django-master
-install: pip install tox
+install: pip install tox coveralls
+before_script: coverage erase
 script: tox
+after_success: coveralls
