@@ -2,7 +2,7 @@ include .coveragerc
 include LICENSE
 include Makefile
 include README.rst
-include changelog.txt
+include changelog.rst
 include manage.py
 include requirements.txt
 include runtests.sh

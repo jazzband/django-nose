@@ -8,12 +8,18 @@ from setuptools import setup, find_packages
 def get_long_description(title):
     """Create the long_description from other files."""
     ROOT = os.path.abspath(os.path.dirname(__file__))
-    readme = open(os.path.join(ROOT, 'README.rst'), 'r', 'utf8').read()
 
+    readme = open(os.path.join(ROOT, 'README.rst'), 'r', 'utf8').read()
     body_tag = ".. Omit badges from docs"
     readme_body_start = readme.index(body_tag)
     assert readme_body_start
     readme_body = readme[readme_body_start + len(body_tag):]
+
+    changelog = open(os.path.join(ROOT, 'changelog.rst'), 'r', 'utf8').read()
+    old_tag = ".. Omit older changes from package"
+    changelog_body_end = changelog.index(old_tag)
+    assert changelog_body_end
+    changelog_body = changelog[:changelog_body_end]
 
     bars = '=' * len(title)
     long_description = """
@@ -21,6 +27,10 @@ def get_long_description(title):
 %(title)s
 %(bars)s
 %(readme_body)s
+
+%(changelog_body)s
+
+_(Older changes can be found in the full documentation)._
 """ % locals()
     return long_description
 

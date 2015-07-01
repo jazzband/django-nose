@@ -7,6 +7,14 @@ django-nose
 .. include:: ../README.rst
     :start-after: .. Omit badges from docs
 
+Contents
+--------
+
+.. toctree::
+   :maxdepth: 2
+
+   changelog
+
 Indices and tables
 ------------------
 
