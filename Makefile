@@ -1,4 +1,4 @@
-.PHONY: clean clean-build clean-pyc clean-test qa lint coverage jslint qa-all install-jslint test test-all coverage-console release sdist
+.PHONY: clean clean-build clean-pyc clean-test docs qa lint coverage jslint qa-all install-jslint test test-all coverage-console release sdist
 
 help:
 	@echo "clean - remove all artifacts"
@@ -6,6 +6,7 @@ help:
 	@echo "clean-pyc - remove Python file artifacts"
 	@echo "clean-test - remove test and coverage artifacts"
 	@echo "coverage - check code coverage quickly with the default Python"
+	@echo "docs - generate Sphinx HTML documentation"
 	@echo "lint - check style with flake8"
 	@echo "qa - run linters and test coverage"
 	@echo "qa-all - run QA plus tox and packaging"
@@ -36,6 +37,11 @@ clean-test:
 	rm -fr .tox/
 	rm -f .coverage
 	rm -fr htmlcov/
+
+docs:
+	$(MAKE) -C docs clean
+	$(MAKE) -C docs html
+	open docs/_build/html/index.html
 
 lint:
 	flake8 .

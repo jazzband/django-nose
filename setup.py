@@ -1,15 +1,34 @@
 """django-nose packaging."""
+from __future__ import unicode_literals
 import os
+from codecs import open
 from setuptools import setup, find_packages
 
 
-ROOT = os.path.abspath(os.path.dirname(__file__))
+def get_long_description(title):
+    """Create the long_description from other files."""
+    ROOT = os.path.abspath(os.path.dirname(__file__))
+    readme = open(os.path.join(ROOT, 'README.rst'), 'r', 'utf8').read()
+
+    body_tag = ".. Omit badges from docs"
+    readme_body_start = readme.index(body_tag)
+    assert readme_body_start
+    readme_body = readme[readme_body_start + len(body_tag):]
+
+    bars = '=' * len(title)
+    long_description = """
+%(bars)s
+%(title)s
+%(bars)s
+%(readme_body)s
+""" % locals()
+    return long_description
 
 setup(
     name='django-nose',
     version='1.4.1',
     description='Makes your Django tests simple and snappy',
-    long_description=open(os.path.join(ROOT, 'README.rst')).read(),
+    long_description=get_long_description('django-nose'),
     author='Jeff Balogh',
     author_email='me@jeffbalogh.org',
     maintainer='Erik Rose',

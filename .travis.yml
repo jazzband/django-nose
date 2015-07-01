@@ -6,6 +6,7 @@ env:
     matrix:
         # Most important builds
         - TOXENV=flake8
+        - TOXENV=docs
         - TOXENV=py27-django-18
         - TOXENV=py34-django-18
         - TOXENV=py27-django-17
