@@ -66,6 +66,14 @@ django_test() {
     TEST_COUNT=$2
     DESCRIPTION=$3
 
+    if [ $VERBOSE -eq 1 ]
+    then
+        echo "================"
+        echo "Django settings:"
+        ./manage.py diffsettings
+        echo "================"
+    fi
+
     if [ -n "$COVERAGE" ]
     then
         TEST="coverage run -p $COMMAND"
