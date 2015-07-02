@@ -4,6 +4,7 @@
 VERBOSE=0
 HELP=0
 ERR=0
+NOINPUT=""
 while [[ $# > 0 ]]
 do
     key="$1"
@@ -13,6 +14,9 @@ do
             ;;
         -v|--verbose)
             VERBOSE=1
+            ;;
+        --noinput)
+            NOINPUT="--noinput"
             ;;
         *)
             echo "Unknown option '$key'"
@@ -86,6 +90,7 @@ django_test() {
     RETURN=0
     if [ $VERBOSE -eq 1 ]
     then
+        echo $TEST
         $TEST > >(tee $TMP_OUT) 2> >(tee $TMP_ERR >&2)
     else
         $TEST >$TMP_OUT 2>$TMP_ERR
@@ -122,42 +127,42 @@ django_test() {
 TESTAPP_COUNT=6
 
 reset_env
-django_test './manage.py test' $TESTAPP_COUNT 'normal settings'
+django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'normal settings'
 
 DJANGO_VERSION=`./manage.py version | cut -d. -f1-2`
 if [ "$DJANGO_VERSION" = "1.4" -o "$DJANGO_VERSION" = "1.5" -o "$DJANGO_VERSION" = "1.6" ]
 then
     reset_env
     export USE_SOUTH=1
-    django_test './manage.py test' $TESTAPP_COUNT 'with south in installed apps'
+    django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'with south in installed apps'
 fi
 
 reset_env
 export TEST_RUNNER="django_nose.run_tests"
-django_test './manage.py test' $TESTAPP_COUNT 'django_nose.run_tests format'
+django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'django_nose.run_tests format'
 
 reset_env
-django_test 'testapp/runtests.py testapp.test_only_this' 1 'via run_tests API'
+django_test "testapp/runtests.py testapp.test_only_this" 1 'via run_tests API'
 
 reset_env
 export NOSE_PLUGINS="testapp.plugins.SanityCheckPlugin"
-django_test './manage.py test testapp/plugin_t' 1 'with plugins'
+django_test "./manage.py test testapp/plugin_t $NOINPUT" 1 'with plugins'
 
 reset_env
-django_test './manage.py test unittests' 4 'unittests'
+django_test "./manage.py test unittests $NOINPUT" 4 'unittests'
 
 reset_env
-django_test './manage.py test unittests --testrunner=testapp.custom_runner.CustomNoseTestSuiteRunner' 4 'unittests with testrunner'
+django_test "./manage.py test unittests --testrunner=testapp.custom_runner.CustomNoseTestSuiteRunner $NOINPUT" 4 'unittests with testrunner'
 
 reset_env
 export REUSE_DB=1
-django_test './manage.py test' $TESTAPP_COUNT 'with REUSE_DB=1, call #1'
-django_test './manage.py test' $TESTAPP_COUNT 'with REUSE_DB=1, call #2'
+django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'with REUSE_DB=1, call #1'
+django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'with REUSE_DB=1, call #2'
 
 
 if ! [ $(version $PYTHONVERSION) \> $(version 3.0.0) ]
 then
     # Python 3 doesn't support the hotshot profiler. See nose#842.
     reset_env
-    django_test './manage.py test --with-profile --profile-restrict "less_output"' $TESTAPP_COUNT 'with profile plugin'
+    django_test "./manage.py test $NOINPUT --with-profile --profile-restrict less_output" $TESTAPP_COUNT 'with profile plugin'
 fi
