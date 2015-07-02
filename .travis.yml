@@ -4,25 +4,17 @@ env:
     global:
         - COVERAGE=1 RUNTEST_ARGS=-v
     matrix:
-        # Most important builds
+        # Quality checks
         - TOXENV=flake8
         - TOXENV=docs
+        # Supported Python / Django versions
         - TOXENV=py27-django-18
         - TOXENV=py34-django-18
         - TOXENV=py27-django-17
         - TOXENV=py34-django-17
-        - TOXENV=py27-django-16
-        - TOXENV=py32-django-16
         - TOXENV=py26-django-14
-        # Redundant builds that might be dropped
-        - TOXENV=py32-django-18
-        - TOXENV=py33-django-18
-        - TOXENV=py32-django-17
-        - TOXENV=py33-django-17
-        - TOXENV=py26-django-16
-        - TOXENV=py33-django-16
-        - TOXENV=py34-django-16
-        # Django master builds that are allowed to fail
+        - TOXENV=py27-django-14
+        # Django master is allowed to fail
         - TOXENV=py27-django-master
         - TOXENV=py34-django-master
 matrix:
