@@ -7,9 +7,8 @@ from django.conf import settings
 if not settings.configured:
     settings.configure(
         DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3'}},
-        INSTALLED_APPS=[
-            'django_nose',
-        ],
+        INSTALLED_APPS=['django_nose'],
+        MIDDLEWARE_CLASSES=[],
     )
 
 from django_nose import NoseTestSuiteRunner
