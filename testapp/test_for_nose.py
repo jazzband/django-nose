@@ -2,4 +2,5 @@
 
 
 def test_addition():
+    """Test some advanced maths."""
     assert 1 + 1 == 2

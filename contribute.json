@@ -3,7 +3,7 @@
     "description": "Django test runner using nose.",
     "repository": {
         "url": "https://github.com/django-nose/django-nose",
-        "license": "MPL2",
+        "license": "BSD",
         "tests": "https://travis-ci.org/django-nose/django-nose"
     },
     "participate": {

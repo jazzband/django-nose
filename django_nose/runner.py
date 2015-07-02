@@ -61,7 +61,7 @@ except ImportError:
     from django.test.simple import DjangoTestSuiteRunner as DiscoverRunner
 
 
-__all__ = ['BasicNoseRunner', 'NoseTestSuiteRunner']
+__all__ = ('BasicNoseRunner', 'NoseTestSuiteRunner')
 
 
 # This is a table of Django's "manage.py test" options which
@@ -97,21 +97,21 @@ def _get_plugins_from_settings():
             dot = plug_path.rindex('.')
         except ValueError:
             raise exceptions.ImproperlyConfigured(
-                    "%s isn't a Nose plugin module" % plug_path)
+                "%s isn't a Nose plugin module" % plug_path)
         p_mod, p_classname = plug_path[:dot], plug_path[dot + 1:]
 
         try:
             mod = import_module(p_mod)
         except ImportError as e:
             raise exceptions.ImproperlyConfigured(
-                    'Error importing Nose plugin module %s: "%s"' % (p_mod, e))
+                'Error importing Nose plugin module %s: "%s"' % (p_mod, e))
 
         try:
             p_class = getattr(mod, p_classname)
         except AttributeError:
             raise exceptions.ImproperlyConfigured(
-                    'Nose plugin module "%s" does not define a "%s"' %
-                    (p_mod, p_classname))
+                'Nose plugin module "%s" does not define a "%s"' %
+                (p_mod, p_classname))
 
         yield p_class()
 
@@ -136,12 +136,13 @@ def _get_options():
 
     # Django 1.6 introduces a "--pattern" option, which is shortened into "-p"
     # do not allow "-p" to collide with nose's "--plugins" option.
-    plugins_option = [o for o in options if o.get_opt_string() == '--plugins'][0]
+    plugins_option = [
+        o for o in options if o.get_opt_string() == '--plugins'][0]
     plugins_option._short_opts.remove('-p')
 
     django_opts = [opt.dest for opt in BaseCommand.option_list] + ['version']
-    return tuple(o for o in options if o.dest not in django_opts and
-                                       o.action != 'help')
+    return tuple(
+        o for o in options if o.dest not in django_opts and o.action != 'help')
 
 
 if hasattr(BaseCommand, 'use_argparse'):
@@ -186,7 +187,7 @@ if hasattr(BaseCommand, 'use_argparse'):
 
         @classmethod
         def add_arguments(cls, parser):
-            """Convert nose's optparse arguments to argparse"""
+            """Convert nose's optparse arguments to argparse."""
             super(BaseRunner, cls).add_arguments(parser)
 
             # Read optparse options for nose and plugins
@@ -266,21 +267,23 @@ else:
         options = _get_options()
 
         # Not add following options to nosetests
-        django_opts = ['--noinput', '--liveserver', '-p', '--pattern',
-            '--testrunner']
+        django_opts = [
+            '--noinput', '--liveserver', '-p', '--pattern', '--testrunner']
 
 
 class BasicNoseRunner(BaseRunner):
-    """Facade that implements a nose runner in the guise of a Django runner
+
+    """Facade that implements a nose runner in the guise of a Django runner.
 
     You shouldn't have to use this directly unless the additions made by
     ``NoseTestSuiteRunner`` really bother you. They shouldn't, because they're
     all off by default.
-
     """
+
     __test__ = False
 
     def run_suite(self, nose_argv):
+        """Run the test suite."""
         result_plugin = ResultPlugin()
         plugins_to_add = [DjangoSetUpPlugin(self),
                           result_plugin,
@@ -325,7 +328,6 @@ class BasicNoseRunner(BaseRunner):
         but the extra tests will not be run.  Maybe later.
 
         Returns the number of tests that failed.
-
         """
         nose_argv = (['nosetests'] + list(test_labels))
         if hasattr(settings, 'NOSE_ARGS'):
@@ -337,9 +339,10 @@ class BasicNoseRunner(BaseRunner):
             django_opts.extend(opt._long_opts)
             django_opts.extend(opt._short_opts)
 
-        nose_argv.extend(translate_option(opt) for opt in sys.argv[1:]
-        if opt.startswith('-')
-           and not any(opt.startswith(d) for d in django_opts))
+        nose_argv.extend(
+            translate_option(opt) for opt in sys.argv[1:]
+            if opt.startswith('-') and
+            not any(opt.startswith(d) for d in django_opts))
 
         # if --nose-verbosity was omitted, pass Django verbosity to nose
         if ('--verbosity' not in nose_argv and
@@ -358,11 +361,10 @@ _old_handle = Command.handle
 
 
 def _foreign_key_ignoring_handle(self, *fixture_labels, **options):
-    """Wrap the the stock loaddata to ignore foreign key
-    checks so we can load circular references from fixtures.
+    """Wrap the the stock loaddata to ignore foreign key checks.
 
-    This is monkeypatched into place in setup_databases().
-
+    This allows loading circular references from fixtures, and is
+    monkeypatched into place in setup_databases().
     """
     using = options.get('database', DEFAULT_DB_ALIAS)
     commit = options.get('commit', True)
@@ -384,12 +386,11 @@ def _foreign_key_ignoring_handle(self, *fixture_labels, **options):
 
 
 def _skip_create_test_db(self, verbosity=1, autoclobber=False, serialize=True):
-    """``create_test_db`` implementation that skips both creation and flushing
+    """``create_test_db`` implementation that skips both creation and flushing.
 
     The idea is to re-use the perfectly good test DB already created by an
     earlier test run, cutting the time spent before any tests run from 5-13s
     (depending on your I/O luck) down to 3.
-
     """
     # Notice that the DB supports transactions. Originally, this was done in
     # the method this overrides. The confirm method was added in Django v1.3
@@ -408,13 +409,12 @@ def _skip_create_test_db(self, verbosity=1, autoclobber=False, serialize=True):
 
 
 def _reusing_db():
-    """Return whether the ``REUSE_DB`` flag was passed"""
+    """Return whether the ``REUSE_DB`` flag was passed."""
     return os.getenv('REUSE_DB', 'false').lower() in ('true', '1', '')
 
 
 def _can_support_reuse_db(connection):
-    """Return whether it makes any sense to
-    use REUSE_DB with the backend of a connection."""
+    """Return True if REUSE_DB is a sensible option for the backend."""
     # Perhaps this is a SQLite in-memory DB. Those are created implicitly when
     # you try to connect to them, so our usual test doesn't work.
     return not connection.creation._get_test_db_name() == ':memory:'
@@ -424,7 +424,6 @@ def _should_create_database(connection):
     """Return whether we should recreate the given DB.
 
     This is true if the DB doesn't exist or the REUSE_DB env var isn't truthy.
-
     """
     # TODO: Notice when the Model classes change and return True. Worst case,
     # we can generate sqlall and hash it, though it's a bit slow (2 secs) and
@@ -444,11 +443,10 @@ def _should_create_database(connection):
 
 
 def _mysql_reset_sequences(style, connection):
-    """Return a list of SQL statements needed to
-    reset all sequences for Django tables."""
+    """Return a SQL statements needed to reset Django tables."""
     tables = connection.introspection.django_table_names(only_existing=True)
     flush_statements = connection.ops.sql_flush(
-            style, tables, connection.introspection.sequence_list())
+        style, tables, connection.introspection.sequence_list())
 
     # connection.ops.sequence_reset_sql() is not implemented for MySQL,
     # and the base class just returns []. TODO: Implement it by pulling
@@ -461,14 +459,14 @@ def _mysql_reset_sequences(style, connection):
 
 
 class NoseTestSuiteRunner(BasicNoseRunner):
-    """A runner that optionally skips DB creation
+
+    """A runner that optionally skips DB creation.
 
     Monkeypatches connection.creation to let you skip creating databases if
     they already exist. Your tests will start up much faster.
 
     To opt into this behavior, set the environment variable ``REUSE_DB`` to
     something that isn't "0" or "false" (case insensitive).
-
     """
 
     def _get_models_for_connection(self, connection):
@@ -478,6 +476,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 m._meta.db_table in tables]
 
     def setup_databases(self):
+        """Setup databases, skipping DB creation if requested and possible."""
         for alias in connections:
             connection = connections[alias]
             creation = connection.creation
@@ -512,7 +511,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                         style, connection)
                 else:
                     reset_statements = connection.ops.sequence_reset_sql(
-                            style, self._get_models_for_connection(connection))
+                        style, self._get_models_for_connection(connection))
 
                 for reset_statement in reset_statements:
                     cursor.execute(reset_statement)
@@ -526,7 +525,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 # Each connection has its own creation object, so this affects
                 # only a single connection:
                 creation.create_test_db = MethodType(
-                        _skip_create_test_db, creation)
+                    _skip_create_test_db, creation)
 
         Command.handle = _foreign_key_ignoring_handle
 
@@ -538,5 +537,5 @@ class NoseTestSuiteRunner(BasicNoseRunner):
         """Leave those poor, reusable databases alone if REUSE_DB is true."""
         if not _reusing_db():
             return super(NoseTestSuiteRunner, self).teardown_databases(
-                    *args, **kwargs)
+                *args, **kwargs)
         # else skip tearing down the DB so we can reuse it next time

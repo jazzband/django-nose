@@ -1,7 +1,8 @@
 # coding: utf-8
 """
-Add extra options from the test runner to the ``test`` command, so that you can
-browse all the nose options from the command line.
+Add extra options from the test runner to the ``test`` command.
+
+This enables browsing all the nose options from the command line.
 """
 from __future__ import unicode_literals
 
@@ -33,4 +34,7 @@ else:
 
 
 class Command(Command):
+
+    """Implement the ``test`` command."""
+
     option_list = Command.option_list + tuple(extra_options)

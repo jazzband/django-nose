@@ -1,3 +1,4 @@
+"""Test database access without a database."""
 from contextlib import contextmanager
 from unittest import TestCase
 
@@ -10,6 +11,9 @@ from django_nose.runner import NoseTestSuiteRunner
 
 
 class GetModelsForConnectionTests(TestCase):
+
+    """Test runner._get_models_for_connection."""
+
     tables = ['test_table%d' % i for i in range(5)]
 
     def _connection_mock(self, tables):
@@ -40,6 +44,7 @@ class GetModelsForConnectionTests(TestCase):
         apps.get_models = old
 
     def setUp(self):
+        """Initialize the runner."""
         self.runner = NoseTestSuiteRunner()
 
     def test_no_models(self):
@@ -57,17 +62,19 @@ class GetModelsForConnectionTests(TestCase):
                 self.runner._get_models_for_connection(connection), [])
 
     def test_some_models(self):
-        """If some of the models has appropriate table in the DB, return matching models."""
+        """If some of the models are in the DB, return matching models."""
         connection = self._connection_mock(self.tables)
         with self._cache_mock(self.tables[1:3]):
-            result_tables = [m._meta.db_table for m in
-                             self.runner._get_models_for_connection(connection)]
+            result_tables = [
+                m._meta.db_table for m in
+                self.runner._get_models_for_connection(connection)]
         self.assertEqual(result_tables, self.tables[1:3])
 
     def test_all_models(self):
-        """If all the models have appropriate tables in the DB, return them all."""
+        """If all the models have in the DB, return them all."""
         connection = self._connection_mock(self.tables)
         with self._cache_mock(self.tables):
-            result_tables = [m._meta.db_table for m in
-                             self.runner._get_models_for_connection(connection)]
+            result_tables = [
+                m._meta.db_table for m in
+                self.runner._get_models_for_connection(connection)]
         self.assertEqual(result_tables, self.tables)
