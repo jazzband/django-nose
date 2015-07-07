@@ -1,5 +1,12 @@
+# coding: utf-8
+"""django-nose utility methods."""
+from __future__ import unicode_literals
+
+
 def process_tests(suite, process):
-    """Given a nested disaster of [Lazy]Suites, traverse to the first level
+    """Find and process the suite with setup/teardown methods.
+
+    Given a nested disaster of [Lazy]Suites, traverse to the first level
     that has setup or teardown, and do something to them.
 
     If we were to traverse all the way to the leaves (the Tests)
@@ -17,10 +24,9 @@ def process_tests(suite, process):
 
     :arg process: The thing to call once we get to a leaf or a test with setup
         or teardown
-
     """
     if (not hasattr(suite, '_tests') or
-        (hasattr(suite, 'hasFixtures') and suite.hasFixtures())):
+            (hasattr(suite, 'hasFixtures') and suite.hasFixtures())):
         # We hit a Test or something with setup, so do the thing. (Note that
         # "fixtures" here means setup or teardown routines, not Django
         # fixtures.)

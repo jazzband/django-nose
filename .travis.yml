@@ -1,30 +1,52 @@
+sudo: false
 language: python
-python:
-  - "2.6"
-  - "2.7"
-  - "3.2"
-  - "3.3"
-  - "3.4"
 env:
-  - DJANGO="Django>=1.4,<1.5"
-  - DJANGO="Django>=1.6,<1.7"
-  - DJANGO="Django>=1.7,<1.8"
-  - DJANGO="Django>=1.8,<1.9"
+    global:
+        - COVERAGE=1 RUNTEST_ARGS="-v --noinput"
+    matrix:
+        # Quality checks
+        - TOXENV=flake8
+        - TOXENV=docs
+        # Supported Python / Django versions w/ SQLite
+        - TOXENV=py27-django-18
+        - TOXENV=py34-django-18
+        - TOXENV=py27-django-17
+        - TOXENV=py34-django-17
+        - TOXENV=py26-django-14
+        - TOXENV=py27-django-14
+        # Test with PostgreSQL
+        - TOXENV=py27-django-18-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-18-postgres"
+        - TOXENV=py34-django-18-postgres DATABASE_URL="postgres://postgres@localhost:5432/py34-django-18-postgres"
+        - TOXENV=py27-django-17-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-17-postgres"
+        - TOXENV=py27-django-14-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-14-postgres"
+        # Test with MySQL
+        - TOXENV=py27-django-18-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-18-mysql"
+        - TOXENV=py34-django-18-mysql DATABASE_URL="mysql://travis@localhost:3306/py34-django-18-mysql"
+        - TOXENV=py27-django-17-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-17-mysql"
+        - TOXENV=py27-django-14-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-14-mysql"
+        # Django master is allowed to fail
+        - TOXENV=py27-django-master
+        - TOXENV=py34-django-master
+        - TOXENV=py27-django-master-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-master-mysql"
+        - TOXENV=py34-django-master-postgres DATABASE_URL="postgres://postgres@localhost:5432/py34-django-master-postgres"
 matrix:
-  exclude:
-    - python: "3.2"
-      env: DJANGO="Django>=1.4,<1.5"
-    - python: "3.3"
-      env: DJANGO="Django>=1.4,<1.5"
-    - python: "3.4"
-      env: DJANGO="Django>=1.4,<1.5"
-    - python: "2.6"
-      env: DJANGO="Django>=1.7,<1.8"
-    - python: "2.6"
-      env: DJANGO="Django>=1.8,<1.9"
+    allow_failures:
+        # Bug #197
+        - env: TOXENV=py27-django-18-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-18-postgres"
+        - env: TOXENV=py34-django-18-postgres DATABASE_URL="postgres://postgres@localhost:5432/py34-django-18-postgres"
+        - env: TOXENV=py27-django-18-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-18-mysql"
+        - env: TOXENV=py34-django-18-mysql DATABASE_URL="mysql://travis@localhost:3306/py34-django-18-mysql"
+        # Master is allowed to fail
+        - env: TOXENV=py27-django-master
+        - env: TOXENV=py34-django-master
+        - env: TOXENV=py27-django-master-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-master-mysql"
+        - env: TOXENV=py34-django-master-postgres DATABASE_URL="postgres://postgres@localhost:5432/py34-django-master-postgres"
+
 install:
-  - if [ $DJANGO = 'Django>=1.4,<1.5' -o $DJANGO = 'Django>=1.6,<1.7' ]; then pip install south; fi
-  - pip install "$DJANGO"
-  - pip install -e .
-script:
-  - ./runtests.sh
+    - pip install tox coveralls
+before_script:
+    - coverage erase
+    - bash -c "if [[ \"$DATABASE_URL\" == postgres* ]]; then psql -c 'create database \"$TOXENV\";' -U postgres; fi"
+    - bash -c "if [[ \"$DATABASE_URL\" == mysql* ]]; then mysql -e 'create database IF NOT EXISTS \`$TOXENV\`;'; fi"
+script: tox
+after_success: coveralls
