@@ -49,6 +49,7 @@ These non-maintainers have contributed code to a django-nose release:
 * Rob Madole (`robmadole <https://github.com/robmadole>`_)
 * Roger Hu (`rogerhu <https://github.com/rogerhu>`_)
 * Ross Lawley (`rozza <https://github.com/rozza>`_)
+* Scott Sexton (`scottsexton <https://github.com/scottsexton>`_)
 * Stephen Burrows (`melinath <https://github.com/melinath>`_)
 * Sverre Johansen (`sverrejoh <https://github.com/sverrejoh>`_)
 * Tim Child (`timc3 <https://github.com/timc3>`_)

@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+*Unreleased*
+~~~~~~~~~~~~
+* REUSE_DB=1 uses new transaction management in Django 1.7, 1.8 (scottsexton)
+* Supported Django versions limited to current supported Django version 1.4,
+  1.7, and 1.8, as well as relevant Python versions.
+
 1.4.1 (2015-06-29)
 ~~~~~~~~~~~~~~~~~~
 * Fix version number (ezarowny)
