@@ -537,7 +537,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
 
     def teardown_databases(self, *args, **kwargs):
         """Leave those poor, reusable databases alone if REUSE_DB is true."""
-        if not _reusing_db():
+        if not _reusing_db() and os.getenv('REUSE_DB', 'false') != '2':
             return super(NoseTestSuiteRunner, self).teardown_databases(
                 *args, **kwargs)
         # else skip tearing down the DB so we can reuse it next time
