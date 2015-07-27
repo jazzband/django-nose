@@ -29,7 +29,7 @@ django-nose
     accidentally shadowing test classes.
   * Taking advantage of all the useful `nose plugins`_
 
-.. _nose: http://somethingaboutorange.com/mrl/projects/nose/
+.. _nose: https://nose.readthedocs.org/en/latest/
 .. _nose plugins: http://nose-plugins.jottit.com/
 
 It also provides:
