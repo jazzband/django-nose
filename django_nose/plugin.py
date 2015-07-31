@@ -98,6 +98,9 @@ class Bucketer(object):
 
     def __init__(self):
         """Initialize the test buckets."""
+        # All non-FastFixtureTestCase we saw before hitting the first FFTC
+        self.preamble = []
+
         # { (frozenset(['users.json']), True):
         #      [ContextSuite(...), ContextSuite(...)] }
         self.buckets = {}
@@ -120,6 +123,8 @@ class Bucketer(object):
                            'exempt_from_fixture_bundling',
                            False))
             self.buckets.setdefault(key, []).append(test)
+        elif not self.buckets:
+            self.preamble.append(test)
         else:
             self.remainder.append(test)
 
@@ -173,26 +178,34 @@ class TestReorderer(AlwaysOnPlugin):
 
             Thus, things will get these comparands (and run in this order):
 
-            * 1: TestCase subclasses. These clean up after themselves.
-            * 1: TransactionTestCase subclasses with
-                 cleans_up_after_itself=True. These include
-                 FastFixtureTestCases. If you're using the
-                 FixtureBundlingPlugin, it will pull the FFTCs out, reorder
-                 them, and run them first of all.
-            * 2: TransactionTestCase subclasses. These leave a mess.
-            * 2: Anything else (including doctests, I hope). These don't care
-                 about the mess you left, because they don't hit the DB or, if
-                 they do, are responsible for ensuring that it's clean (as per
+            * 0: Not a subclass of TransactionTestCase. These should not hit
+                 the DB or, if they do, are responsible for ensuring that it's
+                 clean (as per
                  https://docs.djangoproject.com/en/dev/topics/testing/?from=
-                 olddocs#writing-doctests)
+                 olddocs#writing-doctests). Note that this could include a
+                 group of tests (including TransactionTestCase tests) with
+                 setup and/or teardown routines in a "context" such as a
+                 module or package defining fixture functions. To avoid that
+                 scenario, don't use TestCase or TransactionTestCase in
+                 modules or packages with setup or teardown functions.
+            * 1: FastFixtureTestCase subclasses. If you're using the
+                 FixtureBundlingPlugin, it will pull the FFTCs out, reorder
+                 them, and run them before the following groups.
+            * 2: TestCase subclasses. These clean up after themselves.
+            * 2: TransactionTestCase subclasses with
+                 cleans_up_after_itself=True.
+            * 3: TransactionTestCase subclasses. These leave a mess.
 
             """
             test_class = test.context
-            if (is_subclass_at_all(test_class, TestCase) or
-                (is_subclass_at_all(test_class, TransactionTestCase) and
-                 getattr(test_class, 'cleans_up_after_itself', False))):
-                return 1
-            return 2
+            if is_subclass_at_all(test_class, TransactionTestCase):
+                if is_subclass_at_all(test_class, FastFixtureTestCase):
+                    return 1
+                if (is_subclass_at_all(test_class, TestCase) or
+                        getattr(test_class, 'cleans_up_after_itself', False)):
+                    return 2
+                return 3
+            return 0
 
         flattened = []
         process_tests(test, flattened.append)
@@ -228,7 +241,7 @@ class TestReorderer(AlwaysOnPlugin):
 
             # Lay the bundles of common-fixture-having test classes end to end
             # in a single list so we can make a test suite out of them:
-            flattened = []
+            flattened = list(bucketer.preamble)
             for (key, fixture_bundle) in bucketer.buckets.items():
                 fixtures, is_exempt = key
                 # Advise first and last test classes in each bundle to set up
