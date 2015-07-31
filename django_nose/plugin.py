@@ -145,11 +145,22 @@ class TestReorderer(AlwaysOnPlugin):
                           help='Load a unique set of fixtures only once, even '
                                'across test classes. '
                                '[NOSE_WITH_FIXTURE_BUNDLING]')
+        parser.add_option('--non-db-test-context',
+                          dest='non_db_test_context',
+                          default=env.get('NOSE_NON_DB_TEST_CONTEXT'),
+                          help='A module path to a callable taking a list of '
+                               'tests and returning a context object (with '
+                               '`setup` and `teardown` methods) to be used '
+                               'while running non-DB tests. This is useful, '
+                               'for example, to enforce that non-DB tests do '
+                               'not try to access a database. '
+                               '[NOSE_NON_DB_TEST_CONTEXT]')
 
     def configure(self, options, conf):
         """Configure plugin, reading the with_fixture_bundling option."""
         super(TestReorderer, self).configure(options, conf)
         self.should_bundle = options.with_fixture_bundling
+        self.non_db_test_context = options.non_db_test_context
 
     def _put_transaction_test_cases_last(self, test):
         """Reorder test suite so TransactionTestCase-based tests come last.
@@ -241,7 +252,12 @@ class TestReorderer(AlwaysOnPlugin):
 
             # Lay the bundles of common-fixture-having test classes end to end
             # in a single list so we can make a test suite out of them:
-            flattened = list(bucketer.preamble)
+            if self.non_db_test_context:
+                context = get_non_db_test_context(
+                            self.non_db_test_context, bucketer.preamble)
+                flattened = [ContextSuite(bucketer.preamble, context)]
+            else:
+                flattened = list(bucketer.preamble)
             for (key, fixture_bundle) in bucketer.buckets.items():
                 fixtures, is_exempt = key
                 # Advise first and last test classes in each bundle to set up
@@ -279,3 +295,10 @@ class TestReorderer(AlwaysOnPlugin):
         if self.should_bundle:
             test = self._bundle_fixtures(test)
         return test
+
+
+def get_non_db_test_context(context_path, tests):
+    """Make a test context for non-db tests"""
+    module_path, context_name = context_path.rsplit(".", 1)
+    module = __import__(module_path, globals(), locals(), [context_name])
+    return getattr(module, context_name)(tests)
