@@ -42,7 +42,7 @@ except ImportError:
 
 import nose.core
 
-from django_nose.plugin import DjangoSetUpPlugin, ResultPlugin, TestReorderer
+from django_nose.plugin import DjangoSetUpPlugin, ResultPlugin, DatabaseSetUpPlugin
 from django_nose.utils import uses_mysql
 
 try:
@@ -90,8 +90,7 @@ if not hasattr(BaseDatabaseCreation, '_get_test_db_name'):
 
 
 def _get_plugins_from_settings():
-    plugins = (list(getattr(settings, 'NOSE_PLUGINS', [])) +
-               ['django_nose.plugin.TestReorderer'])
+    plugins = list(getattr(settings, 'NOSE_PLUGINS', []))
     for plug_path in plugins:
         try:
             dot = plug_path.rindex('.')
@@ -285,12 +284,12 @@ class BasicNoseRunner(BaseRunner):
     def run_suite(self, nose_argv):
         """Run the test suite."""
         result_plugin = ResultPlugin()
-        plugins_to_add = [DjangoSetUpPlugin(self),
-                          result_plugin,
-                          TestReorderer()]
+        plugins_to_add = [DjangoSetUpPlugin(self), result_plugin]
 
         for plugin in _get_plugins_from_settings():
             plugins_to_add.append(plugin)
+
+        plugins_to_add.append(DatabaseSetUpPlugin(self))
 
         try:
             django.setup()

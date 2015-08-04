@@ -83,13 +83,11 @@ class DjangoSetUpPlugin(AlwaysOnPlugin):
         sys.stdout = self.sys_stdout
 
         self.runner.setup_test_environment()
-        self.old_names = self.runner.setup_databases()
 
         sys.stdout = sys_stdout
 
     def finalize(self, result):
         """Finalize test run by cleaning up databases and environment."""
-        self.runner.teardown_databases(self.old_names)
         self.runner.teardown_test_environment()
 
 
@@ -125,7 +123,7 @@ class Bucketer(object):
             self.remainder.append(test)
 
 
-class TestReorderer(AlwaysOnPlugin):
+class DatabaseSetUpPlugin(AlwaysOnPlugin):
 
     """Reorder tests for various reasons."""
 
@@ -136,9 +134,14 @@ class TestReorderer(AlwaysOnPlugin):
     CLEAN_TESTS = 2
     DIRTY_TESTS = 3
 
+    def __init__(self, runner):
+        """Initialize the plugin with the test runner."""
+        super(DatabaseSetUpPlugin, self).__init__()
+        self.runner = runner
+
     def options(self, parser, env):
-        """Add --with-fixture-bundling to options."""
-        super(TestReorderer, self).options(parser, env)  # pointless
+        """Add options."""
+        super(DatabaseSetUpPlugin, self).options(parser, env)  # pointless
         parser.add_option('--with-fixture-bundling',
                           action='store_true',
                           dest='with_fixture_bundling',
@@ -146,21 +149,36 @@ class TestReorderer(AlwaysOnPlugin):
                           help='Load a unique set of fixtures only once, even '
                                'across test classes. '
                                '[NOSE_WITH_FIXTURE_BUNDLING]')
+        parser.add_option('--db-test-context',
+                          dest='db_test_context',
+                          default=env.get('NOSE_DB_TEST_CONTEXT',
+                                          'django_nose.plugin.DatabaseContext'),
+                          help='A module path to a callable accepting two '
+                               'arguments (tests, runner) and returning a '
+                               'context object (with `setup` and `teardown` '
+                               'methods) to be used while running database '
+                               'tests. This is useful, for example, to perform '
+                               'custom database setup/teardown. Defaults to '
+                               'django_nose.plugin.DatabaseContext. '
+                               '[NOSE_DB_TEST_CONTEXT]')
         parser.add_option('--non-db-test-context',
                           dest='non_db_test_context',
                           default=env.get('NOSE_NON_DB_TEST_CONTEXT'),
-                          help='A module path to a callable taking a list of '
-                               'tests and returning a context object (with '
-                               '`setup` and `teardown` methods) to be used '
-                               'while running non-DB tests. This is useful, '
-                               'for example, to enforce that non-DB tests do '
-                               'not try to access a database. '
+                          help='A module path to a callable accepting two '
+                               'arguments (tests, runner) and returning a '
+                               'context object (with `setup` and `teardown` '
+                               'methods) to be used while running non-database '
+                               'tests. This is useful, for example, to enforce '
+                               'that non-database tests do not try to access a '
+                               'database. The db-test-context will be used for '
+                               'all tests if this option is not specified. '
                                '[NOSE_NON_DB_TEST_CONTEXT]')
 
     def configure(self, options, conf):
         """Configure plugin, reading the with_fixture_bundling option."""
-        super(TestReorderer, self).configure(options, conf)
+        super(DatabaseSetUpPlugin, self).configure(options, conf)
         self.should_bundle = options.with_fixture_bundling
+        self.db_test_context_path = options.db_test_context
         self.non_db_test_context_path = options.non_db_test_context
 
     def _group_test_cases_by_type(self, test):
@@ -295,26 +313,67 @@ class TestReorderer(AlwaysOnPlugin):
     def prepareTest(self, test):
         """Reorder the tests."""
         test_groups = self._group_test_cases_by_type(test)
+        suites = []
 
         if self.non_db_test_context_path and self.NON_DB_TESTS in test_groups:
-            non_db_tests = test_groups[self.NON_DB_TESTS]
-            context = get_non_db_test_context(
-                        self.non_db_test_context_path, non_db_tests)
-            test_groups[self.NON_DB_TESTS] = [
-                ContextSuite(non_db_tests, context)
-            ]
+            # setup context for non-database tests
+            non_db_tests = test_groups.pop(self.NON_DB_TESTS)
+            context = get_test_context(
+                self.non_db_test_context_path, non_db_tests, self.runner)
+            suites.append(ContextSuite(non_db_tests, context))
 
         if self.should_bundle and self.FFTC_TESTS in test_groups:
             fftc_tests = test_groups[self.FFTC_TESTS]
             test_groups[self.FFTC_TESTS] = self._bundle_fixtures(fftc_tests)
 
-        return ContextSuite([test
-            for key, group in sorted(test_groups.items())
-            for test in group])
+        if test_groups:
+            db_tests = [test
+                        for key, group in sorted(test_groups.items())
+                        for test in group]
+            context = get_test_context(
+                self.db_test_context_path, db_tests, self.runner)
+            suites.append(ContextSuite(db_tests, context))
+
+        return suites[0] if len(suites) == 1 else ContextSuite(suites)
 
 
-def get_non_db_test_context(context_path, tests):
-    """Make a test context for non-db tests"""
+def get_test_context(context_path, tests, runner):
+    """Make a test context
+
+    Lookup context constructor and call it with the given list of
+    tests and runner.
+
+    Returns the context
+    """
+    from django_nose.runner import import_module
     module_path, context_name = context_path.rsplit(".", 1)
-    module = __import__(module_path, globals(), locals(), [context_name])
-    return getattr(module, context_name)(tests)
+    module = import_module(module_path)
+    return getattr(module, context_name)(tests, runner)
+
+
+class DatabaseContext(object):
+    """A context that performs standard Django database setup/teardown"""
+
+    def __init__(self, tests, runner):
+        self.runner = runner
+
+    def setup(self):
+        """Setup database."""
+        self.old_names = self.runner.setup_databases()
+
+    def teardown(self):
+        """Tear down database."""
+        self.runner.teardown_databases(self.old_names)
+
+
+class NullContext(object):
+    """A context that does nothing"""
+
+    def __init__(self, tests, runner):
+        pass
+
+    def setup(self):
+        pass
+
+    def teardown(self):
+        pass
