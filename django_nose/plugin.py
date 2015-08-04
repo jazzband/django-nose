@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import sys
+from itertools import groupby
 
 from nose.plugins.base import Plugin
 from nose.suite import ContextSuite
@@ -98,9 +99,6 @@ class Bucketer(object):
 
     def __init__(self):
         """Initialize the test buckets."""
-        # All non-FastFixtureTestCase we saw before hitting the first FFTC
-        self.preamble = []
-
         # { (frozenset(['users.json']), True):
         #      [ContextSuite(...), ContextSuite(...)] }
         self.buckets = {}
@@ -123,8 +121,6 @@ class Bucketer(object):
                            'exempt_from_fixture_bundling',
                            False))
             self.buckets.setdefault(key, []).append(test)
-        elif not self.buckets:
-            self.preamble.append(test)
         else:
             self.remainder.append(test)
 
@@ -134,6 +130,11 @@ class TestReorderer(AlwaysOnPlugin):
     """Reorder tests for various reasons."""
 
     name = 'django-nose-test-reorderer'
+
+    NON_DB_TESTS = 0
+    FFTC_TESTS = 1
+    CLEAN_TESTS = 2
+    DIRTY_TESTS = 3
 
     def options(self, parser, env):
         """Add --with-fixture-bundling to options."""
@@ -160,10 +161,20 @@ class TestReorderer(AlwaysOnPlugin):
         """Configure plugin, reading the with_fixture_bundling option."""
         super(TestReorderer, self).configure(options, conf)
         self.should_bundle = options.with_fixture_bundling
-        self.non_db_test_context = options.non_db_test_context
+        self.non_db_test_context_path = options.non_db_test_context
 
-    def _put_transaction_test_cases_last(self, test):
-        """Reorder test suite so TransactionTestCase-based tests come last.
+    def _group_test_cases_by_type(self, test):
+        """Group test suite by test type
+
+        Test types:
+
+        - Non-database tests (or ones that manage their own database connection
+          and cleanup) In simplest terms, this is any test that is not a
+          subclass of ``TransactionTestCase``.
+        - ``FastFixtureTestCase`` tests.
+        - Subclasses of ``django.test.TestCase`` and other database tests that
+          clean up after themselves.
+        - ``TransactionTestCase``-based tests, which often leave a mess.
 
         Django has a weird design decision wherein TransactionTestCase doesn't
         clean up after itself. Instead, it resets the DB to a clean state only
@@ -210,20 +221,22 @@ class TestReorderer(AlwaysOnPlugin):
             """
             test_class = test.context
             if is_subclass_at_all(test_class, TransactionTestCase):
-                if is_subclass_at_all(test_class, FastFixtureTestCase):
-                    return 1
+                if (is_subclass_at_all(test_class, FastFixtureTestCase) and
+                        self.should_bundle):
+                    return self.FFTC_TESTS
                 if (is_subclass_at_all(test_class, TestCase) or
                         getattr(test_class, 'cleans_up_after_itself', False)):
-                    return 2
-                return 3
-            return 0
+                    return self.CLEAN_TESTS
+                return self.DIRTY_TESTS
+            return self.NON_DB_TESTS
 
         flattened = []
         process_tests(test, flattened.append)
         flattened.sort(key=filthiness)
-        return ContextSuite(flattened)
+        return {key: list(group)
+                for key, group in groupby(flattened, filthiness)}
 
-    def _bundle_fixtures(self, test):
+    def _bundle_fixtures(self, fftc_tests):
         """Reorder tests to minimize fixture loading.
 
         I reorder FastFixtureTestCases so ones using identical sets
@@ -236,65 +249,68 @@ class TestReorderer(AlwaysOnPlugin):
         nobody else, in practice, pays attention to the ``_fb`` advisory
         bits. We return those first, then any remaining tests in the
         order they were received.
+
+        Add ``_fb_should_setup_fixtures`` and
+        ``_fb_should_teardown_fixtures`` attrs to each test class to advise
+        it whether to set up or tear down (respectively) the fixtures.
+
+        Return a list of tests.
         """
-        def suite_sorted_by_fixtures(suite):
-            """Flatten and sort a tree of Suites by fixture.
+        bucketer = Bucketer()
+        for test in fftc_tests:
+            bucketer.add(test)
 
-            Add ``_fb_should_setup_fixtures`` and
-            ``_fb_should_teardown_fixtures`` attrs to each test class to advise
-            it whether to set up or tear down (respectively) the fixtures.
+        # Lay the bundles of common-fixture-having test classes end to end
+        # in a single list so we can make a test suite out of them:
+        tests = []
+        for (key, fixture_bundle) in bucketer.buckets.items():
+            fixtures, is_exempt = key
+            # Advise first and last test classes in each bundle to set up
+            # and tear down fixtures and the rest not to:
+            if fixtures and not is_exempt:
+                # Ones with fixtures are sure to be classes, which means
+                # they're sure to be ContextSuites with contexts.
 
-            Return a Suite.
+                # First class with this set of fixtures sets up:
+                first = fixture_bundle[0].context
+                first._fb_should_setup_fixtures = True
 
-            """
-            bucketer = Bucketer()
-            process_tests(suite, bucketer.add)
+                # Set all classes' 1..n should_setup to False:
+                for cls in fixture_bundle[1:]:
+                    cls.context._fb_should_setup_fixtures = False
 
-            # Lay the bundles of common-fixture-having test classes end to end
-            # in a single list so we can make a test suite out of them:
-            if self.non_db_test_context:
-                context = get_non_db_test_context(
-                            self.non_db_test_context, bucketer.preamble)
-                flattened = [ContextSuite(bucketer.preamble, context)]
-            else:
-                flattened = list(bucketer.preamble)
-            for (key, fixture_bundle) in bucketer.buckets.items():
-                fixtures, is_exempt = key
-                # Advise first and last test classes in each bundle to set up
-                # and tear down fixtures and the rest not to:
-                if fixtures and not is_exempt:
-                    # Ones with fixtures are sure to be classes, which means
-                    # they're sure to be ContextSuites with contexts.
+                # Last class tears down:
+                last = fixture_bundle[-1].context
+                last._fb_should_teardown_fixtures = True
 
-                    # First class with this set of fixtures sets up:
-                    first = fixture_bundle[0].context
-                    first._fb_should_setup_fixtures = True
+                # Set all classes' 0..(n-1) should_teardown to False:
+                for cls in fixture_bundle[:-1]:
+                    cls.context._fb_should_teardown_fixtures = False
 
-                    # Set all classes' 1..n should_setup to False:
-                    for cls in fixture_bundle[1:]:
-                        cls.context._fb_should_setup_fixtures = False
+            tests.extend(fixture_bundle)
+        tests.extend(bucketer.remainder)
 
-                    # Last class tears down:
-                    last = fixture_bundle[-1].context
-                    last._fb_should_teardown_fixtures = True
-
-                    # Set all classes' 0..(n-1) should_teardown to False:
-                    for cls in fixture_bundle[:-1]:
-                        cls.context._fb_should_teardown_fixtures = False
-
-                flattened.extend(fixture_bundle)
-            flattened.extend(bucketer.remainder)
-
-            return ContextSuite(flattened)
-
-        return suite_sorted_by_fixtures(test)
+        return tests
 
     def prepareTest(self, test):
         """Reorder the tests."""
-        test = self._put_transaction_test_cases_last(test)
-        if self.should_bundle:
-            test = self._bundle_fixtures(test)
-        return test
+        test_groups = self._group_test_cases_by_type(test)
+
+        if self.non_db_test_context_path and self.NON_DB_TESTS in test_groups:
+            non_db_tests = test_groups[self.NON_DB_TESTS]
+            context = get_non_db_test_context(
+                        self.non_db_test_context_path, non_db_tests)
+            test_groups[self.NON_DB_TESTS] = [
+                ContextSuite(non_db_tests, context)
+            ]
+
+        if self.should_bundle and self.FFTC_TESTS in test_groups:
+            fftc_tests = test_groups[self.FFTC_TESTS]
+            test_groups[self.FFTC_TESTS] = self._bundle_fixtures(fftc_tests)
+
+        return ContextSuite([test
+            for key, group in sorted(test_groups.items())
+            for test in group])
 
 
 def get_non_db_test_context(context_path, tests):
