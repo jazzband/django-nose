@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+*Unreleased*
+~~~~~~~~~~~~
+* Add support for custom database contexts.
+
 1.4.2 (2015-10-07)
 ~~~~~~~~~~~~~~~~~~
 * Warn against using REUSE_DB=1 and FastFixtureTestCase in docs
