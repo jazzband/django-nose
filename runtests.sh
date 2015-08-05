@@ -37,10 +37,14 @@ fi
 
 export PYTHONPATH=.
 
-PYTHONVERSION=$(python --version 2>&1)
-PYTHONVERSION=${PYTHONVERSION##Python }
-
-function version { echo $@ | gawk -F. '{ printf("%d.%d.%d\n", $1,$2,$3); }'; }
+HAS_HOTSHOT=$(python -c "\
+try:
+  import hotshot
+except ImportError:
+  print('0')
+else:
+  print('1')
+")
 
 reset_env() {
     unset USE_SOUTH
@@ -160,7 +164,7 @@ django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'with REUSE_DB=1, call #1
 django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'with REUSE_DB=1, call #2'
 
 
-if ! [ $(version $PYTHONVERSION) \> $(version 3.0.0) ]
+if [ "$HAS_HOTSHOT" = "1" ]
 then
     # Python 3 doesn't support the hotshot profiler. See nose#842.
     reset_env
