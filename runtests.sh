@@ -73,6 +73,7 @@ django_test() {
     COMMAND=$1
     TEST_COUNT=$2
     DESCRIPTION=$3
+    CAN_FAIL=${4:-0}
 
     if [ $VERBOSE -eq 1 ]
     then
@@ -103,7 +104,12 @@ django_test() {
     then
         echo "FAIL (test failure): $DESCRIPTION"
         echo_output $TMP_OUT $TMP_ERR
-        exit 1;
+        if [ "$CAN_FAIL" == "0" ]
+        then
+            exit 1
+        else
+            return
+        fi
     fi
     OUTPUT=`cat $TMP_OUT $TMP_ERR`
     echo $OUTPUT | grep "Ran $TEST_COUNT test" > /dev/null
@@ -111,7 +117,12 @@ django_test() {
     then
         echo "FAIL (count!=$TEST_COUNT): $DESCRIPTION"
         echo_output $TMP_OUT $TMP_ERR
-        exit 1;
+        if [ "$CAN_FAIL" == "0" ]
+        then
+            exit 1
+        else
+            return
+        fi
     else
         echo "PASS (count==$TEST_COUNT): $DESCRIPTION"
     fi
@@ -122,7 +133,12 @@ django_test() {
     if [ $? -gt 0 ]
     then
         echo "FAIL (--help): $DESCRIPTION"
-        exit 1;
+        if [ "$CAN_FAIL" == 0 ]
+        then
+            exit 1;
+        else
+            return
+        fi
     else
         echo "PASS (  --help): $DESCRIPTION"
     fi
@@ -160,8 +176,10 @@ django_test "./manage.py test unittests --testrunner=testapp.custom_runner.Custo
 
 reset_env
 export REUSE_DB=1
-django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'with REUSE_DB=1, call #1'
-django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'with REUSE_DB=1, call #2'
+# For the many issues with REUSE_DB=1, see:
+# https://github.com/django-nose/django-nose/milestones/Fix%20REUSE_DB=1
+django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'with REUSE_DB=1, call #1' 'can fail'
+django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'with REUSE_DB=1, call #2' 'can fail'
 
 
 if [ "$HAS_HOTSHOT" = "1" ]
