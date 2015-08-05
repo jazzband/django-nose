@@ -42,7 +42,8 @@ except ImportError:
 
 import nose.core
 
-from django_nose.plugin import DjangoSetUpPlugin, ResultPlugin, DatabaseSetUpPlugin
+from django_nose.plugin import DjangoSetUpPlugin, ResultPlugin
+from django_nose.plugin import DatabaseSetUpPlugin
 from django_nose.utils import uses_mysql
 
 try:

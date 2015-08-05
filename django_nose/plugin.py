@@ -152,13 +152,15 @@ class DatabaseSetUpPlugin(AlwaysOnPlugin):
         parser.add_option('--db-test-context',
                           dest='db_test_context',
                           default=env.get('NOSE_DB_TEST_CONTEXT',
-                                          'django_nose.plugin.DatabaseContext'),
+                                          'django_nose.plugin.DatabaseContext'
+                                          ),
                           help='A module path to a callable accepting two '
                                'arguments (tests, runner) and returning a '
                                'context object (with `setup` and `teardown` '
                                'methods) to be used while running database '
-                               'tests. This is useful, for example, to perform '
-                               'custom database setup/teardown. Defaults to '
+                               'tests. This is useful, for example, to '
+                               'perform custom database setup/teardown. '
+                               'Defaults to '
                                'django_nose.plugin.DatabaseContext. '
                                '[NOSE_DB_TEST_CONTEXT]')
         parser.add_option('--non-db-test-context',
@@ -167,12 +169,12 @@ class DatabaseSetUpPlugin(AlwaysOnPlugin):
                           help='A module path to a callable accepting two '
                                'arguments (tests, runner) and returning a '
                                'context object (with `setup` and `teardown` '
-                               'methods) to be used while running non-database '
-                               'tests. This is useful, for example, to enforce '
-                               'that non-database tests do not try to access a '
-                               'database. The db-test-context will be used for '
-                               'all tests if this option is not specified. '
-                               '[NOSE_NON_DB_TEST_CONTEXT]')
+                               'methods) to be used while running non-'
+                               'database tests. This is useful, for example, '
+                               'to enforce that non-database tests do not try '
+                               'to access a database. The db-test-context '
+                               'will be used for all tests if this option is '
+                               'not specified. [NOSE_NON_DB_TEST_CONTEXT]')
 
     def configure(self, options, conf):
         """Configure plugin, reading the with_fixture_bundling option."""
@@ -182,7 +184,7 @@ class DatabaseSetUpPlugin(AlwaysOnPlugin):
         self.non_db_test_context_path = options.non_db_test_context
 
     def _group_test_cases_by_type(self, test):
-        """Group test suite by test type
+        """Group test suite by test type.
 
         Test types:
 
@@ -251,8 +253,8 @@ class DatabaseSetUpPlugin(AlwaysOnPlugin):
         flattened = []
         process_tests(test, flattened.append)
         flattened.sort(key=filthiness)
-        return {key: list(group)
-                for key, group in groupby(flattened, filthiness)}
+        return dict((key, list(group))
+                    for key, group in groupby(flattened, filthiness))
 
     def _bundle_fixtures(self, fftc_tests):
         """Reorder tests to minimize fixture loading.
@@ -327,9 +329,9 @@ class DatabaseSetUpPlugin(AlwaysOnPlugin):
             test_groups[self.FFTC_TESTS] = self._bundle_fixtures(fftc_tests)
 
         if test_groups:
-            db_tests = [test
+            db_tests = [test_
                         for key, group in sorted(test_groups.items())
-                        for test in group]
+                        for test_ in group]
             context = get_test_context(
                 self.db_test_context_path, db_tests, self.runner)
             suites.append(ContextSuite(db_tests, context))
@@ -338,7 +340,7 @@ class DatabaseSetUpPlugin(AlwaysOnPlugin):
 
 
 def get_test_context(context_path, tests, runner):
-    """Make a test context
+    """Make a test context.
 
     Lookup context constructor and call it with the given list of
     tests and runner.
@@ -352,9 +354,11 @@ def get_test_context(context_path, tests, runner):
 
 
 class DatabaseContext(object):
-    """A context that performs standard Django database setup/teardown"""
+
+    """A context that performs standard Django database setup/teardown."""
 
     def __init__(self, tests, runner):
+        """Initialize database context."""
         self.runner = runner
 
     def setup(self):
@@ -367,13 +371,17 @@ class DatabaseContext(object):
 
 
 class NullContext(object):
-    """A context that does nothing"""
+
+    """A context that does nothing."""
 
     def __init__(self, tests, runner):
+        """Initialize the context."""
         pass
 
     def setup(self):
+        """Do setup."""
         pass
 
     def teardown(self):
+        """Do teardown."""
         pass
