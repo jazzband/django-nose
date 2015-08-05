@@ -363,7 +363,13 @@ class DatabaseContext(object):
 
     def setup(self):
         """Setup database."""
-        self.old_names = self.runner.setup_databases()
+        # temporarily restore sys.stdout in case of propmt to delete database
+        test_stdout = sys.stdout
+        sys.stdout = sys.__stdout__
+        try:
+            self.old_names = self.runner.setup_databases()
+        finally:
+            sys.stdout = test_stdout
 
     def teardown(self):
         """Tear down database."""
