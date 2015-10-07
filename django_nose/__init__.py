@@ -7,7 +7,7 @@ from django_nose.testcases import FastFixtureTestCase
 assert BasicNoseRunner
 assert FastFixtureTestCase
 
-VERSION = (1, 4, 1)
+VERSION = (1, 4, 2)
 __version__ = '.'.join(map(str, VERSION))
 
 # Django < 1.2 compatibility.

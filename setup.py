@@ -36,7 +36,7 @@ _(Older changes can be found in the full documentation)._
 
 setup(
     name='django-nose',
-    version='1.4.1',
+    version='1.4.2',
     description='Makes your Django tests simple and snappy',
     long_description=get_long_description('django-nose'),
     author='Jeff Balogh',
@@ -74,8 +74,8 @@ setup(
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Topic :: Software Development :: Testing'
     ]
 )
