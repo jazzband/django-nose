@@ -18,7 +18,10 @@ try:
     from django.db.models import get_apps
 except ImportError:
     from django.apps import apps
-    get_apps = lambda: [a.models_module for a in apps.get_app_configs()]
+
+    def get_apps():
+        """Emulate get_apps in Django 1.9 and later."""
+        return [a.models_module for a in apps.get_app_configs()]
 
 try:
     import bz2

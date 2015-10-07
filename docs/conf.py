@@ -22,7 +22,7 @@ parent = os.path.dirname(cwd)
 sys.path.append(parent)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "testapp.settings")
 
-from django_nose import __version__
+from django_nose import __version__  # flake8: noqa
 
 # -- General configuration ------------------------------------------------
 

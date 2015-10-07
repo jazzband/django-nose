@@ -23,7 +23,9 @@ class GetModelsForConnectionTests(TestCase):
 
         class FakeConnection(object):
             introspection = FakeIntrospection()
-            cursor = lambda x: None
+
+            def cursor(self):
+                return None
 
         return FakeConnection()
 

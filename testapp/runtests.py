@@ -11,11 +11,10 @@ if not settings.configured:
         MIDDLEWARE_CLASSES=[],
     )
 
-from django_nose import NoseTestSuiteRunner
-
 
 def runtests(*test_labels):
     """Run the selected tests, or all tests if none selected."""
+    from django_nose import NoseTestSuiteRunner
     runner = NoseTestSuiteRunner(verbosity=1, interactive=True)
     failures = runner.run_tests(test_labels)
     sys.exit(failures)
