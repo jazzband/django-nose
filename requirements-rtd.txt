@@ -1,0 +1,4 @@
+# Requirements for ReadTheDocs
+# None right now, but avoid installing gnureadline, etc.
+# Must be set in the RTD Admin, at:
+# https://readthedocs.org/dashboard/django-nose/advanced/
