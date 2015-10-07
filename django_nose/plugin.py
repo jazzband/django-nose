@@ -312,7 +312,11 @@ class DatabaseSetUpPlugin(AlwaysOnPlugin):
 
         return tests
 
-    def prepareTest(self, test):
+    def prepareTestRunner(self, runner):
+        """Get a runner that reorders tests before running them."""
+        return _DatabaseSetupTestRunner(self, runner)
+
+    def group_by_database_setup(self, test):
         """Reorder the tests."""
         test_groups = self._group_test_cases_by_type(test)
         suites = []
@@ -337,6 +341,24 @@ class DatabaseSetUpPlugin(AlwaysOnPlugin):
             suites.append(ContextSuite(db_tests, context))
 
         return suites[0] if len(suites) == 1 else ContextSuite(suites)
+
+
+class _DatabaseSetupTestRunner(object):
+
+    """A test runner that groups tests by database setup.
+
+    This is a helper class that reorders tests for efficient database
+    setup. It modifies the test suite before any other plugins have a
+    chance to wrap it in the `prepareTest` hook.
+    """
+
+    def __init__(self, plugin, real_runner):
+        self.plugin = plugin
+        self.runner = real_runner
+
+    def run(self, test):
+        test = self.plugin.group_by_database_setup(test)
+        return self.runner.run(test)
 
 
 def get_test_context(context_path, tests, runner):
