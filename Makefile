@@ -14,7 +14,7 @@ help:
 	@echo "sdist - package"
 	@echo "test - run tests quickly with the default Python"
 	@echo "test-all - run tests on every Python version with tox"
-	@echo "test-release - upload a release to the PyPI test server
+	@echo "test-release - upload a release to the PyPI test server"
 
 clean: clean-build clean-pyc clean-test
 
