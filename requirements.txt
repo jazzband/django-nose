@@ -3,7 +3,7 @@
 #
 
 # Latest Django
-Django==1.8.2
+Django==1.8.5
 
 # This project
 -e .
@@ -12,7 +12,7 @@ Django==1.8.2
 dj-database-url==0.3.0
 
 # Packaging
-wheel==0.24.0
+wheel==0.26.0
 
 # PEP8, PEP257, and static analysis
 mccabe==0.3.1
@@ -35,12 +35,12 @@ check-manifest==0.25
 pyroma==1.8.2
 
 # Multi-env test runner
-virtualenv==13.0.3
+virtualenv==13.1.2
 py==1.4.30
 tox==2.1.1
 
 # Better interactive debugging
 gnureadline==6.3.3
-ipython==3.2.0
+ipython==4.0.0
 ipdb==0.8.1
 ipdbplugin==1.4.2
