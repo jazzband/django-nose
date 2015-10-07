@@ -3,7 +3,9 @@ Changelog
 
 *Unreleased*
 ~~~~~~~~~~~~
+* Warn against using REUSE_DB=1 and FastFixtureTestCase in docs
 * REUSE_DB=1 uses new transaction management in Django 1.7, 1.8 (scottsexton)
+* Try to avoid accidentally using production database with REUSE_DB=1 (alexjg, eroninjapan)
 * Supported Django versions limited to current supported Django version 1.4,
   1.7, and 1.8, as well as relevant Python versions.
 

@@ -21,6 +21,7 @@ These non-maintainers have contributed code to a django-nose release:
 
 * Adam DePue (`adepue <https://github.com/adepue>`_)
 * Alexey Evseev (`st4lk <https://github.com/st4lk>`_)
+* Alex (`alexjg <https://github.com/alexjg>`_)
 * Antti Kaihola (`akaihola <https://github.com/akaihola>`_)
 * Ash Christopher (`ashchristopher <https://github.com/ashchristopher>`_)
 * Blake Winton (`bwinton <https://github.com/bwinton>`_)
@@ -33,6 +34,7 @@ These non-maintainers have contributed code to a django-nose release:
 * Dmitry Gladkov (`dgladkov <https://github.com/dgladkov>`_)
 * Ederson Mota (`edrmp <https://github.com/edrmp>`_)
 * Eric Zarowny (`ezarowny <https://github.com/ezarowny>`_)
+* Eron Villarreal (`eroninjapan <https://github.com/eroninjapan>`_)
 * Fred Wenzel (`fwenzel <https://github.com/fwenzel>`_)
 * Fábio Santos (`fabiosantoscode <https://github.com/fabiosantoscode>`_)
 * Ionel Cristian Mărieș (`ionelmc <https://github.com/ionelmc>`_)
