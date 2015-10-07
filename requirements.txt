@@ -23,7 +23,7 @@ pep257==0.5.0
 flake8-docstrings==0.2.1
 
 # Code coverage
-coverage==3.7.1
+coverage==4.0
 
 # Documentation
 Pygments==2.0.2
