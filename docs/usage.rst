@@ -12,6 +12,11 @@ the `nose docs`_ for more help with nose.
 Enabling Database Reuse
 -----------------------
 
+.. warning:: There are several
+   `open issues <https://github.com/django-nose/django-nose/milestones/Fix%20REUSE_DB=1>`_
+   with this feature, including
+   `reports of data loss <https://github.com/django-nose/django-nose/issues/76>`_.
+
 You can save several seconds at the beginning and end of your test suite by
 reusing the test database from the last run. To do this, set the environment
 variable ``REUSE_DB`` to 1::
@@ -29,6 +34,10 @@ you want to use it.
 
 Enabling Fast Fixtures
 ----------------------
+
+.. warning:: There are several
+   `known issues <https://github.com/django-nose/django-nose/milestones/Fix%20FastFixtureTestCase>`_
+   with this feature.
 
 django-nose includes a fixture bundler which drastically speeds up your tests
 by eliminating redundant setup of Django test fixtures. To use it...
