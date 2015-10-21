@@ -6,6 +6,7 @@ import sys
 from itertools import groupby
 
 from nose.plugins.base import Plugin
+from nose.plugins.skip import SkipTest
 from nose.suite import ContextSuite
 
 from django.test.testcases import TransactionTestCase, TestCase
@@ -149,6 +150,16 @@ class DatabaseSetUpPlugin(AlwaysOnPlugin):
                           help='Load a unique set of fixtures only once, even '
                                'across test classes. '
                                '[NOSE_WITH_FIXTURE_BUNDLING]')
+        parser.add_option('--db',
+                          dest='db_tests',
+                          metavar='(skip|only)',
+                          choices=['skip', 'only'],
+                          default=env.get('NOSE_DB_TESTS'),
+                          help='Skip or run only database tests. This option '
+                               'accepts two values: "skip" database tests or '
+                               'run "only" database tests. Both non-database '
+                               'and database tests are run by default. '
+                               '[NOSE_DB_TESTS]')
         parser.add_option('--db-test-context',
                           dest='db_test_context',
                           default=env.get('NOSE_DB_TEST_CONTEXT',
@@ -182,6 +193,8 @@ class DatabaseSetUpPlugin(AlwaysOnPlugin):
         self.should_bundle = options.with_fixture_bundling
         self.db_test_context_path = options.db_test_context
         self.non_db_test_context_path = options.non_db_test_context
+        self.skip_non_db_tests = options.db_tests == 'only'
+        self.skip_db_tests = options.db_tests == 'skip'
 
     def _group_test_cases_by_type(self, test):
         """Group test suite by test type.
@@ -321,7 +334,10 @@ class DatabaseSetUpPlugin(AlwaysOnPlugin):
         test_groups = self._group_test_cases_by_type(test)
         suites = []
 
-        if self.non_db_test_context_path and self.NON_DB_TESTS in test_groups:
+        if self.skip_non_db_tests:
+            test_groups.pop(self.NON_DB_TESTS, None)
+            sys.__stdout__.write('skipped non-database tests\n')
+        elif self.non_db_test_context_path and self.NON_DB_TESTS in test_groups:
             # setup context for non-database tests
             non_db_tests = test_groups.pop(self.NON_DB_TESTS)
             context = get_test_context(
@@ -332,7 +348,9 @@ class DatabaseSetUpPlugin(AlwaysOnPlugin):
             fftc_tests = test_groups[self.FFTC_TESTS]
             test_groups[self.FFTC_TESTS] = self._bundle_fixtures(fftc_tests)
 
-        if test_groups:
+        if self.skip_db_tests:
+            sys.__stdout__.write('skipped database tests (and setup)\n')
+        elif test_groups:
             db_tests = [test_
                         for key, group in sorted(test_groups.items())
                         for test_ in group]
