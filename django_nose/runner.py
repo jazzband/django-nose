@@ -42,7 +42,8 @@ except ImportError:
 
 import nose.core
 
-from django_nose.plugin import DjangoSetUpPlugin, ResultPlugin, TestReorderer
+from django_nose.plugin import DatabaseSetUpPlugin
+from django_nose.plugin import DjangoSetUpPlugin, ResultPlugin
 from django_nose.utils import uses_mysql
 
 try:
@@ -90,8 +91,7 @@ if not hasattr(BaseDatabaseCreation, '_get_test_db_name'):
 
 
 def _get_plugins_from_settings():
-    plugins = (list(getattr(settings, 'NOSE_PLUGINS', [])) +
-               ['django_nose.plugin.TestReorderer'])
+    plugins = list(getattr(settings, 'NOSE_PLUGINS', []))
     for plug_path in plugins:
         try:
             dot = plug_path.rindex('.')
@@ -121,6 +121,7 @@ def _get_options():
     cfg_files = nose.core.all_config_files()
     manager = nose.core.DefaultPluginManager()
     config = nose.core.Config(env=os.environ, files=cfg_files, plugins=manager)
+    config.plugins.addPlugin(DatabaseSetUpPlugin(None))
     config.plugins.addPlugins(list(_get_plugins_from_settings()))
     options = config.getParser()._get_all_options()
 
@@ -195,6 +196,7 @@ if hasattr(BaseCommand, 'use_argparse'):
             manager = nose.core.DefaultPluginManager()
             config = nose.core.Config(
                 env=os.environ, files=cfg_files, plugins=manager)
+            config.plugins.addPlugin(DatabaseSetUpPlugin(None))
             config.plugins.addPlugins(list(_get_plugins_from_settings()))
             options = config.getParser()._get_all_options()
 
@@ -285,9 +287,11 @@ class BasicNoseRunner(BaseRunner):
     def run_suite(self, nose_argv):
         """Run the test suite."""
         result_plugin = ResultPlugin()
-        plugins_to_add = [DjangoSetUpPlugin(self),
-                          result_plugin,
-                          TestReorderer()]
+        plugins_to_add = [
+            DjangoSetUpPlugin(self),
+            DatabaseSetUpPlugin(self),
+            result_plugin,
+        ]
 
         for plugin in _get_plugins_from_settings():
             plugins_to_add.append(plugin)

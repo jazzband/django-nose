@@ -150,6 +150,54 @@ course of loading tests. For example, if the tests that need it are in
 sure its DB table gets created.
 
 
+Custom Database Contexts
+------------------------
+
+Django-nose can be instructed to use custom contexts for database and non-
+database tests. What this means is that you can write a "context" class to do
+custom setup and/or teardown for database tests (i.e., tests that extend
+``TransactionTestCase`` or one of its subclasses) and/or non-database tests
+(i.e., tests that do not extend ``TransactionTestCase``). This might mean
+creating a new database that Django does not support or patching Django's
+database machinery to assert that tests that should not access a database fail
+if they try to do so.
+
+Custom contexts can be specified with the following options:
+
+   NOSE_PLUGINS = [
+       '--db-test-context=django_nose.plugin.DatabaseContext',
+       '--non-db-test-context=django_nose.plugin.NullContext',
+   ]
+
+While this example uses contexts that come with django-nose, you can of
+course specify paths for your own custom context classes. A custom context
+class might look something like this:
+
+   class CustomContext(django_nose.plugin.DatabaseContext):
+
+       """Setup/teardown custom database and standard Django databases."""
+
+       def setup(self):
+           """Setup database."""
+
+           # do custom database setup here
+
+           super(CustomContext, self).setup()
+
+       def teardown(self):
+           """Tear down database."""
+
+           # do custom database teardown here
+
+           super(CustomContext, self).teardown()
+
+For each type of context, ``context.setup()`` is called once before the first
+test of its type is run, and ``context.teardown()`` is called once after the
+last test of its type is run. The database context will be used for all tests,
+including "non-database" tests, unless ``--non-db-test-context=...`` is
+specified.
+
+
 Assertions
 ----------
 

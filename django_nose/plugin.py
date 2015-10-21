@@ -3,8 +3,10 @@
 from __future__ import unicode_literals
 
 import sys
+from itertools import groupby
 
 from nose.plugins.base import Plugin
+from nose.plugins.skip import SkipTest
 from nose.suite import ContextSuite
 
 from django.test.testcases import TransactionTestCase, TestCase
@@ -82,13 +84,11 @@ class DjangoSetUpPlugin(AlwaysOnPlugin):
         sys.stdout = self.sys_stdout
 
         self.runner.setup_test_environment()
-        self.old_names = self.runner.setup_databases()
 
         sys.stdout = sys_stdout
 
     def finalize(self, result):
         """Finalize test run by cleaning up databases and environment."""
-        self.runner.teardown_databases(self.old_names)
         self.runner.teardown_test_environment()
 
 
@@ -124,15 +124,25 @@ class Bucketer(object):
             self.remainder.append(test)
 
 
-class TestReorderer(AlwaysOnPlugin):
+class DatabaseSetUpPlugin(AlwaysOnPlugin):
 
     """Reorder tests for various reasons."""
 
     name = 'django-nose-test-reorderer'
 
+    NON_DB_TESTS = 0
+    FFTC_TESTS = 1
+    CLEAN_TESTS = 2
+    DIRTY_TESTS = 3
+
+    def __init__(self, runner):
+        """Initialize the plugin with the test runner."""
+        super(DatabaseSetUpPlugin, self).__init__()
+        self.runner = runner
+
     def options(self, parser, env):
-        """Add --with-fixture-bundling to options."""
-        super(TestReorderer, self).options(parser, env)  # pointless
+        """Add options."""
+        super(DatabaseSetUpPlugin, self).options(parser, env)  # pointless
         parser.add_option('--with-fixture-bundling',
                           action='store_true',
                           dest='with_fixture_bundling',
@@ -140,14 +150,64 @@ class TestReorderer(AlwaysOnPlugin):
                           help='Load a unique set of fixtures only once, even '
                                'across test classes. '
                                '[NOSE_WITH_FIXTURE_BUNDLING]')
+        parser.add_option('--db',
+                          dest='db_tests',
+                          metavar='(skip|only)',
+                          choices=['skip', 'only'],
+                          default=env.get('NOSE_DB_TESTS'),
+                          help='Skip or run only database tests. This option '
+                               'accepts two values: "skip" database tests or '
+                               'run "only" database tests. Both non-database '
+                               'and database tests are run by default. '
+                               '[NOSE_DB_TESTS]')
+        parser.add_option('--db-test-context',
+                          dest='db_test_context',
+                          default=env.get('NOSE_DB_TEST_CONTEXT',
+                                          'django_nose.plugin.DatabaseContext'
+                                          ),
+                          help='A module path to a callable accepting two '
+                               'arguments (tests, runner) and returning a '
+                               'context object (with `setup` and `teardown` '
+                               'methods) to be used while running database '
+                               'tests. This is useful, for example, to '
+                               'perform custom database setup/teardown. '
+                               'Defaults to '
+                               'django_nose.plugin.DatabaseContext. '
+                               '[NOSE_DB_TEST_CONTEXT]')
+        parser.add_option('--non-db-test-context',
+                          dest='non_db_test_context',
+                          default=env.get('NOSE_NON_DB_TEST_CONTEXT'),
+                          help='A module path to a callable accepting two '
+                               'arguments (tests, runner) and returning a '
+                               'context object (with `setup` and `teardown` '
+                               'methods) to be used while running non-'
+                               'database tests. This is useful, for example, '
+                               'to enforce that non-database tests do not try '
+                               'to access a database. The db-test-context '
+                               'will be used for all tests if this option is '
+                               'not specified. [NOSE_NON_DB_TEST_CONTEXT]')
 
     def configure(self, options, conf):
         """Configure plugin, reading the with_fixture_bundling option."""
-        super(TestReorderer, self).configure(options, conf)
+        super(DatabaseSetUpPlugin, self).configure(options, conf)
         self.should_bundle = options.with_fixture_bundling
+        self.db_test_context_path = options.db_test_context
+        self.non_db_test_context_path = options.non_db_test_context
+        self.skip_non_db_tests = options.db_tests == 'only'
+        self.skip_db_tests = options.db_tests == 'skip'
 
-    def _put_transaction_test_cases_last(self, test):
-        """Reorder test suite so TransactionTestCase-based tests come last.
+    def _group_test_cases_by_type(self, test):
+        """Group test suite by test type.
+
+        Test types:
+
+        - Non-database tests (or ones that manage their own database connection
+          and cleanup) In simplest terms, this is any test that is not a
+          subclass of ``TransactionTestCase``.
+        - ``FastFixtureTestCase`` tests.
+        - Subclasses of ``django.test.TestCase`` and other database tests that
+          clean up after themselves.
+        - ``TransactionTestCase``-based tests, which often leave a mess.
 
         Django has a weird design decision wherein TransactionTestCase doesn't
         clean up after itself. Instead, it resets the DB to a clean state only
@@ -173,33 +233,43 @@ class TestReorderer(AlwaysOnPlugin):
 
             Thus, things will get these comparands (and run in this order):
 
-            * 1: TestCase subclasses. These clean up after themselves.
-            * 1: TransactionTestCase subclasses with
-                 cleans_up_after_itself=True. These include
-                 FastFixtureTestCases. If you're using the
-                 FixtureBundlingPlugin, it will pull the FFTCs out, reorder
-                 them, and run them first of all.
-            * 2: TransactionTestCase subclasses. These leave a mess.
-            * 2: Anything else (including doctests, I hope). These don't care
-                 about the mess you left, because they don't hit the DB or, if
-                 they do, are responsible for ensuring that it's clean (as per
+            * 0: Not a subclass of TransactionTestCase. These should not hit
+                 the DB or, if they do, are responsible for ensuring that it's
+                 clean (as per
                  https://docs.djangoproject.com/en/dev/topics/testing/?from=
-                 olddocs#writing-doctests)
+                 olddocs#writing-doctests). Note that this could include a
+                 group of tests (including TransactionTestCase tests) with
+                 setup and/or teardown routines in a "context" such as a
+                 module or package defining fixture functions. To avoid that
+                 scenario, don't use TestCase or TransactionTestCase in
+                 modules or packages with setup or teardown functions.
+            * 1: FastFixtureTestCase subclasses. If you're using the
+                 FixtureBundlingPlugin, it will pull the FFTCs out, reorder
+                 them, and run them before the following groups.
+            * 2: TestCase subclasses. These clean up after themselves.
+            * 2: TransactionTestCase subclasses with
+                 cleans_up_after_itself=True.
+            * 3: TransactionTestCase subclasses. These leave a mess.
 
             """
             test_class = test.context
-            if (is_subclass_at_all(test_class, TestCase) or
-                (is_subclass_at_all(test_class, TransactionTestCase) and
-                 getattr(test_class, 'cleans_up_after_itself', False))):
-                return 1
-            return 2
+            if is_subclass_at_all(test_class, TransactionTestCase):
+                if (is_subclass_at_all(test_class, FastFixtureTestCase) and
+                        self.should_bundle):
+                    return self.FFTC_TESTS
+                if (is_subclass_at_all(test_class, TestCase) or
+                        getattr(test_class, 'cleans_up_after_itself', False)):
+                    return self.CLEAN_TESTS
+                return self.DIRTY_TESTS
+            return self.NON_DB_TESTS
 
         flattened = []
         process_tests(test, flattened.append)
         flattened.sort(key=filthiness)
-        return ContextSuite(flattened)
+        return dict((key, list(group))
+                    for key, group in groupby(flattened, filthiness))
 
-    def _bundle_fixtures(self, test):
+    def _bundle_fixtures(self, fftc_tests):
         """Reorder tests to minimize fixture loading.
 
         I reorder FastFixtureTestCases so ones using identical sets
@@ -212,57 +282,152 @@ class TestReorderer(AlwaysOnPlugin):
         nobody else, in practice, pays attention to the ``_fb`` advisory
         bits. We return those first, then any remaining tests in the
         order they were received.
+
+        Add ``_fb_should_setup_fixtures`` and
+        ``_fb_should_teardown_fixtures`` attrs to each test class to advise
+        it whether to set up or tear down (respectively) the fixtures.
+
+        Return a list of tests.
         """
-        def suite_sorted_by_fixtures(suite):
-            """Flatten and sort a tree of Suites by fixture.
+        bucketer = Bucketer()
+        for test in fftc_tests:
+            bucketer.add(test)
 
-            Add ``_fb_should_setup_fixtures`` and
-            ``_fb_should_teardown_fixtures`` attrs to each test class to advise
-            it whether to set up or tear down (respectively) the fixtures.
+        # Lay the bundles of common-fixture-having test classes end to end
+        # in a single list so we can make a test suite out of them:
+        tests = []
+        for (key, fixture_bundle) in bucketer.buckets.items():
+            fixtures, is_exempt = key
+            # Advise first and last test classes in each bundle to set up
+            # and tear down fixtures and the rest not to:
+            if fixtures and not is_exempt:
+                # Ones with fixtures are sure to be classes, which means
+                # they're sure to be ContextSuites with contexts.
 
-            Return a Suite.
+                # First class with this set of fixtures sets up:
+                first = fixture_bundle[0].context
+                first._fb_should_setup_fixtures = True
 
-            """
-            bucketer = Bucketer()
-            process_tests(suite, bucketer.add)
+                # Set all classes' 1..n should_setup to False:
+                for cls in fixture_bundle[1:]:
+                    cls.context._fb_should_setup_fixtures = False
 
-            # Lay the bundles of common-fixture-having test classes end to end
-            # in a single list so we can make a test suite out of them:
-            flattened = []
-            for (key, fixture_bundle) in bucketer.buckets.items():
-                fixtures, is_exempt = key
-                # Advise first and last test classes in each bundle to set up
-                # and tear down fixtures and the rest not to:
-                if fixtures and not is_exempt:
-                    # Ones with fixtures are sure to be classes, which means
-                    # they're sure to be ContextSuites with contexts.
+                # Last class tears down:
+                last = fixture_bundle[-1].context
+                last._fb_should_teardown_fixtures = True
 
-                    # First class with this set of fixtures sets up:
-                    first = fixture_bundle[0].context
-                    first._fb_should_setup_fixtures = True
+                # Set all classes' 0..(n-1) should_teardown to False:
+                for cls in fixture_bundle[:-1]:
+                    cls.context._fb_should_teardown_fixtures = False
 
-                    # Set all classes' 1..n should_setup to False:
-                    for cls in fixture_bundle[1:]:
-                        cls.context._fb_should_setup_fixtures = False
+            tests.extend(fixture_bundle)
+        tests.extend(bucketer.remainder)
 
-                    # Last class tears down:
-                    last = fixture_bundle[-1].context
-                    last._fb_should_teardown_fixtures = True
+        return tests
 
-                    # Set all classes' 0..(n-1) should_teardown to False:
-                    for cls in fixture_bundle[:-1]:
-                        cls.context._fb_should_teardown_fixtures = False
+    def prepareTestRunner(self, runner):
+        """Get a runner that reorders tests before running them."""
+        return _DatabaseSetupTestRunner(self, runner)
 
-                flattened.extend(fixture_bundle)
-            flattened.extend(bucketer.remainder)
-
-            return ContextSuite(flattened)
-
-        return suite_sorted_by_fixtures(test)
-
-    def prepareTest(self, test):
+    def group_by_database_setup(self, test):
         """Reorder the tests."""
-        test = self._put_transaction_test_cases_last(test)
-        if self.should_bundle:
-            test = self._bundle_fixtures(test)
-        return test
+        test_groups = self._group_test_cases_by_type(test)
+        suites = []
+
+        if self.skip_non_db_tests:
+            test_groups.pop(self.NON_DB_TESTS, None)
+            sys.__stdout__.write('skipped non-database tests\n')
+        elif self.non_db_test_context_path and self.NON_DB_TESTS in test_groups:
+            # setup context for non-database tests
+            non_db_tests = test_groups.pop(self.NON_DB_TESTS)
+            context = get_test_context(
+                self.non_db_test_context_path, non_db_tests, self.runner)
+            suites.append(ContextSuite(non_db_tests, context))
+
+        if self.should_bundle and self.FFTC_TESTS in test_groups:
+            fftc_tests = test_groups[self.FFTC_TESTS]
+            test_groups[self.FFTC_TESTS] = self._bundle_fixtures(fftc_tests)
+
+        if self.skip_db_tests:
+            sys.__stdout__.write('skipped database tests (and setup)\n')
+        elif test_groups:
+            db_tests = [test_
+                        for key, group in sorted(test_groups.items())
+                        for test_ in group]
+            context = get_test_context(
+                self.db_test_context_path, db_tests, self.runner)
+            suites.append(ContextSuite(db_tests, context))
+
+        return suites[0] if len(suites) == 1 else ContextSuite(suites)
+
+
+class _DatabaseSetupTestRunner(object):
+
+    """A test runner that groups tests by database setup.
+
+    This is a helper class that reorders tests for efficient database
+    setup. It modifies the test suite before any other plugins have a
+    chance to wrap it in the `prepareTest` hook.
+    """
+
+    def __init__(self, plugin, real_runner):
+        self.plugin = plugin
+        self.runner = real_runner
+
+    def run(self, test):
+        test = self.plugin.group_by_database_setup(test)
+        return self.runner.run(test)
+
+
+def get_test_context(context_path, tests, runner):
+    """Make a test context.
+
+    Lookup context constructor and call it with the given list of
+    tests and runner.
+
+    Returns the context
+    """
+    from django_nose.runner import import_module
+    module_path, context_name = context_path.rsplit(".", 1)
+    module = import_module(module_path)
+    return getattr(module, context_name)(tests, runner)
+
+
+class DatabaseContext(object):
+
+    """A context that performs standard Django database setup/teardown."""
+
+    def __init__(self, tests, runner):
+        """Initialize database context."""
+        self.runner = runner
+
+    def setup(self):
+        """Setup database."""
+        # temporarily restore sys.stdout in case of propmt to delete database
+        test_stdout = sys.stdout
+        sys.stdout = sys.__stdout__
+        try:
+            self.old_names = self.runner.setup_databases()
+        finally:
+            sys.stdout = test_stdout
+
+    def teardown(self):
+        """Tear down database."""
+        self.runner.teardown_databases(self.old_names)
+
+
+class NullContext(object):
+
+    """A context that does nothing."""
+
+    def __init__(self, tests, runner):
+        """Initialize the context."""
+        pass
+
+    def setup(self):
+        """Do setup."""
+        pass
+
+    def teardown(self):
+        """Do teardown."""
+        pass

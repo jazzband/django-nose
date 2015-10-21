@@ -29,6 +29,7 @@ These non-maintainers have contributed code to a django-nose release:
 * Camilo Nova (`camilonova <https://github.com/camilonova>`_)
 * Carl Meyer (`carljm <https://github.com/carljm>`_)
 * Conrado Buhrer (`conrado <https://github.com/conrado>`_)
+* Daniel Miller (`millerdev <https://github.com/millerdev>`_)
 * David Baumgold (`singingwolfboy <https://github.com/singingwolfboy>`_)
 * David Cramer (`dcramer <https://github.com/dcramer>`_)
 * Dmitry Gladkov (`dgladkov <https://github.com/dgladkov>`_)
