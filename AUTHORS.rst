@@ -38,6 +38,7 @@ These non-maintainers have contributed code to a django-nose release:
 * Fred Wenzel (`fwenzel <https://github.com/fwenzel>`_)
 * Fábio Santos (`fabiosantoscode <https://github.com/fabiosantoscode>`_)
 * Ionel Cristian Mărieș (`ionelmc <https://github.com/ionelmc>`_)
+* Jeremy Satterfield (`jsatt <https://github.com/jsatt>`_)
 * Johan Euphrosine (`proppy <https://github.com/proppy>`_)
 * Kyle Robertson (`dvelyk <https://github.com/dvelyk>`_)
 * Marius Gedminas (`mgedmin <https://github.com/mgedmin>`_)
