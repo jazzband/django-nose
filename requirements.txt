@@ -18,8 +18,8 @@ wheel==0.26.0
 mccabe==0.3.1
 pep8==1.6.2
 pyflakes==1.0.0
-flake8==2.4.1
-pep257==0.6.0
+flake8==2.5.0
+pep257==0.7.0
 flake8-docstrings==0.2.1
 
 # Code coverage

@@ -34,7 +34,6 @@ else:
 
 
 class Command(Command):
-
     """Implement the ``test`` command."""
 
     option_list = Command.option_list + tuple(extra_options)

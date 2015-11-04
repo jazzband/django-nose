@@ -7,7 +7,6 @@ from testapp.models import Question, Choice
 
 
 class NoDatabaseTestCase(TestCase):
-
     """Tests that don't read or write to the database."""
 
     def test_question_str(self):
@@ -22,7 +21,6 @@ class NoDatabaseTestCase(TestCase):
 
 
 class UsesDatabaseTestCase(TestCase):
-
     """Tests that read and write to the database."""
 
     def test_question(self):
@@ -37,7 +35,6 @@ class UsesDatabaseTestCase(TestCase):
 
 
 class UsesFixtureTestCase(TestCase):
-
     """Tests that use a test fixture."""
 
     fixtures = ["testdata.json"]

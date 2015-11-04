@@ -37,7 +37,6 @@ def _get_django_vars():
         return str(camelcase.sub(insert_underscore, name).lower())
 
     class Dummy(TransactionTestCase):
-
         """A dummy test case for gathering current assertion helpers."""
 
         def nop():

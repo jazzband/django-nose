@@ -5,7 +5,6 @@ plugin_began = False
 
 
 class SanityCheckPlugin(Plugin):
-
     """Test plugin that registers that it ran."""
 
     enabled = True

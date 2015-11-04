@@ -8,7 +8,6 @@ from django.db import models
 
 
 class Question(models.Model):
-
     """A poll question."""
 
     question_text = models.CharField(max_length=200)
@@ -20,7 +19,6 @@ class Question(models.Model):
 
 
 class Choice(models.Model):
-
     """A poll answer."""
 
     question = models.ForeignKey(Question)

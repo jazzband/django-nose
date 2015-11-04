@@ -11,7 +11,6 @@ from django_nose.runner import NoseTestSuiteRunner
 
 
 class GetModelsForConnectionTests(TestCase):
-
     """Test runner._get_models_for_connection."""
 
     tables = ['test_table%d' % i for i in range(5)]
