@@ -14,7 +14,6 @@ from django_nose.utils import process_tests, is_subclass_at_all
 
 
 class AlwaysOnPlugin(Plugin):
-
     """A base plugin that takes no options and is always enabled."""
 
     def options(self, parser, env):
@@ -32,7 +31,6 @@ class AlwaysOnPlugin(Plugin):
 
 
 class ResultPlugin(AlwaysOnPlugin):
-
     """Captures the TestResult object for later inspection.
 
     nose doesn't return the full test result object from any of its runner
@@ -48,7 +46,6 @@ class ResultPlugin(AlwaysOnPlugin):
 
 
 class DjangoSetUpPlugin(AlwaysOnPlugin):
-
     """Configures Django to set up and tear down the environment.
 
     This allows coverage to report on all code imported and used during the
@@ -93,7 +90,6 @@ class DjangoSetUpPlugin(AlwaysOnPlugin):
 
 
 class Bucketer(object):
-
     """Collect tests into buckets with similar setup requirements."""
 
     def __init__(self):
@@ -125,7 +121,6 @@ class Bucketer(object):
 
 
 class TestReorderer(AlwaysOnPlugin):
-
     """Reorder tests for various reasons."""
 
     name = 'django-nose-test-reorderer'

@@ -272,7 +272,6 @@ else:
 
 
 class BasicNoseRunner(BaseRunner):
-
     """Facade that implements a nose runner in the guise of a Django runner.
 
     You shouldn't have to use this directly unless the additions made by
@@ -467,7 +466,6 @@ def _mysql_reset_sequences(style, connection):
 
 
 class NoseTestSuiteRunner(BasicNoseRunner):
-
     """A runner that optionally skips DB creation.
 
     Monkeypatches connection.creation to let you skip creating databases if
