@@ -11,7 +11,7 @@ in settings.py for arguments that you want always passed to nose.
 from __future__ import print_function, unicode_literals
 import os
 import sys
-from optparse import make_option
+from optparse import make_option, NO_DEFAULT
 from types import MethodType
 
 import django
@@ -229,6 +229,9 @@ if hasattr(BaseCommand, 'use_argparse'):
                 option_attrs = {}
                 for attr in option.ATTRS:
                     value = getattr(option, attr)
+
+                    if attr == 'default' and value == NO_DEFAULT:
+                        continue
 
                     # Rename options for nose's --verbosity
                     if opt_long == '--nose-verbosity':
