@@ -287,6 +287,20 @@ else:
         django_opts = [
             '--noinput', '--liveserver', '-p', '--pattern', '--testrunner']
 
+        # Default nosetest options with an argument
+        _has_nargs = set([
+            '--attr', '--config', '--cover-html-dir', '--cover-min-percentage',
+            '--cover-package', '--cover-xml-file', '--debug', '--debug-log',
+            '--doctest-extension', '--doctest-fixtures', '--doctest-options',
+            '--doctest-result-variable', '--eval-attr', '--exclude',
+            '--id-file', '--ignore-files', '--include', '--logging-config',
+            '--logging-datefmt', '--logging-filter', '--logging-format',
+            '--logging-level', '--match', '--process-timeout', '--processes',
+            '--profile-restrict', '--profile-sort', '--profile-stats-file',
+            '--py3where', '--tests', u'--verbosity', '--where', '--xunit-file',
+            '--xunit-testsuite-name', '-A', '-I', '-a', '-c', '-e', '-i', '-l',
+            '-m', '-w'])
+
 
 class BasicNoseRunner(BaseRunner):
     """Facade that implements a nose runner in the guise of a Django runner.
