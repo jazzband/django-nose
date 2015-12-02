@@ -178,13 +178,12 @@ if hasattr(BaseCommand, 'use_argparse'):
         # If optparse has a None argument, omit from call to add_argument
         _argparse_omit_if_none = (
             'action', 'nargs', 'const', 'default', 'type', 'choices',
-            'required', 'help', 'metavar', 'dest', 'callback', 'callback_args',
-            'callback_kwargs')
+            'required', 'help', 'metavar', 'dest')
 
-        # Translating callbacks is not supported, because none of the built-in
-        # plugins uses one.  If you have a plugin that uses a callback, please
-        # open a ticket or submit a working implementation.
-        _argparse_fail_if_not_none = (
+        # Always ignore these optparse arguments
+        # Django will parse without calling the callback
+        # nose will then reparse with the callback
+        _argparse_callback_options = (
             'callback', 'callback_args', 'callback_kwargs')
 
         # Keep track of nose options with nargs=1
@@ -233,6 +232,10 @@ if hasattr(BaseCommand, 'use_argparse'):
                 # Convert optparse attributes to argparse attributes
                 option_attrs = {}
                 for attr in option.ATTRS:
+                    # Ignore callback options
+                    if attr in cls._argparse_callback_options:
+                        continue
+
                     value = getattr(option, attr)
 
                     if attr == 'default' and value == NO_DEFAULT:
@@ -249,16 +252,13 @@ if hasattr(BaseCommand, 'use_argparse'):
                     if attr in cls._argparse_omit_if_none and value is None:
                         continue
 
-                    # Translating callbacks is not supported
-                    if attr in cls._argparse_fail_if_not_none:
-                        assert value is None, (
-                            'argparse option %s=%s is not supported' %
-                            (attr, value))
-                        continue
-
                     # Convert type from optparse string to argparse type
                     if attr == 'type':
                         value = cls._argparse_type[value]
+
+                    # Convert action='callback' to action='store'
+                    if attr == 'action' and value == 'callback':
+                        action = 'store'
 
                     # Keep track of nargs=1
                     if attr == 'nargs':
