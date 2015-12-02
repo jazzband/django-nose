@@ -187,6 +187,9 @@ if hasattr(BaseCommand, 'use_argparse'):
         _argparse_fail_if_not_none = (
             'callback', 'callback_args', 'callback_kwargs')
 
+        # Keep track of nose options with nargs=1
+        _has_nargs = set(['--verbosity'])
+
         @classmethod
         def add_arguments(cls, parser):
             """Convert nose's optparse arguments to argparse."""
@@ -256,6 +259,15 @@ if hasattr(BaseCommand, 'use_argparse'):
                     # Convert type from optparse string to argparse type
                     if attr == 'type':
                         value = cls._argparse_type[value]
+
+                    # Keep track of nargs=1
+                    if attr == 'nargs':
+                        assert value == 1, (
+                            'argparse option nargs=%s is not supported' %
+                            value)
+                        cls._has_nargs.add(opt_long)
+                        if opt_short:
+                            cls._has_nargs.add(opt_short)
 
                     # Pass converted attribute to optparse option
                     option_attrs[attr] = value
@@ -343,10 +355,25 @@ class BasicNoseRunner(BaseRunner):
             django_opts.extend(opt._long_opts)
             django_opts.extend(opt._short_opts)
 
-        nose_argv.extend(
-            translate_option(opt) for opt in sys.argv[1:]
-            if opt.startswith('-') and
-            not any(opt.startswith(d) for d in django_opts))
+        # Recreate the arguments in a nose-compatible format
+        arglist = sys.argv[1:]
+        has_nargs = getattr(self, '_has_nargs', set(['--verbosity']))
+        while arglist:
+            opt = arglist.pop(0)
+            if not opt.startswith('-'):
+                # Discard test labels
+                continue
+            if any(opt.startswith(d) for d in django_opts):
+                # Discard options handled by Djangp
+                continue
+
+            trans_opt = translate_option(opt)
+            nose_argv.append(trans_opt)
+
+            if opt in has_nargs:
+                # Handle arguments without an equals sign
+                opt_value = arglist.pop(0)
+                nose_argv.append(opt_value)
 
         # if --nose-verbosity was omitted, pass Django verbosity to nose
         if ('--verbosity' not in nose_argv and
