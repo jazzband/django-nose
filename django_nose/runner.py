@@ -153,7 +153,9 @@ if hasattr(BaseCommand, 'use_argparse'):
         # Don't pass the following options to nosetests
         django_opts = [
             '--noinput', '--liveserver', '-p', '--pattern', '--testrunner',
-            '--settings']
+            '--settings',
+            # 1.8 arguments
+            '--keepdb', '--reverse', '--debug-sql']
 
         #
         # For optparse -> argparse conversion
