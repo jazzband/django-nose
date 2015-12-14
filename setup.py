@@ -48,7 +48,7 @@ setup(
     packages=find_packages(exclude=['testapp', 'testapp/*']),
     include_package_data=True,
     zip_safe=False,
-    install_requires=['nose>=1.2.1', 'Django>=1.4'],
+    install_requires=['nose>=1.2.1'],
     tests_require=['south>=0.7'],
     test_suite='testapp.runtests.runtests',
     # This blows up tox runs that install django-nose into a virtualenv,
