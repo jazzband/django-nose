@@ -413,7 +413,7 @@ def _skip_create_test_db(self, verbosity=1, autoclobber=False, serialize=True,
 
 def _reusing_db():
     """Return whether the ``REUSE_DB`` flag was passed."""
-    return os.getenv('REUSE_DB', 'false').lower() in ('true', '1', '')
+    return os.getenv('REUSE_DB', 'false').lower() in ('true', '1')
 
 
 def _can_support_reuse_db(connection):
@@ -475,7 +475,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
     they already exist. Your tests will start up much faster.
 
     To opt into this behavior, set the environment variable ``REUSE_DB`` to
-    something that isn't "0" or "false" (case insensitive).
+    "1" or "true" (case insensitive).
     """
 
     def _get_models_for_connection(self, connection):
