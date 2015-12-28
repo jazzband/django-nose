@@ -49,7 +49,7 @@ recommended.  It follows the `Django's support policy`_, supporting:
   * Django 1.4 (LTS) with Python 2.6 and 2.7
   * Django 1.7 with Python 2.7 or 3.4
   * Django 1.8 (LTS) with Python 2.7 or 3.4
-  * Django 1.9 (pre-release)
+  * Django 1.9 with Python 2.7 or 3.4
 
 .. _latest release: https://pypi.python.org/pypi/nose
 .. _Django's support policy: https://docs.djangoproject.com/en/1.8/internals/release-process/#supported-versions

@@ -1,6 +1,17 @@
 Changelog
 ---------
 
+1.4.3 (2015-12-28)
+~~~~~~~~~~~~~~~~~~
+* Add Django 1.9 support
+* Support long options without equals signs, such as "--attr selected"
+* Support nose plugins using callback options
+* Support nose options without default values (jsatt)
+* Remove Django from install dependencies, to avoid accidental upgrades
+  (jsocol, willkg)
+* Setting REUSE_DB to an empty value now disables REUSE_DB, instead of
+  enabling it (wdoekes)
+
 1.4.2 (2015-10-07)
 ~~~~~~~~~~~~~~~~~~
 * Warn against using REUSE_DB=1 and FastFixtureTestCase in docs

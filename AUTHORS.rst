@@ -56,4 +56,6 @@ These non-maintainers have contributed code to a django-nose release:
 * Stephen Burrows (`melinath <https://github.com/melinath>`_)
 * Sverre Johansen (`sverrejoh <https://github.com/sverrejoh>`_)
 * Tim Child (`timc3 <https://github.com/timc3>`_)
+* Walter Doekes (`wdoekes <https://github.com/wdoekes>`_)
+* Will Kahn-Greene (`willkg <https://github.com/willkg>`_)
 * Yegor Roganov (`roganov <https://github.com/roganov>`_)
