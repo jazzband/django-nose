@@ -155,7 +155,10 @@ if hasattr(BaseCommand, 'use_argparse'):
             '--noinput', '--liveserver', '-p', '--pattern', '--testrunner',
             '--settings',
             # 1.8 arguments
-            '--keepdb', '--reverse', '--debug-sql']
+            '--keepdb', '--reverse', '--debug-sql',
+            # 1.9 arguments
+            '--parallel',
+        ]
 
         #
         # For optparse -> argparse conversion
