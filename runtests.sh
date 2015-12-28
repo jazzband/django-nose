@@ -178,6 +178,9 @@ reset_env
 django_test "./manage.py test unittests --testrunner=testapp.custom_runner.CustomNoseTestSuiteRunner $NOINPUT" 4 'unittests with testrunner'
 
 reset_env
+django_test "./manage.py test unittests --attr special $NOINPUT" 1 'select by attribute'
+
+reset_env
 export REUSE_DB=1
 # For the many issues with REUSE_DB=1, see:
 # https://github.com/django-nose/django-nose/milestones/Fix%20REUSE_DB=1

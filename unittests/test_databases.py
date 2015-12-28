@@ -7,6 +7,7 @@ try:
 except:
     from django.apps import apps
 
+from nose.plugins.attrib import attr
 from django_nose.runner import NoseTestSuiteRunner
 
 
@@ -62,6 +63,7 @@ class GetModelsForConnectionTests(TestCase):
             self.assertEqual(
                 self.runner._get_models_for_connection(connection), [])
 
+    @attr("special")
     def test_some_models(self):
         """If some of the models are in the DB, return matching models."""
         connection = self._connection_mock(self.tables)
