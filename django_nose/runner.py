@@ -22,43 +22,16 @@ from django.core.management.color import no_style
 from django.core.management.commands.loaddata import Command
 from django.db import connections, transaction, DEFAULT_DB_ALIAS
 
-try:
-    from django.db.backends.base.creation import BaseDatabaseCreation
-except ImportError:
-    # Django < 1.7
-    from django.db.backends.creation import BaseDatabaseCreation
+from importlib import import_module
 
-try:
-    from importlib import import_module
-except ImportError:
-    # Django < 1.7 and Python < 2.7
-    from django.utils.importlib import import_module
-
-try:
-    from django.apps import apps
-except ImportError:
-    # Django < 1.7
-    from django.db.models.loading import cache as apps
+from django.apps import apps
 
 import nose.core
 
 from django_nose.plugin import DjangoSetUpPlugin, ResultPlugin, TestReorderer
 from django_nose.utils import uses_mysql
 
-try:
-    any
-except NameError:
-    def any(iterable):
-        for element in iterable:
-            if element:
-                return True
-        return False
-
-try:
-    from django.test.runner import DiscoverRunner
-except ImportError:
-    # Django < 1.8
-    from django.test.simple import DjangoTestSuiteRunner as DiscoverRunner
+from django.test.runner import DiscoverRunner
 
 
 __all__ = ('BasicNoseRunner', 'NoseTestSuiteRunner')
@@ -75,18 +48,6 @@ def translate_option(opt):
         long_opt, value = opt.split('=', 1)
         return '%s=%s' % (translate_option(long_opt), value)
     return OPTION_TRANSLATION.get(opt, opt)
-
-
-# Django v1.2 does not have a _get_test_db_name() function.
-if not hasattr(BaseDatabaseCreation, '_get_test_db_name'):
-    def _get_test_db_name(self):
-        TEST_DATABASE_PREFIX = 'test_'
-
-        if self.connection.settings_dict['TEST_NAME']:
-            return self.connection.settings_dict['TEST_NAME']
-        return TEST_DATABASE_PREFIX + self.connection.settings_dict['NAME']
-
-    BaseDatabaseCreation._get_test_db_name = _get_test_db_name
 
 
 def _get_plugins_from_settings():
@@ -325,11 +286,7 @@ class BasicNoseRunner(BaseRunner):
         for plugin in _get_plugins_from_settings():
             plugins_to_add.append(plugin)
 
-        try:
-            django.setup()
-        except AttributeError:
-            # Setup isn't necessary in Django < 1.7
-            pass
+        django.setup()
 
         nose.core.TestProgram(argv=nose_argv, exit=False,
                               addplugins=plugins_to_add)

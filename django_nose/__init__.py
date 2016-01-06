@@ -9,6 +9,4 @@ assert FastFixtureTestCase
 
 VERSION = (1, 4, 3)
 __version__ = '.'.join(map(str, VERSION))
-
-# Django < 1.2 compatibility.
 run_tests = run_gis_tests = NoseTestSuiteRunner

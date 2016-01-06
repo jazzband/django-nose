@@ -7,22 +7,8 @@ This enables browsing all the nose options from the command line.
 from __future__ import unicode_literals
 
 from django.conf import settings
+from django.core.management.commands.test import Command
 from django.test.utils import get_runner
-
-
-if 'south' in settings.INSTALLED_APPS:
-    from south.management.commands.test import Command
-else:
-    from django.core.management.commands.test import Command
-
-
-# Django < 1.2 compatibility
-test_runner = settings.TEST_RUNNER
-if test_runner.endswith('run_tests') or test_runner.endswith('run_gis_tests'):
-    import warnings
-    warnings.warn(
-        'Use `django_nose.NoseTestSuiteRunner` instead of `%s`' % test_runner,
-        DeprecationWarning)
 
 
 TestRunner = get_runner(settings)

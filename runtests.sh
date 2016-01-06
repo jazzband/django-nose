@@ -47,7 +47,6 @@ else:
 ")
 
 reset_env() {
-    unset USE_SOUTH
     unset TEST_RUNNER
     unset NOSE_PLUGINS
     unset REUSE_DB
@@ -148,14 +147,6 @@ TESTAPP_COUNT=6
 
 reset_env
 django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'normal settings'
-
-DJANGO_VERSION=`./manage.py version | cut -d. -f1-2`
-if [ "$DJANGO_VERSION" = "1.4" -o "$DJANGO_VERSION" = "1.5" -o "$DJANGO_VERSION" = "1.6" ]
-then
-    reset_env
-    export USE_SOUTH=1
-    django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'with south in installed apps'
-fi
 
 reset_env
 export TEST_RUNNER="django_nose.run_tests"
