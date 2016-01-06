@@ -11,7 +11,7 @@ in settings.py for arguments that you want always passed to nose.
 from __future__ import print_function, unicode_literals
 import os
 import sys
-from optparse import make_option, NO_DEFAULT
+from optparse import NO_DEFAULT
 from types import MethodType
 
 import django
@@ -77,193 +77,145 @@ def _get_plugins_from_settings():
         yield p_class()
 
 
-def _get_options():
-    """Return all nose options that don't conflict with django options."""
-    cfg_files = nose.core.all_config_files()
-    manager = nose.core.DefaultPluginManager()
-    config = nose.core.Config(env=os.environ, files=cfg_files, plugins=manager)
-    config.plugins.addPlugins(list(_get_plugins_from_settings()))
-    options = config.getParser()._get_all_options()
+class BaseRunner(DiscoverRunner):
+    """Runner that translates nose optparse arguments to argparse.
 
-    # copy nose's --verbosity option and rename to --nose-verbosity
-    verbosity = [o for o in options if o.get_opt_string() == '--verbosity'][0]
-    verbosity_attrs = dict((attr, getattr(verbosity, attr))
-                           for attr in verbosity.ATTRS
-                           if attr not in ('dest', 'metavar'))
-    options.append(make_option('--nose-verbosity',
-                               dest='nose_verbosity',
-                               metavar='NOSE_VERBOSITY',
-                               **verbosity_attrs))
+    Django 1.8 and later uses argparse.ArgumentParser. Nose's optparse
+    arguments need to be translated to this format, so that the Django
+    command line parsing will pass. This parsing is (mostly) thrown out,
+    and reassembled into command line arguments for nose to reparse.
+    """
 
-    # Django 1.6 introduces a "--pattern" option, which is shortened into "-p"
-    # do not allow "-p" to collide with nose's "--plugins" option.
-    plugins_option = [
-        o for o in options if o.get_opt_string() == '--plugins'][0]
-    plugins_option._short_opts.remove('-p')
+    # Don't pass the following options to nosetests
+    django_opts = [
+        '--noinput', '--liveserver', '-p', '--pattern', '--testrunner',
+        '--settings',
+        # 1.8 arguments
+        '--keepdb', '--reverse', '--debug-sql',
+        # 1.9 arguments
+        '--parallel',
+    ]
 
-    django_opts = [opt.dest for opt in BaseCommand.option_list] + ['version']
-    return tuple(
-        o for o in options if o.dest not in django_opts and o.action != 'help')
+    #
+    # For optparse -> argparse conversion
+    #
+    # Option strings to remove from Django options if found
+    _argparse_remove_options = (
+        '-p',  # Short arg for nose's --plugins, not Django's --patterns
+        '-d',  # Short arg for nose's --detailed-errors, not Django's
+               #  --debug-sql
+    )
 
+    # Convert nose optparse options to argparse options
+    _argparse_type = {
+        'int': int,
+        'float': float,
+        'complex': complex,
+        'string': str,
+        'choice': str,
+    }
+    # If optparse has a None argument, omit from call to add_argument
+    _argparse_omit_if_none = (
+        'action', 'nargs', 'const', 'default', 'type', 'choices',
+        'required', 'help', 'metavar', 'dest')
 
-if hasattr(BaseCommand, 'use_argparse'):
-    # Django 1.8 and later uses argparse.ArgumentParser
-    # Translate nose optparse arguments to argparse
-    class BaseRunner(DiscoverRunner):
+    # Always ignore these optparse arguments
+    # Django will parse without calling the callback
+    # nose will then reparse with the callback
+    _argparse_callback_options = (
+        'callback', 'callback_args', 'callback_kwargs')
 
-        # Don't pass the following options to nosetests
-        django_opts = [
-            '--noinput', '--liveserver', '-p', '--pattern', '--testrunner',
-            '--settings',
-            # 1.8 arguments
-            '--keepdb', '--reverse', '--debug-sql',
-            # 1.9 arguments
-            '--parallel',
-        ]
+    # Keep track of nose options with nargs=1
+    _has_nargs = set(['--verbosity'])
 
-        #
-        # For optparse -> argparse conversion
-        #
-        # Option strings to remove from Django options if found
-        _argparse_remove_options = (
-            '-p',  # Short arg for nose's --plugins, not Django's --patterns
-            '-d',  # Short arg for nose's --detailed-errors, not Django's
-                   #  --debug-sql
-        )
+    @classmethod
+    def add_arguments(cls, parser):
+        """Convert nose's optparse arguments to argparse."""
+        super(BaseRunner, cls).add_arguments(parser)
 
-        # Convert nose optparse options to argparse options
-        _argparse_type = {
-            'int': int,
-            'float': float,
-            'complex': complex,
-            'string': str,
-            'choice': str,
-        }
-        # If optparse has a None argument, omit from call to add_argument
-        _argparse_omit_if_none = (
-            'action', 'nargs', 'const', 'default', 'type', 'choices',
-            'required', 'help', 'metavar', 'dest')
+        # Read optparse options for nose and plugins
+        cfg_files = nose.core.all_config_files()
+        manager = nose.core.DefaultPluginManager()
+        config = nose.core.Config(
+            env=os.environ, files=cfg_files, plugins=manager)
+        config.plugins.addPlugins(list(_get_plugins_from_settings()))
+        options = config.getParser()._get_all_options()
 
-        # Always ignore these optparse arguments
-        # Django will parse without calling the callback
-        # nose will then reparse with the callback
-        _argparse_callback_options = (
-            'callback', 'callback_args', 'callback_kwargs')
+        # Gather existing option strings`
+        django_options = set()
+        for action in parser._actions:
+            for override in cls._argparse_remove_options:
+                if override in action.option_strings:
+                    # Emulate parser.conflict_handler='resolve'
+                    parser._handle_conflict_resolve(
+                        None, ((override, action),))
+            django_options.update(action.option_strings)
 
-        # Keep track of nose options with nargs=1
-        _has_nargs = set(['--verbosity'])
-
-        @classmethod
-        def add_arguments(cls, parser):
-            """Convert nose's optparse arguments to argparse."""
-            super(BaseRunner, cls).add_arguments(parser)
-
-            # Read optparse options for nose and plugins
-            cfg_files = nose.core.all_config_files()
-            manager = nose.core.DefaultPluginManager()
-            config = nose.core.Config(
-                env=os.environ, files=cfg_files, plugins=manager)
-            config.plugins.addPlugins(list(_get_plugins_from_settings()))
-            options = config.getParser()._get_all_options()
-
-            # Gather existing option strings`
-            django_options = set()
-            for action in parser._actions:
-                for override in cls._argparse_remove_options:
-                    if override in action.option_strings:
-                        # Emulate parser.conflict_handler='resolve'
-                        parser._handle_conflict_resolve(
-                            None, ((override, action),))
-                django_options.update(action.option_strings)
-
-            # Process nose optparse options
-            for option in options:
-                # Skip any options also in Django options
-                opt_long = option.get_opt_string()
-                if opt_long in django_options:
+        # Process nose optparse options
+        for option in options:
+            # Skip any options also in Django options
+            opt_long = option.get_opt_string()
+            if opt_long in django_options:
+                continue
+            if option._short_opts:
+                opt_short = option._short_opts[0]
+                if opt_short in django_options:
                     continue
-                if option._short_opts:
-                    opt_short = option._short_opts[0]
-                    if opt_short in django_options:
-                        continue
-                else:
-                    opt_short = None
+            else:
+                opt_short = None
 
-                # Rename nose's --verbosity to --nose-verbosity
-                if opt_long == '--verbosity':
-                    opt_long = '--nose-verbosity'
+            # Rename nose's --verbosity to --nose-verbosity
+            if opt_long == '--verbosity':
+                opt_long = '--nose-verbosity'
 
-                # Convert optparse attributes to argparse attributes
-                option_attrs = {}
-                for attr in option.ATTRS:
-                    # Ignore callback options
-                    if attr in cls._argparse_callback_options:
-                        continue
+            # Convert optparse attributes to argparse attributes
+            option_attrs = {}
+            for attr in option.ATTRS:
+                # Ignore callback options
+                if attr in cls._argparse_callback_options:
+                    continue
 
-                    value = getattr(option, attr)
+                value = getattr(option, attr)
 
-                    if attr == 'default' and value == NO_DEFAULT:
-                        continue
+                if attr == 'default' and value == NO_DEFAULT:
+                    continue
 
-                    # Rename options for nose's --verbosity
-                    if opt_long == '--nose-verbosity':
-                        if attr == 'dest':
-                            value = 'nose_verbosity'
-                        elif attr == 'metavar':
-                            value = 'NOSE_VERBOSITY'
+                # Rename options for nose's --verbosity
+                if opt_long == '--nose-verbosity':
+                    if attr == 'dest':
+                        value = 'nose_verbosity'
+                    elif attr == 'metavar':
+                        value = 'NOSE_VERBOSITY'
 
-                    # Omit arguments that are None, use default
-                    if attr in cls._argparse_omit_if_none and value is None:
-                        continue
+                # Omit arguments that are None, use default
+                if attr in cls._argparse_omit_if_none and value is None:
+                    continue
 
-                    # Convert type from optparse string to argparse type
-                    if attr == 'type':
-                        value = cls._argparse_type[value]
+                # Convert type from optparse string to argparse type
+                if attr == 'type':
+                    value = cls._argparse_type[value]
 
-                    # Convert action='callback' to action='store'
-                    if attr == 'action' and value == 'callback':
-                        action = 'store'
+                # Convert action='callback' to action='store'
+                if attr == 'action' and value == 'callback':
+                    action = 'store'
 
-                    # Keep track of nargs=1
-                    if attr == 'nargs':
-                        assert value == 1, (
-                            'argparse option nargs=%s is not supported' %
-                            value)
-                        cls._has_nargs.add(opt_long)
-                        if opt_short:
-                            cls._has_nargs.add(opt_short)
+                # Keep track of nargs=1
+                if attr == 'nargs':
+                    assert value == 1, (
+                        'argparse option nargs=%s is not supported' %
+                        value)
+                    cls._has_nargs.add(opt_long)
+                    if opt_short:
+                        cls._has_nargs.add(opt_short)
 
-                    # Pass converted attribute to optparse option
-                    option_attrs[attr] = value
+                # Pass converted attribute to optparse option
+                option_attrs[attr] = value
 
-                # Add the optparse argument
-                if opt_short:
-                    parser.add_argument(opt_short, opt_long, **option_attrs)
-                else:
-                    parser.add_argument(opt_long, **option_attrs)
-else:
-    # Django 1.7 and earlier use optparse
-    class BaseRunner(DiscoverRunner):
-        # Replace the builtin options with the merged django/nose options:
-        options = _get_options()
-
-        # Not add following options to nosetests
-        django_opts = [
-            '--noinput', '--liveserver', '-p', '--pattern', '--testrunner']
-
-        # Default nosetest options with an argument
-        _has_nargs = set([
-            '--attr', '--config', '--cover-html-dir', '--cover-min-percentage',
-            '--cover-package', '--cover-xml-file', '--debug', '--debug-log',
-            '--doctest-extension', '--doctest-fixtures', '--doctest-options',
-            '--doctest-result-variable', '--eval-attr', '--exclude',
-            '--id-file', '--ignore-files', '--include', '--logging-config',
-            '--logging-datefmt', '--logging-filter', '--logging-format',
-            '--logging-level', '--match', '--process-timeout', '--processes',
-            '--profile-restrict', '--profile-sort', '--profile-stats-file',
-            '--py3where', '--tests', u'--verbosity', '--where', '--xunit-file',
-            '--xunit-testsuite-name', '-A', '-I', '-a', '-c', '-e', '-i', '-l',
-            '-m', '-w'])
+            # Add the optparse argument
+            if opt_short:
+                parser.add_argument(opt_short, opt_long, **option_attrs)
+            else:
+                parser.add_argument(opt_long, **option_attrs)
 
 
 class BasicNoseRunner(BaseRunner):
