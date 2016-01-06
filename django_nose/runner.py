@@ -273,7 +273,7 @@ class BasicNoseRunner(BaseRunner):
 
         # Skip over 'manage.py test' and any arguments handled by django.
         django_opts = self.django_opts[:]
-        for opt in BaseCommand.option_list:
+        for opt in getattr(BaseCommand, 'option_list', []):
             django_opts.extend(opt._long_opts)
             django_opts.extend(opt._short_opts)
 
