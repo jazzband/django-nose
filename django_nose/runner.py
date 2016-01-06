@@ -9,30 +9,26 @@ in settings.py for arguments that you want always passed to nose.
 
 """
 from __future__ import print_function, unicode_literals
+
 import os
 import sys
+from importlib import import_module
 from optparse import NO_DEFAULT
 from types import MethodType
 
-import django
+from django import setup
+from django.apps import apps
 from django.conf import settings
 from django.core import exceptions
 from django.core.management.base import BaseCommand
 from django.core.management.color import no_style
 from django.core.management.commands.loaddata import Command
 from django.db import connections, transaction, DEFAULT_DB_ALIAS
-
-from importlib import import_module
-
-from django.apps import apps
-
-import nose.core
+from django.test.runner import DiscoverRunner
 
 from django_nose.plugin import DjangoSetUpPlugin, ResultPlugin, TestReorderer
 from django_nose.utils import uses_mysql
-
-from django.test.runner import DiscoverRunner
-
+import nose.core
 
 __all__ = ('BasicNoseRunner', 'NoseTestSuiteRunner')
 
@@ -238,7 +234,7 @@ class BasicNoseRunner(BaseRunner):
         for plugin in _get_plugins_from_settings():
             plugins_to_add.append(plugin)
 
-        django.setup()
+        setup()
 
         nose.core.TestProgram(argv=nose_argv, exit=False,
                               addplugins=plugins_to_add)
