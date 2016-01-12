@@ -10,3 +10,7 @@ assert FastFixtureTestCase
 VERSION = (1, 4, 3)
 __version__ = '.'.join(map(str, VERSION))
 run_tests = run_gis_tests = NoseTestSuiteRunner
+
+
+# Replace the default test loader.
+import django_nose.loader
