@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import sys
 from itertools import groupby
+from types import ModuleType
 
 from nose.plugins.base import Plugin
 from nose.plugins.skip import SkipTest
@@ -231,18 +232,18 @@ class DatabaseSetUpPlugin(AlwaysOnPlugin):
             because the odd behavior of TransactionTestCase is documented, so
             subclasses should by default be assumed to preserve it.
 
+            If the given test is a suite of tests with setup and/or teardown
+            routines in a "context" such as a module or package defining
+            fixture functions, then the entire suite will be assigned the value
+            of the filthiest test in the suite.
+
             Thus, things will get these comparands (and run in this order):
 
             * 0: Not a subclass of TransactionTestCase. These should not hit
                  the DB or, if they do, are responsible for ensuring that it's
                  clean (as per
                  https://docs.djangoproject.com/en/dev/topics/testing/?from=
-                 olddocs#writing-doctests). Note that this could include a
-                 group of tests (including TransactionTestCase tests) with
-                 setup and/or teardown routines in a "context" such as a
-                 module or package defining fixture functions. To avoid that
-                 scenario, don't use TestCase or TransactionTestCase in
-                 modules or packages with setup or teardown functions.
+                 olddocs#writing-doctests).
             * 1: FastFixtureTestCase subclasses. If you're using the
                  FixtureBundlingPlugin, it will pull the FFTCs out, reorder
                  them, and run them before the following groups.
@@ -261,6 +262,23 @@ class DatabaseSetUpPlugin(AlwaysOnPlugin):
                         getattr(test_class, 'cleans_up_after_itself', False)):
                     return self.CLEAN_TESTS
                 return self.DIRTY_TESTS
+            if isinstance(test, ContextSuite) and \
+                    isinstance(test_class, ModuleType):
+                # Get value of filthiest test in module with setup/teardown.
+                # It should be safe to iterate over tests in a module because
+                # modules should not change state as tests are generated.
+                # However, other test types such as test generator functions
+                # may not be safe to iterate.
+                filth = set(filthiness(t) for t in test)
+                if len(filth) == 1:
+                    return filth.pop()
+                for const in [
+                        self.DIRTY_TESTS,
+                        self.CLEAN_TESTS,
+                        self.FFTC_TESTS,  # will be bundled in remainder bucket
+                    ]:
+                    if const in filth:
+                        return const
             return self.NON_DB_TESTS
 
         flattened = []
