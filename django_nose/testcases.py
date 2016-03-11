@@ -37,6 +37,7 @@ class FastFixtureTestCase(test.TransactionTestCase):
     """
 
     cleans_up_after_itself = True  # This is the good kind of puppy.
+    fixtures = []  # Otherwise default is None & non-iterable.
 
     @classmethod
     def setUpClass(cls):
@@ -59,7 +60,7 @@ class FastFixtureTestCase(test.TransactionTestCase):
     def _fixture_setup(cls):
         """Load fixture data, and commit."""
         for db in cls._databases():
-            if (hasattr(cls, 'fixtures') and
+            if (getattr(cls, 'fixtures', None) and
                     getattr(cls, '_fb_should_setup_fixtures', True)):
                 # Iff the fixture-bundling test runner tells us we're the first
                 # suite having these fixtures, set them up:

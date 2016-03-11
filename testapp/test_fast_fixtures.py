@@ -25,3 +25,11 @@ class HasFixturesTestCase(FastFixtureTestCase):
         choice = question.choice_set.get()
         self.assertEqual("Blue.", choice.choice_text)
         self.assertEqual(3, choice.votes)
+
+
+class MissingFixturesTestCase(FastFixtureTestCase):
+    """No fixtures defined."""
+
+    def test_anything(self):
+        """Run any test to ensure Testcase is loaded without fixtures."""
+        assert True
