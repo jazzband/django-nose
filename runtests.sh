@@ -143,7 +143,7 @@ django_test() {
     fi
 }
 
-TESTAPP_COUNT=6
+TESTAPP_COUNT=8
 
 reset_env
 django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'normal settings'
