@@ -60,6 +60,12 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
 
     app_module_paths = []
     for app in get_apps():
+
+        # *Hopefully* just an artifact of testing, but at least one NoneType is
+        # returned by get_apps
+        if app is None:
+            continue
+
         if hasattr(app, '__path__'):
             # It's a 'models/' subpackage
             for path in app.__path__:

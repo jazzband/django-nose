@@ -44,12 +44,6 @@ class FastFixtureTestCase(test.TransactionTestCase):
         if not test.testcases.connections_support_transactions():
             raise NotImplementedError('%s supports only DBs with transaction '
                                       'capabilities.' % cls.__name__)
-        for db in cls._databases():
-            # These MUST be balanced with one leave_* each:
-            transaction.enter_transaction_management(using=db)
-            # Don't commit unless we say so:
-            transaction.managed(True, using=db)
-
         cls._fixture_setup()
 
     @classmethod
@@ -59,9 +53,7 @@ class FastFixtureTestCase(test.TransactionTestCase):
         for db in cls._databases():
             # Finish off any transactions that may have happened in
             # tearDownClass in a child method.
-            if transaction.is_dirty(using=db):
-                transaction.commit(using=db)
-            transaction.leave_transaction_management(using=db)
+            transaction.commit(using=db)
 
     @classmethod
     def _fixture_setup(cls):
@@ -122,11 +114,7 @@ class FastFixtureTestCase(test.TransactionTestCase):
         cache.cache.clear()
         settings.TEMPLATE_DEBUG = settings.DEBUG = False
 
-        test.testcases.disable_transaction_methods()
-
         self.client = self.client_class()
-        # self._fixture_setup()
-        self._urlconf_setup()
         mail.outbox = []
 
         # Clear site cache in case somebody's mutated Site objects and then
@@ -142,11 +130,8 @@ class FastFixtureTestCase(test.TransactionTestCase):
 
         """
         # Rollback any mutations made by tests:
-        test.testcases.restore_transaction_methods()
         for db in self._databases():
             transaction.rollback(using=db)
-
-        self._urlconf_teardown()
 
         # We do not need to close the connection here to prevent
         # http://code.djangoproject.com/ticket/7572, since we commit, not
