@@ -177,16 +177,6 @@ and some of its own as functions. ::
    assert_mail_count(count, msg=None)
 
 
-Using With South
-----------------
-
-`South`_ installs its own test command that turns off migrations during
-testing. Make sure that django-nose comes *after* ``south`` in
-``INSTALLED_APPS`` so that django_nose's test command is used.
-
-.. _South: http://south.aeracode.org/
-
-
 Always Passing The Same Options
 -------------------------------
 
