@@ -149,20 +149,22 @@ class BaseRunner(DiscoverRunner):
 
         # Process nose optparse options
         for option in options:
-            # Skip any options also in Django options
+            # Gather options
             opt_long = option.get_opt_string()
-            if opt_long in django_options:
-                continue
             if option._short_opts:
                 opt_short = option._short_opts[0]
-                if opt_short in django_options:
-                    continue
             else:
                 opt_short = None
 
             # Rename nose's --verbosity to --nose-verbosity
             if opt_long == '--verbosity':
                 opt_long = '--nose-verbosity'
+
+            # Skip any options also in Django options
+            if opt_long in django_options:
+                continue
+            if opt_short and opt_short in django_options:
+                opt_short = None
 
             # Convert optparse attributes to argparse attributes
             option_attrs = {}
