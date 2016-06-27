@@ -20,7 +20,6 @@ from django import setup
 from django.apps import apps
 from django.conf import settings
 from django.core import exceptions
-from django.core.management.base import BaseCommand
 from django.core.management.color import no_style
 from django.core.management.commands.loaddata import Command
 from django.db import connections, transaction, DEFAULT_DB_ALIAS
@@ -273,12 +272,6 @@ class BasicNoseRunner(BaseRunner):
         if hasattr(settings, 'NOSE_ARGS'):
             nose_argv.extend(settings.NOSE_ARGS)
 
-        # Skip over 'manage.py test' and any arguments handled by django.
-        django_opts = self.django_opts[:]
-        for opt in getattr(BaseCommand, 'option_list', []):
-            django_opts.extend(opt._long_opts)
-            django_opts.extend(opt._short_opts)
-
         # Recreate the arguments in a nose-compatible format
         arglist = sys.argv[1:]
         has_nargs = getattr(self, '_has_nargs', set(['--verbosity']))
@@ -287,7 +280,7 @@ class BasicNoseRunner(BaseRunner):
             if not opt.startswith('-'):
                 # Discard test labels
                 continue
-            if any(opt.startswith(d) for d in django_opts):
+            if any(opt.startswith(d) for d in self.django_opts):
                 # Discard options handled by Djangp
                 continue
 
