@@ -8,15 +8,21 @@ env:
         - TOXENV=flake8
         - TOXENV=docs
         # Supported Python / Django versions w/ SQLite
+        - TOXENV=py27-django-110
+        - TOXENV=py35-django-110
         - TOXENV=py27-django-19
         - TOXENV=py35-django-19
         - TOXENV=py27-django-18
         - TOXENV=py34-django-18
         # Test with PostgreSQL
+        - TOXENV=py27-django-19-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-110-postgres"
+        - TOXENV=py35-django-19-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-110-postgres"
         - TOXENV=py27-django-19-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-19-postgres"
         - TOXENV=py35-django-19-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-19-postgres"
         - TOXENV=py27-django-18-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-18-postgres"
         # Test with MySQL
+        - TOXENV=py27-django-110-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-110-mysql"
+        - TOXENV=py35-django-110-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-110-mysql"
         - TOXENV=py27-django-19-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-19-mysql"
         - TOXENV=py35-django-19-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-19-mysql"
         - TOXENV=py27-django-18-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-18-mysql"
