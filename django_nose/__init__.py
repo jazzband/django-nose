@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 from django_nose.runner import BasicNoseRunner, NoseTestSuiteRunner
 from django_nose.testcases import FastFixtureTestCase
 assert BasicNoseRunner
+assert NoseTestSuiteRunner
 assert FastFixtureTestCase
 
-VERSION = (1, 4, 3)
+VERSION = (1, 4, 4)
 __version__ = '.'.join(map(str, VERSION))
-run_tests = run_gis_tests = NoseTestSuiteRunner

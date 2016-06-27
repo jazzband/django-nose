@@ -1,6 +1,12 @@
 Changelog
 ---------
 
+1.4.4 (2016-06-27)
+~~~~~~~~~~~~~~~~~~
+* Add Django 1.10 support
+* Drop Django 1.4, 1.7, and Python 2.6 support
+* Drop South support
+
 1.4.3 (2015-12-28)
 ~~~~~~~~~~~~~~~~~~
 * Add Django 1.9 support

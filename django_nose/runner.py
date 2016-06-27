@@ -20,7 +20,6 @@ from django import setup
 from django.apps import apps
 from django.conf import settings
 from django.core import exceptions
-from django.core.management.base import BaseCommand
 from django.core.management.color import no_style
 from django.core.management.commands.loaddata import Command
 from django.db import connections, transaction, DEFAULT_DB_ALIAS
@@ -149,20 +148,22 @@ class BaseRunner(DiscoverRunner):
 
         # Process nose optparse options
         for option in options:
-            # Skip any options also in Django options
+            # Gather options
             opt_long = option.get_opt_string()
-            if opt_long in django_options:
-                continue
             if option._short_opts:
                 opt_short = option._short_opts[0]
-                if opt_short in django_options:
-                    continue
             else:
                 opt_short = None
 
             # Rename nose's --verbosity to --nose-verbosity
             if opt_long == '--verbosity':
                 opt_long = '--nose-verbosity'
+
+            # Skip any options also in Django options
+            if opt_long in django_options:
+                continue
+            if opt_short and opt_short in django_options:
+                opt_short = None
 
             # Convert optparse attributes to argparse attributes
             option_attrs = {}
@@ -271,12 +272,6 @@ class BasicNoseRunner(BaseRunner):
         if hasattr(settings, 'NOSE_ARGS'):
             nose_argv.extend(settings.NOSE_ARGS)
 
-        # Skip over 'manage.py test' and any arguments handled by django.
-        django_opts = self.django_opts[:]
-        for opt in getattr(BaseCommand, 'option_list', []):
-            django_opts.extend(opt._long_opts)
-            django_opts.extend(opt._short_opts)
-
         # Recreate the arguments in a nose-compatible format
         arglist = sys.argv[1:]
         has_nargs = getattr(self, '_has_nargs', set(['--verbosity']))
@@ -285,7 +280,7 @@ class BasicNoseRunner(BaseRunner):
             if not opt.startswith('-'):
                 # Discard test labels
                 continue
-            if any(opt.startswith(d) for d in django_opts):
+            if any(opt.startswith(d) for d in self.django_opts):
                 # Discard options handled by Djangp
                 continue
 

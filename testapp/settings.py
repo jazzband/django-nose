@@ -32,10 +32,6 @@ INSTALLED_APPS = [
     'django_nose',
     'testapp',
 ]
-if environ.get('USE_SOUTH', '0') in (1, '1'):
-    import south  # Raise ImportError if not installed
-    assert south
-    INSTALLED_APPS.insert(0, 'south')
 
 raw_test_runner = environ.get('TEST_RUNNER')
 if raw_test_runner:

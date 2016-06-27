@@ -149,8 +149,8 @@ reset_env
 django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'normal settings'
 
 reset_env
-export TEST_RUNNER="django_nose.run_tests"
-django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'django_nose.run_tests format'
+export TEST_RUNNER="django_nose.NoseTestSuiteRunner"
+django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'test runner from environment'
 
 reset_env
 django_test "testapp/runtests.py testapp.test_only_this" 1 'via run_tests API'
@@ -164,6 +164,9 @@ django_test "./manage.py test unittests $NOINPUT" 4 'unittests'
 
 reset_env
 django_test "./manage.py test unittests --verbosity 1 $NOINPUT" 4 'argument option without equals'
+
+reset_env
+django_test "./manage.py test unittests --nose-verbosity=2 $NOINPUT" 4 'argument with equals'
 
 reset_env
 django_test "./manage.py test unittests --testrunner=testapp.custom_runner.CustomNoseTestSuiteRunner $NOINPUT" 4 'unittests with testrunner'
