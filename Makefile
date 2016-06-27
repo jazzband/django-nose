@@ -64,7 +64,7 @@ coverage: coverage-console
 
 release: clean
 	python setup.py sdist bdist_wheel upload
-	python -m webbrowser -n https://testpypi.python.org/pypi/django-nose
+	python -m webbrowser -n https://pypi.python.org/pypi/django-nose
 
 test-release:
 	python setup.py register -r https://testpypi.python.org/pypi
