@@ -31,7 +31,7 @@ django-nose
     accidentally shadowing test classes.
   * Taking advantage of all the useful `nose plugins`_
 
-.. _nose: https://nose.readthedocs.org/en/latest/
+.. _nose: https://nose.readthedocs.io/en/latest/
 .. _nose plugins: http://nose-plugins.jottit.com/
 
 It also provides:
@@ -57,4 +57,4 @@ Development
 -----------
 :Code:   https://github.com/django-nose/django-nose
 :Issues: https://github.com/django-nose/django-nose/issues?state=open
-:Docs:   https://django-nose.readthedocs.org
+:Docs:   https://django-nose.readthedocs.io

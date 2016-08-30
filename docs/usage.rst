@@ -7,7 +7,7 @@ test`` as usual.
 See ``./manage.py help test`` for all the options nose provides, and look to
 the `nose docs`_ for more help with nose.
 
-.. _nose docs: https://nose.readthedocs.org
+.. _nose docs: https://nose.readthedocs.io/en/latest/
 
 Enabling Database Reuse
 -----------------------
@@ -185,7 +185,7 @@ setup.cfg`_ (as usual) or you can specify them in settings.py like this::
 
     NOSE_ARGS = ['--failed', '--stop']
 
-.. _nose.cfg or setup.cfg: https://nose.readthedocs.org/en/latest/usage.html#configuration
+.. _nose.cfg or setup.cfg: https://nose.readthedocs.io/en/latest/usage.html#configuration
 
 
 Custom Plugins
@@ -203,5 +203,5 @@ Just like middleware or anything else, each string must be a dot-separated,
 importable path to an actual class. Each plugin class will be instantiated and
 added to the Nose test runner.
 
-.. _make custom plugins: https://nose.readthedocs.org/en/latest/plugins.html#writing-plugins
+.. _make custom plugins: https://nose.readthedocs.io/en/latest/plugins.html#writing-plugins
 
