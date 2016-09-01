@@ -393,7 +393,8 @@ def _should_create_database(connection):
             connection.close()
         connection.connection = None
         connection.cursor()
-    except Exception:  # TODO: Be more discerning but still DB agnostic.
+    except Exception as e:  # TODO: Be more discerning but still DB agnostic.
+        sys.stderr.write("%r\n" % e)
         return True
     return not _reusing_db()
 
