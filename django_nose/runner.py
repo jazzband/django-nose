@@ -400,6 +400,8 @@ class BasicNoseRunner(BaseRunner):
         if self.verbosity >= 1:
             print(' '.join(nose_argv))
 
+        self._collect_only = '--collect-only' in nose_argv
+
         result = self.run_suite(nose_argv)
         # suite_result expects the suite as the first argument.  Fake it.
         return self.suite_result({}, result)
@@ -532,6 +534,9 @@ class NoseTestSuiteRunner(BasicNoseRunner):
 
     def setup_databases(self):
         """Setup databases, skipping DB creation if requested and possible."""
+        if self._collect_only:
+            return
+
         for alias in connections:
             connection = connections[alias]
             creation = connection.creation
@@ -591,6 +596,8 @@ class NoseTestSuiteRunner(BasicNoseRunner):
 
     def teardown_databases(self, *args, **kwargs):
         """Leave those poor, reusable databases alone if REUSE_DB is true."""
+        if self._collect_only:
+            return
         if not _reusing_db():
             return super(NoseTestSuiteRunner, self).teardown_databases(
                 *args, **kwargs)
