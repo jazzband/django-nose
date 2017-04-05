@@ -11,6 +11,10 @@ matrix:
         - env: TOXENV=docs
           python: "2.7"
         # Supported Python / Django versions w/ SQLite
+        - env: TOXENV=py27-django-111
+          python: "2.7"
+        - env: TOXENV=py36-django-111
+          python: "3.6"
         - env: TOXENV=py27-django-110
           python: "2.7"
         - env: TOXENV=py35-django-110
@@ -24,9 +28,13 @@ matrix:
         - env: TOXENV=py34-django-18
           python: "3.4"
         # Test with PostgreSQL
-        - env: TOXENV=py27-django-19-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-110-postgres"
+        - env: TOXENV=py27-django-111-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-111-postgres"
           python: "2.7"
-        - env: TOXENV=py35-django-19-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-110-postgres"
+        - env: TOXENV=py36-django-111-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-111-postgres"
+          python: "3.6"
+        - env: TOXENV=py27-django-110-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-110-postgres"
+          python: "2.7"
+        - env: TOXENV=py35-django-110-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-110-postgres"
           python: "3.5"
         - env: TOXENV=py27-django-19-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-19-postgres"
           python: "2.7"
@@ -35,6 +43,10 @@ matrix:
         - env: TOXENV=py27-django-18-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-18-postgres"
           python: "2.7"
         # Test with MySQL
+        - env: TOXENV=py27-django-111-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-111-mysql"
+          python: "2.7"
+        - env: TOXENV=py36-django-111-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-111-mysql"
+          python: "3.6"
         - env: TOXENV=py27-django-110-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-110-mysql"
           python: "2.7"
         - env: TOXENV=py35-django-110-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-110-mysql"
@@ -46,20 +58,20 @@ matrix:
         - env: TOXENV=py27-django-18-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-18-mysql"
           python: "2.7"
         # Django master is allowed to fail
-        - env: TOXENV=py27-django-master
-          python: "2.7"
         - env: TOXENV=py35-django-master
           python: "3.5"
-        - env: TOXENV=py27-django-master-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-master-mysql"
-          python: "2.7"
-        - env: TOXENV=py35-django-master-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-master-postgres"
+        - env: TOXENV=py36-django-master
+          python: "3.6"
+        - env: TOXENV=py35-django-master-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-master-mysql"
           python: "3.5"
+        - env: TOXENV=py36-django-master-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-master-postgres"
+          python: "3.6"
     allow_failures:
         # Master is allowed to fail
-        - env: TOXENV=py27-django-master
         - env: TOXENV=py35-django-master
-        - env: TOXENV=py27-django-master-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-master-mysql"
-        - env: TOXENV=py35-django-master-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-master-postgres"
+        - env: TOXENV=py36-django-master
+        - env: TOXENV=py35-django-master-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-master-mysql"
+        - env: TOXENV=py36-django-master-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-master-postgres"
 
 install:
     - pip install tox coveralls

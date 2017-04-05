@@ -3,7 +3,7 @@
 #
 
 # Latest Django
-Django==1.8.5
+Django==1.11
 
 # This project
 -e .
