@@ -60,17 +60,17 @@ coverage: coverage-console
 	coverage html
 	open htmlcov/index.html
 
-release: clean
-	python setup.py sdist bdist_wheel upload
+release: sdist
+	twine upload dist/*
 	python -m webbrowser -n https://pypi.python.org/pypi/django-nose
 
-test-release:
-	python setup.py register -r https://testpypi.python.org/pypi
-	python setup.py sdist bdist_wheel upload -r https://testpypi.python.org/pypi
+# Add [test] section to ~/.pypirc, https://test.pypi.org/legacy/
+test-release: sdist
+	twine upload --repository test dist/*
 	python -m webbrowser -n https://testpypi.python.org/pypi/django-nose
 
 sdist: clean
-	python setup.py sdist
+	python setup.py sdist bdist_wheel
 	ls -l dist
 	check-manifest
-	pyroma dist/`ls -t dist | head -n1`
+	pyroma dist/`ls -t dist | grep tar.gz | head -n1`
