@@ -48,7 +48,7 @@ test:
 	./manage.py test
 
 test-all:
-	tox --skip-missing-interpreters
+	COVERAGE=1 tox --skip-missing-interpreters
 
 coverage-console:
 	coverage erase
