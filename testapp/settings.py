@@ -20,6 +20,7 @@ def rel_path(*subpaths):
     """Construct the full path given a relative path."""
     return path.join(BASE_DIR, *subpaths)
 
+
 DATABASES = {
     'default':
         dj_database_url.config(

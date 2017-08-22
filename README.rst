@@ -6,10 +6,6 @@ django-nose
     :alt: The PyPI package
     :target: https://pypi.python.org/pypi/django-nose
 
-.. image:: https://img.shields.io/pypi/dw/django-nose.svg
-    :alt: PyPI download statistics
-    :target: https://pypi.python.org/pypi/django-nose
-
 .. image:: https://img.shields.io/travis/django-nose/django-nose/master.svg
     :alt: TravisCI Build Status
     :target: https://travis-ci.org/django-nose/django-nose
@@ -49,6 +45,7 @@ recommended.  It follows the `Django's support policy`_, supporting:
   * Django 1.8 (LTS) with Python 2.7, 3.4, or 3.5
   * Django 1.9 with Python 2.7, 3.4, or 3.5
   * Django 1.10 with Python 2.7, 3.4, or 3.5
+  * Django 1.11 (LTS) with Python 2.7, 3.4, 3.5, or 3.6
 
 .. _latest release: https://pypi.python.org/pypi/nose
 .. _Django's support policy: https://docs.djangoproject.com/en/1.8/internals/release-process/#supported-versions

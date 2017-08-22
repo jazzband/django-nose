@@ -8,5 +8,5 @@ assert BasicNoseRunner
 assert NoseTestSuiteRunner
 assert FastFixtureTestCase
 
-VERSION = (1, 4, 4)
+VERSION = (1, 4, 5)
 __version__ = '.'.join(map(str, VERSION))

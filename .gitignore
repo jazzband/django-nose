@@ -23,3 +23,6 @@ testapp.sqlite3
 
 # Sphinx documentation build
 docs/_build/*
+
+# pyenv
+.python-version

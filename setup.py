@@ -34,9 +34,10 @@ _(Older changes can be found in the full documentation)._
 """ % locals()
     return long_description
 
+
 setup(
     name='django-nose',
-    version='1.4.4',
+    version='1.4.5',
     description='Makes your Django tests simple and snappy',
     long_description=get_long_description('django-nose'),
     author='Jeff Balogh',
