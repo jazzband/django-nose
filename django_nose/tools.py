@@ -14,6 +14,7 @@ def _get_nose_vars():
             new_names[t] = getattr(tools, t)
     return new_names
 
+
 for _name, _value in _get_nose_vars().items():
     vars()[_name] = _value
 
@@ -40,7 +41,7 @@ def _get_django_vars():
         """A dummy test case for gathering current assertion helpers."""
 
         def nop():
-            """A dummy test to get an initialized test case."""
+            """Do nothing, dummy test to get an initialized test case."""
             pass
     dummy_test = Dummy('nop')
 
@@ -86,5 +87,5 @@ def assert_mail_count(count, msg=None):
     if msg is None:
         msg = ', '.join([e.subject for e in mail.outbox])
         msg = '%d != %d %s' % (len(mail.outbox), count, msg)
-    # assert_equals is dynamicaly added above
-    assert_equals(len(mail.outbox), count, msg)  # nopep8
+    # assert_equals is dynamicaly added above. F821 is undefined name error
+    assert_equals(len(mail.outbox), count, msg)  # noqa: F821

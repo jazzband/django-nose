@@ -34,6 +34,7 @@ _(Older changes can be found in the full documentation)._
 """ % locals()
     return long_description
 
+
 setup(
     name='django-nose',
     version='1.4.4',

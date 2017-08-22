@@ -246,7 +246,8 @@ class BasicNoseRunner(BaseRunner):
         return result_plugin.result
 
     def run_tests(self, test_labels, extra_tests=None):
-        """Run the unit tests for all the test names in the provided list.
+        """
+        Run the unit tests for all the test names in the provided list.
 
         Test names specified may be file or module names, and may optionally
         indicate the test case to run by separating the module or file name
@@ -259,7 +260,6 @@ class BasicNoseRunner(BaseRunner):
         not the whole string.
 
         Examples:
-
         runner.run_tests( ('test.module',) )
         runner.run_tests(['another.test:TestCase.test_method'])
         runner.run_tests(['a.test:TestCase'])
@@ -271,6 +271,7 @@ class BasicNoseRunner(BaseRunner):
         but the extra tests will not be run.  Maybe later.
 
         Returns the number of tests that failed.
+
         """
         nose_argv = (['nosetests'] + list(test_labels))
         if hasattr(settings, 'NOSE_ARGS'):
@@ -435,7 +436,7 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 m._meta.db_table in tables]
 
     def setup_databases(self):
-        """Setup databases, skipping DB creation if requested and possible."""
+        """Set up databases. Skip DB creation if requested and possible."""
         for alias in connections:
             connection = connections[alias]
             creation = connection.creation

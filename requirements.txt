@@ -3,44 +3,36 @@
 #
 
 # Latest Django
-Django==1.11
+Django>=1.11,<2.0
 
 # This project
 -e .
 
 # Load database config from environment
-dj-database-url==0.3.0
+dj-database-url==0.4.2
 
 # Packaging
-wheel==0.26.0
+wheel==0.29.0
 
 # PEP8, PEP257, and static analysis
-mccabe==0.3.1
-pep8==1.6.2
-pyflakes==1.0.0
-flake8==2.5.0
-pep257==0.7.0
-flake8-docstrings==0.2.1
+flake8==3.4.1
+flake8-docstrings==1.1.0
 
 # Code coverage
-coverage==4.0
+coverage==4.4.1
 
 # Documentation
-Pygments==2.0.2
-Sphinx==1.3.1
-docutils==0.12
+Sphinx==1.6.3
 
 # Packaging Linters
-check-manifest==0.25
-pyroma==1.8.2
+check-manifest==0.35
+pyroma==2.2
 
 # Multi-env test runner
-virtualenv==13.1.2
-py==1.4.30
-tox==2.1.1
+tox==2.7.0
 
 # Better interactive debugging
 gnureadline==6.3.3
-ipython==4.0.0
-ipdb==0.8.1
-ipdbplugin==1.4.2
+ipython==5.4.1
+ipdb==0.10.3
+ipdbplugin==1.4.5
