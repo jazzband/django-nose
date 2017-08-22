@@ -6,10 +6,6 @@ django-nose
     :alt: The PyPI package
     :target: https://pypi.python.org/pypi/django-nose
 
-.. image:: https://img.shields.io/pypi/dw/django-nose.svg
-    :alt: PyPI download statistics
-    :target: https://pypi.python.org/pypi/django-nose
-
 .. image:: https://img.shields.io/travis/django-nose/django-nose/master.svg
     :alt: TravisCI Build Status
     :target: https://travis-ci.org/django-nose/django-nose
