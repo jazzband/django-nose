@@ -55,3 +55,9 @@ Development
 :Code:   https://github.com/django-nose/django-nose
 :Issues: https://github.com/django-nose/django-nose/issues?state=open
 :Docs:   https://django-nose.readthedocs.io
+
+Installation and Usage
+----------------------
+
+Installation and usage documentation is available at Read the Docs:
+https://django-nose.readthedocs.io/en/latest/
