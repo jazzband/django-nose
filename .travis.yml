@@ -7,10 +7,14 @@ matrix:
     include:
         # Quality checks
         - env: TOXENV=flake8
-          python: "2.7"
+          python: "3.5"
         - env: TOXENV=docs
-          python: "2.7"
+          python: "3.5"
         # Supported Python / Django versions w/ SQLite
+        - env: TOXENV=py35-django-20
+          python: "3.5"
+        - env: TOXENV=py36-django-20
+          python: "3.6"
         - env: TOXENV=py27-django-111
           python: "2.7"
         - env: TOXENV=py36-django-111
@@ -28,6 +32,10 @@ matrix:
         - env: TOXENV=py34-django-18
           python: "3.4"
         # Test with PostgreSQL
+        - env: TOXENV=py35-django-20-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-111-postgres"
+          python: "3.5"
+        - env: TOXENV=py36-django-20-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-111-postgres"
+          python: "3.6"
         - env: TOXENV=py27-django-111-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-111-postgres"
           python: "2.7"
         - env: TOXENV=py36-django-111-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-111-postgres"
@@ -43,6 +51,10 @@ matrix:
         - env: TOXENV=py27-django-18-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-18-postgres"
           python: "2.7"
         # Test with MySQL
+        - env: TOXENV=py35-django-20-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-111-mysql"
+          python: "3.5"
+        - env: TOXENV=py36-django-20-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-111-mysql"
+          python: "3.6"
         - env: TOXENV=py27-django-111-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-111-mysql"
           python: "2.7"
         - env: TOXENV=py36-django-111-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-111-mysql"
