@@ -3,7 +3,7 @@
 #
 
 # Latest Django
-Django>=1.11,<2.0
+Django>=2.0,<2.1
 
 # This project
 -e .

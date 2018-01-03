@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from testapp.models import Question, Choice
 
 
@@ -34,7 +34,7 @@ class UsesDatabaseTestCase(TestCase):
         self.assertEqual(0, the_choice.votes)
 
 
-class UsesFixtureTestCase(TestCase):
+class UsesFixtureTestCase(TransactionTestCase):
     """Tests that use a test fixture."""
 
     fixtures = ["testdata.json"]
