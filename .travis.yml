@@ -11,6 +11,10 @@ matrix:
         - env: TOXENV=docs
           python: "3.5"
         # Supported Python / Django versions w/ SQLite
+        - env: TOXENV=py35-django-21
+          python: "3.5"
+        - env: TOXENV=py36-django-21
+          python: "3.6"
         - env: TOXENV=py35-django-20
           python: "3.5"
         - env: TOXENV=py36-django-20
@@ -32,9 +36,13 @@ matrix:
         - env: TOXENV=py34-django-18
           python: "3.4"
         # Test with PostgreSQL
-        - env: TOXENV=py35-django-20-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-111-postgres"
+        - env: TOXENV=py35-django-21-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-21-postgres"
           python: "3.5"
-        - env: TOXENV=py36-django-20-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-111-postgres"
+        - env: TOXENV=py36-django-21-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-21-postgres"
+          python: "3.6"
+        - env: TOXENV=py35-django-20-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-20-postgres"
+          python: "3.5"
+        - env: TOXENV=py36-django-20-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-20-postgres"
           python: "3.6"
         - env: TOXENV=py27-django-111-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-111-postgres"
           python: "2.7"
@@ -51,9 +59,13 @@ matrix:
         - env: TOXENV=py27-django-18-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-18-postgres"
           python: "2.7"
         # Test with MySQL
-        - env: TOXENV=py35-django-20-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-111-mysql"
+        - env: TOXENV=py35-django-21-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-21-mysql"
           python: "3.5"
-        - env: TOXENV=py36-django-20-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-111-mysql"
+        - env: TOXENV=py36-django-21-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-21-mysql"
+          python: "3.6"
+        - env: TOXENV=py35-django-20-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-20-mysql"
+          python: "3.5"
+        - env: TOXENV=py36-django-20-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-20-mysql"
           python: "3.6"
         - env: TOXENV=py27-django-111-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-111-mysql"
           python: "2.7"
