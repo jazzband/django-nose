@@ -37,7 +37,7 @@ _(Older changes can be found in the full documentation)._
 
 setup(
     name='django-nose',
-    version='1.4.5',
+    version='1.4.6',
     description='Makes your Django tests simple and snappy',
     long_description=get_long_description('django-nose'),
     author='Jeff Balogh',
