@@ -11,6 +11,14 @@ matrix:
         - env: TOXENV=docs
           python: "3.5"
         # Supported Python / Django versions w/ SQLite
+        - env: TOXENV=py35-django-22
+          python: "3.5"
+        - env: TOXENV=py36-django-22
+          python: "3.6"
+        - env: TOXENV=py37-django-22
+          python: "3.7"
+          sudo: required
+          dist: xenial
         - env: TOXENV=py35-django-21
           python: "3.5"
         - env: TOXENV=py36-django-21
@@ -40,6 +48,17 @@ matrix:
         - env: TOXENV=py34-django-18
           python: "3.4"
         # Test with PostgreSQL
+        - env: TOXENV=py35-django-22-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-22-postgres"
+          python: "3.5"
+          services: postgresql
+        - env: TOXENV=py36-django-22-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-22-postgres"
+          python: "3.6"
+          services: postgresql
+        - env: TOXENV=py37-django-22-postgres DATABASE_URL="postgres://postgres@localhost:5432/py37-django-22-postgres"
+          python: "3.7"
+          sudo: required
+          dist: xenial
+          services: postgresql
         - env: TOXENV=py35-django-21-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-21-postgres"
           python: "3.5"
           services: postgresql
@@ -84,6 +103,17 @@ matrix:
           python: "2.7"
           services: postgresql
         # Test with MySQL
+        - env: TOXENV=py35-django-22-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-22-mysql"
+          python: "3.5"
+          services: mysql
+        - env: TOXENV=py36-django-22-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-22-mysql"
+          python: "3.6"
+          services: mysql
+        - env: TOXENV=py37-django-22-mysql DATABASE_URL="mysql://travis@localhost:3306/py37-django-22-mysql"
+          python: "3.7"
+          sudo: required
+          dist: xenial
+          services: mysql
         - env: TOXENV=py35-django-21-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-21-mysql"
           python: "3.5"
           services: mysql
