@@ -42,7 +42,7 @@ Django 1.1
 ~~~~~~~~~~
 
 If you want to use django-nose with Django 1.1, use
-https://github.com/django-nose/django-nose/tree/django-1.1 or
+https://github.com/jazzband/django-nose/tree/django-1.1 or
 http://pypi.python.org/pypi/django-nose/0.0.3.
 
 Django 1.0

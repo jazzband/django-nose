@@ -2,6 +2,15 @@
 Contributing
 ============
 
+.. image:: https://jazzband.co/static/img/jazzband.svg
+   :target: https://jazzband.co/
+   :alt: Jazzband
+
+This is a `Jazzband <https://jazzband.co>`_ project. By contributing you agree
+to abide by the
+`Contributor Code of Conduct <https://jazzband.co/about/conduct>`_ and follow the
+`guidelines <https://jazzband.co/about/guidelines>`_.
+
 Contributions are welcome, and they are greatly appreciated! Every
 little bit helps, and credit will always be given.
 
@@ -13,7 +22,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/django-nose/django-nose/issues.
+Report bugs at https://github.com/jazzband/django-nose/issues.
 
 If you are reporting a bug, please include:
 
@@ -52,7 +61,7 @@ Submit Feedback
 ~~~~~~~~~~~~~~~
 
 The best way to send feedback is to file an issue at 
-https://github.com/django-nose/django-nose/issues.
+https://github.com/jazzband/django-nose/issues.
 
 If you are proposing a feature:
 
@@ -116,7 +125,7 @@ Before you submit a pull request, check that it meets these guidelines:
 5. Make liberal use of `git rebase` to ensure clean commits on top of master.
 6. The pull request should pass QA tests and work for supported Python / Django
    combinations.  Check
-   https://travis-ci.org/django-nose/django-nose/pull_requests
+   https://travis-ci.org/jazzband/django-nose/pull_requests
    and make sure that the tests pass for all supported Python versions.
 
 Tips

@@ -44,7 +44,7 @@ setup(
     author_email='me@jeffbalogh.org',
     maintainer='Erik Rose',
     maintainer_email='erikrose@grinchcentral.com',
-    url='http://github.com/django-nose/django-nose',
+    url='http://github.com/jazzband/django-nose',
     license='BSD',
     packages=find_packages(exclude=['testapp', 'testapp/*']),
     include_package_data=True,

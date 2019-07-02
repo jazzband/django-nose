@@ -2,17 +2,17 @@
     "name": "django-nose",
     "description": "Django test runner using nose.",
     "repository": {
-        "url": "https://github.com/django-nose/django-nose",
+        "url": "https://github.com/jazzband/django-nose",
         "license": "BSD",
-        "tests": "https://travis-ci.org/django-nose/django-nose"
+        "tests": "https://travis-ci.org/jazzband/django-nose"
     },
     "participate": {
-        "home": "https://github.com/django-nose/django-nose",
-        "docs": "https://github.com/django-nose/django-nose"
+        "home": "https://github.com/jazzband/django-nose",
+        "docs": "https://github.com/jazzband/django-nose"
     },
     "bugs": {
-        "list": "https://github.com/django-nose/django-nose/issues",
-        "report": "https://github.com/django-nose/django-nose/issues/new"
+        "list": "https://github.com/jazzband/django-nose/issues",
+        "report": "https://github.com/jazzband/django-nose/issues/new"
     },
     "keywords": [
         "django",
