@@ -6,13 +6,17 @@ django-nose
     :alt: The PyPI package
     :target: https://pypi.python.org/pypi/django-nose
 
-.. image:: https://img.shields.io/travis/django-nose/django-nose/master.svg
+.. image:: https://img.shields.io/travis/jazzband/django-nose/master.svg
     :alt: TravisCI Build Status
-    :target: https://travis-ci.org/django-nose/django-nose
+    :target: https://travis-ci.org/jazzband/django-nose
 
-.. image:: https://img.shields.io/coveralls/django-nose/django-nose/master.svg
+.. image:: https://img.shields.io/coveralls/jazzband/django-nose/master.svg
     :alt: Coveralls Test Coverage
-    :target: https://coveralls.io/r/django-nose/django-nose?branch=master
+    :target: https://coveralls.io/r/jazzband/django-nose?branch=master
+
+.. image:: https://jazzband.co/static/img/badge.svg
+    :alt: Jazzband
+    :target: https://jazzband.co/
 
 .. Omit badges from docs
 
@@ -65,7 +69,7 @@ The development version can be installed with... :
 
 .. code-block:: shell
 
-    $ pip install -e git://github.com/django-nose/django-nose.git#egg=django-nose
+    $ pip install -e git://github.com/jazzband/django-nose.git#egg=django-nose
 
 Since django-nose extends Django's built-in test command, you should add it to
 your ``INSTALLED_APPS`` in ``settings.py``:
@@ -86,6 +90,6 @@ Then set ``TEST_RUNNER`` in ``settings.py``:
 
 Development
 -----------
-:Code:   https://github.com/django-nose/django-nose
-:Issues: https://github.com/django-nose/django-nose/issues?state=open
+:Code:   https://github.com/jazzband/django-nose
+:Issues: https://github.com/jazzband/django-nose/issues?state=open
 :Docs:   https://django-nose.readthedocs.io

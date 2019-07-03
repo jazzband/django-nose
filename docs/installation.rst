@@ -11,7 +11,7 @@ The development version can be installed with... :
 
 .. code-block:: shell
 
-    $ pip install -e git://github.com/django-nose/django-nose.git#egg=django-nose
+    $ pip install -e git://github.com/jazzband/django-nose.git#egg=django-nose
 
 Since django-nose extends Django's built-in test command, you should add it to
 your ``INSTALLED_APPS`` in ``settings.py``:

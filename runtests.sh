@@ -177,7 +177,7 @@ django_test "./manage.py test unittests --attr special $NOINPUT" 1 'select by at
 reset_env
 export REUSE_DB=1
 # For the many issues with REUSE_DB=1, see:
-# https://github.com/django-nose/django-nose/milestones/Fix%20REUSE_DB=1
+# https://github.com/jazzband/django-nose/milestones/Fix%20REUSE_DB=1
 django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'with REUSE_DB=1, call #1' 'can fail'
 django_test "./manage.py test $NOINPUT" $TESTAPP_COUNT 'with REUSE_DB=1, call #2' 'can fail'
 
