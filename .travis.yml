@@ -11,6 +11,21 @@ matrix:
         - env: TOXENV=docs
           python: "3.5"
         # Supported Python / Django versions w/ SQLite
+        - env: TOXENV=py35-django-22
+          python: "3.5"
+          # Django 2.2 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
+          sudo: required
+          dist: xenial
+        - env: TOXENV=py36-django-22
+          python: "3.6"
+          # Django 2.2 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
+          sudo: required
+          dist: xenial
+        - env: TOXENV=py37-django-22
+          python: "3.7"
+          # Requires Python 3.7, not in Trusty
+          sudo: required
+          dist: xenial
         - env: TOXENV=py35-django-21
           python: "3.5"
         - env: TOXENV=py36-django-21
@@ -40,6 +55,24 @@ matrix:
         - env: TOXENV=py34-django-18
           python: "3.4"
         # Test with PostgreSQL
+        - env: TOXENV=py35-django-22-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-22-postgres"
+          python: "3.5"
+          services: postgresql
+          # Django 2.2 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
+          sudo: required
+          dist: xenial
+        - env: TOXENV=py36-django-22-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-22-postgres"
+          python: "3.6"
+          services: postgresql
+          # Django 2.2 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
+          sudo: required
+          dist: xenial
+        - env: TOXENV=py37-django-22-postgres DATABASE_URL="postgres://postgres@localhost:5432/py37-django-22-postgres"
+          python: "3.7"
+          # Requires Python 3.7, not in Trusty
+          sudo: required
+          dist: xenial
+          services: postgresql
         - env: TOXENV=py35-django-21-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-21-postgres"
           python: "3.5"
           services: postgresql
@@ -84,6 +117,24 @@ matrix:
           python: "2.7"
           services: postgresql
         # Test with MySQL
+        - env: TOXENV=py35-django-22-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-22-mysql"
+          python: "3.5"
+          services: mysql
+          # Django 2.2 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
+          sudo: required
+          dist: xenial
+        - env: TOXENV=py36-django-22-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-22-mysql"
+          python: "3.6"
+          services: mysql
+          # Django 2.2 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
+          sudo: required
+          dist: xenial
+        - env: TOXENV=py37-django-22-mysql DATABASE_URL="mysql://travis@localhost:3306/py37-django-22-mysql"
+          python: "3.7"
+          # Requires Python 3.7, not in Trusty
+          sudo: required
+          dist: xenial
+          services: mysql
         - env: TOXENV=py35-django-21-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-21-mysql"
           python: "3.5"
           services: mysql
@@ -128,28 +179,40 @@ matrix:
           python: "2.7"
           services: mysql
         # Django master is allowed to fail
-        - env: TOXENV=py35-django-master
-          python: "3.5"
         - env: TOXENV=py36-django-master
           python: "3.6"
-        - env: TOXENV=py37-django-master
-          python: "3.7"
+          # Django 3.0 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
           sudo: required
           dist: xenial
-        - env: TOXENV=py35-django-master-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-master-mysql"
-          python: "3.5"
-          language: pyth
-          services: mysql
-        - env: TOXENV=py36-django-master-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-master-postgres"
+        - env: TOXENV=py37-django-master
+          python: "3.7"
+          # Requires Python 3.7, not in Trusty
+          sudo: required
+          dist: xenial
+        - env: TOXENV=py38-django-master
+          python: "3.8"
+          # Requires Python 3.8, not in Trusty
+          sudo: required
+          dist: xenial
+        - env: TOXENV=py36-django-master-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-master-mysql"
           python: "3.6"
+          services: mysql
+          # Django 3.0 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
+          sudo: required
+          dist: xenial
+        - env: TOXENV=py37-django-master-postgres DATABASE_URL="postgres://postgres@localhost:5432/py37-django-master-postgres"
+          python: "3.7"
           services: postgresql
+          # Django 3.0 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
+          sudo: required
+          dist: xenial
     allow_failures:
         # Master is allowed to fail
-        - env: TOXENV=py35-django-master
         - env: TOXENV=py36-django-master
         - env: TOXENV=py37-django-master
-        - env: TOXENV=py35-django-master-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-master-mysql"
-        - env: TOXENV=py36-django-master-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-master-postgres"
+        - env: TOXENV=py38-django-master
+        - env: TOXENV=py36-django-master-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-master-mysql"
+        - env: TOXENV=py37-django-master-postgres DATABASE_URL="postgres://postgres@localhost:5432/py37-django-master-postgres"
 
 install:
     - pip install tox coveralls
