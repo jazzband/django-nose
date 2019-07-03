@@ -52,6 +52,7 @@ recommended.  It follows the `Django's support policy`_, supporting:
 * Django 1.11 (LTS) with Python 2.7, 3.4, 3.5, or 3.6
 * Django 2.0 with Python 3.4, 3.5, 3.6, or 3.7
 * Django 2.1 with Python 3.5, 3.6, or 3.7
+* Django 2.2 with Python 3.5, 3.6, or 3.7
 
 .. _latest release: https://pypi.python.org/pypi/nose
 .. _Django's support policy: https://docs.djangoproject.com/en/1.8/internals/release-process/#supported-versions
