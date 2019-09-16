@@ -1,224 +1,205 @@
 sudo: false
 language: python
 env:
-    global:
-        - COVERAGE=1 RUNTEST_ARGS="-v --noinput"
+  global:
+  - COVERAGE=1 RUNTEST_ARGS="-v --noinput"
 matrix:
-    include:
-        # Quality checks
-        - env: TOXENV=flake8
-          python: "3.5"
-        - env: TOXENV=docs
-          python: "3.5"
-        # Supported Python / Django versions w/ SQLite
-        - env: TOXENV=py35-django-22
-          python: "3.5"
-          # Django 2.2 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
-          sudo: required
-          dist: xenial
-        - env: TOXENV=py36-django-22
-          python: "3.6"
-          # Django 2.2 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
-          sudo: required
-          dist: xenial
-        - env: TOXENV=py37-django-22
-          python: "3.7"
-          # Requires Python 3.7, not in Trusty
-          sudo: required
-          dist: xenial
-        - env: TOXENV=py35-django-21
-          python: "3.5"
-        - env: TOXENV=py36-django-21
-          python: "3.6"
-        - env: TOXENV=py37-django-21
-          python: "3.7"
-          sudo: required
-          dist: xenial
-        - env: TOXENV=py35-django-20
-          python: "3.5"
-        - env: TOXENV=py36-django-20
-          python: "3.6"
-        - env: TOXENV=py27-django-111
-          python: "2.7"
-        - env: TOXENV=py36-django-111
-          python: "3.6"
-        - env: TOXENV=py27-django-110
-          python: "2.7"
-        - env: TOXENV=py35-django-110
-          python: "3.5"
-        - env: TOXENV=py27-django-19
-          python: "2.7"
-        - env: TOXENV=py35-django-19
-          python: "3.5"
-        - env: TOXENV=py27-django-18
-          python: "2.7"
-        - env: TOXENV=py34-django-18
-          python: "3.4"
-        # Test with PostgreSQL
-        - env: TOXENV=py35-django-22-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-22-postgres"
-          python: "3.5"
-          services: postgresql
-          # Django 2.2 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
-          sudo: required
-          dist: xenial
-        - env: TOXENV=py36-django-22-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-22-postgres"
-          python: "3.6"
-          services: postgresql
-          # Django 2.2 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
-          sudo: required
-          dist: xenial
-        - env: TOXENV=py37-django-22-postgres DATABASE_URL="postgres://postgres@localhost:5432/py37-django-22-postgres"
-          python: "3.7"
-          # Requires Python 3.7, not in Trusty
-          sudo: required
-          dist: xenial
-          services: postgresql
-        - env: TOXENV=py35-django-21-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-21-postgres"
-          python: "3.5"
-          services: postgresql
-        - env: TOXENV=py36-django-21-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-21-postgres"
-          python: "3.6"
-          services: postgresql
-        - env: TOXENV=py37-django-21-postgres DATABASE_URL="postgres://postgres@localhost:5432/py37-django-21-postgres"
-          python: "3.7"
-          sudo: required
-          dist: xenial
-          services: postgresql
-        - env: TOXENV=py35-django-20-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-20-postgres"
-          python: "3.5"
-          services: postgresql
-        - env: TOXENV=py36-django-20-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-20-postgres"
-          python: "3.6"
-          services: postgresql
-        - env: TOXENV=py37-django-20-postgres DATABASE_URL="postgres://postgres@localhost:5432/py37-django-20-postgres"
-          python: "3.7"
-          sudo: required
-          dist: xenial
-          services: postgresql
-        - env: TOXENV=py27-django-111-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-111-postgres"
-          python: "2.7"
-          services: postgresql
-        - env: TOXENV=py36-django-111-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-111-postgres"
-          python: "3.6"
-          services: postgresql
-        - env: TOXENV=py27-django-110-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-110-postgres"
-          python: "2.7"
-          services: postgresql
-        - env: TOXENV=py35-django-110-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-110-postgres"
-          python: "3.5"
-          services: postgresql
-        - env: TOXENV=py27-django-19-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-19-postgres"
-          python: "2.7"
-          services: postgresql
-        - env: TOXENV=py35-django-19-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-19-postgres"
-          python: "3.5"
-          services: postgresql
-        - env: TOXENV=py27-django-18-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-18-postgres"
-          python: "2.7"
-          services: postgresql
-        # Test with MySQL
-        - env: TOXENV=py35-django-22-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-22-mysql"
-          python: "3.5"
-          services: mysql
-          # Django 2.2 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
-          sudo: required
-          dist: xenial
-        - env: TOXENV=py36-django-22-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-22-mysql"
-          python: "3.6"
-          services: mysql
-          # Django 2.2 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
-          sudo: required
-          dist: xenial
-        - env: TOXENV=py37-django-22-mysql DATABASE_URL="mysql://travis@localhost:3306/py37-django-22-mysql"
-          python: "3.7"
-          # Requires Python 3.7, not in Trusty
-          sudo: required
-          dist: xenial
-          services: mysql
-        - env: TOXENV=py35-django-21-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-21-mysql"
-          python: "3.5"
-          services: mysql
-        - env: TOXENV=py36-django-21-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-21-mysql"
-          python: "3.6"
-          services: mysql
-        - env: TOXENV=py37-django-21-mysql DATABASE_URL="mysql://travis@localhost:3306/py37-django-21-mysql"
-          python: "3.7"
-          sudo: required
-          dist: xenial
-          services: mysql
-        - env: TOXENV=py35-django-20-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-20-mysql"
-          python: "3.5"
-          services: mysql
-        - env: TOXENV=py36-django-20-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-20-mysql"
-          python: "3.6"
-          services: mysql
-        - env: TOXENV=py37-django-20-mysql DATABASE_URL="mysql://travis@localhost:3306/py37-django-20-mysql"
-          python: "3.7"
-          sudo: required
-          dist: xenial
-          services: mysql
-        - env: TOXENV=py27-django-111-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-111-mysql"
-          python: "2.7"
-          services: mysql
-        - env: TOXENV=py36-django-111-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-111-mysql"
-          python: "3.6"
-          services: mysql
-        - env: TOXENV=py27-django-110-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-110-mysql"
-          python: "2.7"
-          services: mysql
-        - env: TOXENV=py35-django-110-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-110-mysql"
-          python: "3.5"
-          services: mysql
-        - env: TOXENV=py27-django-19-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-19-mysql"
-          python: "2.7"
-          services: mysql
-        - env: TOXENV=py35-django-19-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-19-mysql"
-          python: "3.5"
-          services: mysql
-        - env: TOXENV=py27-django-18-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-18-mysql"
-          python: "2.7"
-          services: mysql
-        # Django master is allowed to fail
-        - env: TOXENV=py36-django-master
-          python: "3.6"
-          # Django 3.0 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
-          sudo: required
-          dist: xenial
-        - env: TOXENV=py37-django-master
-          python: "3.7"
-          # Requires Python 3.7, not in Trusty
-          sudo: required
-          dist: xenial
-        - env: TOXENV=py38-django-master
-          python: "3.8"
-          # Requires Python 3.8, not in Trusty
-          sudo: required
-          dist: xenial
-        - env: TOXENV=py36-django-master-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-master-mysql"
-          python: "3.6"
-          services: mysql
-          # Django 3.0 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
-          sudo: required
-          dist: xenial
-        - env: TOXENV=py37-django-master-postgres DATABASE_URL="postgres://postgres@localhost:5432/py37-django-master-postgres"
-          python: "3.7"
-          services: postgresql
-          # Django 3.0 requires SQLite 3.8.3 or later, Trusty 14.04.5 has 3.8.2
-          sudo: required
-          dist: xenial
-    allow_failures:
-        # Master is allowed to fail
-        - env: TOXENV=py36-django-master
-        - env: TOXENV=py37-django-master
-        - env: TOXENV=py38-django-master
-        - env: TOXENV=py36-django-master-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-master-mysql"
-        - env: TOXENV=py37-django-master-postgres DATABASE_URL="postgres://postgres@localhost:5432/py37-django-master-postgres"
-
+  include:
+  - env: TOXENV=flake8
+    python: '3.5'
+  - env: TOXENV=docs
+    python: '3.5'
+  - env: TOXENV=py35-django-22
+    python: '3.5'
+    sudo: required
+    dist: xenial
+  - env: TOXENV=py36-django-22
+    python: '3.6'
+    sudo: required
+    dist: xenial
+  - env: TOXENV=py37-django-22
+    python: '3.7'
+    sudo: required
+    dist: xenial
+  - env: TOXENV=py35-django-21
+    python: '3.5'
+  - env: TOXENV=py36-django-21
+    python: '3.6'
+  - env: TOXENV=py37-django-21
+    python: '3.7'
+    sudo: required
+    dist: xenial
+  - env: TOXENV=py35-django-20
+    python: '3.5'
+  - env: TOXENV=py36-django-20
+    python: '3.6'
+  - env: TOXENV=py27-django-111
+    python: '2.7'
+  - env: TOXENV=py36-django-111
+    python: '3.6'
+  - env: TOXENV=py27-django-110
+    python: '2.7'
+  - env: TOXENV=py35-django-110
+    python: '3.5'
+  - env: TOXENV=py27-django-19
+    python: '2.7'
+  - env: TOXENV=py35-django-19
+    python: '3.5'
+  - env: TOXENV=py27-django-18
+    python: '2.7'
+  - env: TOXENV=py34-django-18
+    python: '3.4'
+  - env: TOXENV=py35-django-22-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-22-postgres"
+    python: '3.5'
+    services: postgresql
+    sudo: required
+    dist: xenial
+  - env: TOXENV=py36-django-22-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-22-postgres"
+    python: '3.6'
+    services: postgresql
+    sudo: required
+    dist: xenial
+  - env: TOXENV=py37-django-22-postgres DATABASE_URL="postgres://postgres@localhost:5432/py37-django-22-postgres"
+    python: '3.7'
+    sudo: required
+    dist: xenial
+    services: postgresql
+  - env: TOXENV=py35-django-21-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-21-postgres"
+    python: '3.5'
+    services: postgresql
+  - env: TOXENV=py36-django-21-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-21-postgres"
+    python: '3.6'
+    services: postgresql
+  - env: TOXENV=py37-django-21-postgres DATABASE_URL="postgres://postgres@localhost:5432/py37-django-21-postgres"
+    python: '3.7'
+    sudo: required
+    dist: xenial
+    services: postgresql
+  - env: TOXENV=py35-django-20-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-20-postgres"
+    python: '3.5'
+    services: postgresql
+  - env: TOXENV=py36-django-20-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-20-postgres"
+    python: '3.6'
+    services: postgresql
+  - env: TOXENV=py37-django-20-postgres DATABASE_URL="postgres://postgres@localhost:5432/py37-django-20-postgres"
+    python: '3.7'
+    sudo: required
+    dist: xenial
+    services: postgresql
+  - env: TOXENV=py27-django-111-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-111-postgres"
+    python: '2.7'
+    services: postgresql
+  - env: TOXENV=py36-django-111-postgres DATABASE_URL="postgres://postgres@localhost:5432/py36-django-111-postgres"
+    python: '3.6'
+    services: postgresql
+  - env: TOXENV=py27-django-110-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-110-postgres"
+    python: '2.7'
+    services: postgresql
+  - env: TOXENV=py35-django-110-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-110-postgres"
+    python: '3.5'
+    services: postgresql
+  - env: TOXENV=py27-django-19-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-19-postgres"
+    python: '2.7'
+    services: postgresql
+  - env: TOXENV=py35-django-19-postgres DATABASE_URL="postgres://postgres@localhost:5432/py35-django-19-postgres"
+    python: '3.5'
+    services: postgresql
+  - env: TOXENV=py27-django-18-postgres DATABASE_URL="postgres://postgres@localhost:5432/py27-django-18-postgres"
+    python: '2.7'
+    services: postgresql
+  - env: TOXENV=py35-django-22-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-22-mysql"
+    python: '3.5'
+    services: mysql
+    sudo: required
+    dist: xenial
+  - env: TOXENV=py36-django-22-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-22-mysql"
+    python: '3.6'
+    services: mysql
+    sudo: required
+    dist: xenial
+  - env: TOXENV=py37-django-22-mysql DATABASE_URL="mysql://travis@localhost:3306/py37-django-22-mysql"
+    python: '3.7'
+    sudo: required
+    dist: xenial
+    services: mysql
+  - env: TOXENV=py35-django-21-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-21-mysql"
+    python: '3.5'
+    services: mysql
+  - env: TOXENV=py36-django-21-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-21-mysql"
+    python: '3.6'
+    services: mysql
+  - env: TOXENV=py37-django-21-mysql DATABASE_URL="mysql://travis@localhost:3306/py37-django-21-mysql"
+    python: '3.7'
+    sudo: required
+    dist: xenial
+    services: mysql
+  - env: TOXENV=py35-django-20-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-20-mysql"
+    python: '3.5'
+    services: mysql
+  - env: TOXENV=py36-django-20-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-20-mysql"
+    python: '3.6'
+    services: mysql
+  - env: TOXENV=py37-django-20-mysql DATABASE_URL="mysql://travis@localhost:3306/py37-django-20-mysql"
+    python: '3.7'
+    sudo: required
+    dist: xenial
+    services: mysql
+  - env: TOXENV=py27-django-111-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-111-mysql"
+    python: '2.7'
+    services: mysql
+  - env: TOXENV=py36-django-111-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-111-mysql"
+    python: '3.6'
+    services: mysql
+  - env: TOXENV=py27-django-110-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-110-mysql"
+    python: '2.7'
+    services: mysql
+  - env: TOXENV=py35-django-110-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-110-mysql"
+    python: '3.5'
+    services: mysql
+  - env: TOXENV=py27-django-19-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-19-mysql"
+    python: '2.7'
+    services: mysql
+  - env: TOXENV=py35-django-19-mysql DATABASE_URL="mysql://travis@localhost:3306/py35-django-19-mysql"
+    python: '3.5'
+    services: mysql
+  - env: TOXENV=py27-django-18-mysql DATABASE_URL="mysql://travis@localhost:3306/py27-django-18-mysql"
+    python: '2.7'
+    services: mysql
+  - env: TOXENV=py36-django-master
+    python: '3.6'
+    sudo: required
+    dist: xenial
+  - env: TOXENV=py37-django-master
+    python: '3.7'
+    sudo: required
+    dist: xenial
+  - env: TOXENV=py38-django-master
+    python: '3.8'
+    sudo: required
+    dist: xenial
+  - env: TOXENV=py36-django-master-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-master-mysql"
+    python: '3.6'
+    services: mysql
+    sudo: required
+    dist: xenial
+  - env: TOXENV=py37-django-master-postgres DATABASE_URL="postgres://postgres@localhost:5432/py37-django-master-postgres"
+    python: '3.7'
+    services: postgresql
+    sudo: required
+    dist: xenial
+  allow_failures:
+  - env: TOXENV=py36-django-master
+  - env: TOXENV=py37-django-master
+  - env: TOXENV=py38-django-master
+  - env: TOXENV=py36-django-master-mysql DATABASE_URL="mysql://travis@localhost:3306/py36-django-master-mysql"
+  - env: TOXENV=py37-django-master-postgres DATABASE_URL="postgres://postgres@localhost:5432/py37-django-master-postgres"
 install:
-    - pip install tox coveralls
+- pip install tox coveralls
 before_script:
-    - coverage erase
-    - bash -c "if [[ \"$DATABASE_URL\" == postgres* ]]; then psql -c 'create database \"$TOXENV\";' -U postgres; fi"
-    - bash -c "if [[ \"$DATABASE_URL\" == mysql* ]]; then mysql -e 'create database IF NOT EXISTS \`$TOXENV\`;'; fi"
+- coverage erase
+- bash -c "if [[ \"$DATABASE_URL\" == postgres* ]]; then psql -c 'create database
+  \"$TOXENV\";' -U postgres; fi"
+- bash -c "if [[ \"$DATABASE_URL\" == mysql* ]]; then mysql -e 'create database IF
+  NOT EXISTS \`$TOXENV\`;'; fi"
 script: tox
 after_success: coveralls
