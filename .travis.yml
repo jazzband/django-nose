@@ -203,3 +203,14 @@ before_script:
   NOT EXISTS \`$TOXENV\`;'; fi"
 script: tox
 after_success: coveralls
+deploy:
+  provider: pypi
+  user: jazzband
+  server: https://jazzband.co/projects/django-nose/upload
+  distributions: sdist bdist_wheel
+  password:
+    secure: tNMoNLBm4bNO7FxTVL30r1pG3mHxmoUs0KJhFiN5G7hioRnwmeYfnDDe8dlsxMUH7NNCZjhHNCJ1ll5rBTZhqTuXTXOrxzHigV18rRYiyPfzFsVsKfAhqmjROv0Jf1XgOAZ6VQM7A69eIMVE1gs05kJevDqJaRp2e7hPq7a2+HQ=
+  on:
+    tags: true
+    repo: jazzband/django-nose
+    condition: "$TOXENV = py37-django-22"
