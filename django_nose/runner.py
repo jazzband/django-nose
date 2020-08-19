@@ -320,7 +320,6 @@ def _foreign_key_ignoring_handle(self, *fixture_labels, **options):
     monkeypatched into place in setup_databases().
     """
     using = options.get('database', DEFAULT_DB_ALIAS)
-    commit = options.get('commit', True)
     connection = connections[using]
 
     # MySQL stinks at loading circular references:
@@ -333,9 +332,6 @@ def _foreign_key_ignoring_handle(self, *fixture_labels, **options):
     if uses_mysql(connection):
         cursor = connection.cursor()
         cursor.execute('SET foreign_key_checks = 1')
-
-        if commit:
-            connection.close()
 
 
 def _skip_create_test_db(self, verbosity=1, autoclobber=False, serialize=True,
