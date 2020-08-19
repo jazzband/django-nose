@@ -57,6 +57,21 @@ recommended.  It follows the `Django's support policy`_, supporting:
 .. _latest release: https://pypi.python.org/pypi/nose
 .. _Django's support policy: https://docs.djangoproject.com/en/1.8/internals/release-process/#supported-versions
 
+
+Note to users
+-------------
+
+`nose`_ has been in maintenance mode since at least 2015. ``django-nose`` is in
+maintenance mode as well, and the sole maintainer is no longer an active user.
+See `Jazzband.co`_ to learn how ``django-nose`` is maintained and how you can
+help. New projects should consider using `pytest`_, or `unittest`_ with the
+`Django testing framework`_.
+
+.. _Jazzband.co: https://jazzband.co
+.. _pytest: https://docs.pytest.org/en/stable/
+.. _unittest: https://docs.python.org/3/library/unittest.html
+.. _Django testing framework: https://docs.djangoproject.com/en/3.1/topics/testing/
+
 Installation
 ------------
 
