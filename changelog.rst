@@ -1,6 +1,14 @@
 Changelog
 ---------
 
+1.4.7 (2020-08-19)
+~~~~~~~~~~~~~~~~~~
+* Document Django 2.2 support, no changes needed
+* Move project to `Jazzband.co <https://jazzband.co>`_
+* Fix fixture loading on MySQL
+  (`issue 307 <https://github.com/jazzband/django-nose/issues/307>`_,
+  `dlareau <https://github.com/dlareau>`_)
+
 1.4.6 (2018-10-03)
 ~~~~~~~~~~~~~~~~~~
 * Document Django 2.0 and 2.1 support, no changes needed
