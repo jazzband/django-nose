@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """django-nose packaging."""
 from __future__ import unicode_literals
 import os
@@ -37,13 +39,13 @@ _(Older changes can be found in the full documentation)._
 
 setup(
     name='django-nose',
-    version='1.4.6',
+    version='1.4.7',
     description='Makes your Django tests simple and snappy',
     long_description=get_long_description('django-nose'),
     author='Jeff Balogh',
     author_email='me@jeffbalogh.org',
-    maintainer='Erik Rose',
-    maintainer_email='erikrose@grinchcentral.com',
+    maintainer='John Whitlock',
+    maintainer_email='jwhitlock@mozilla.com',
     url='http://github.com/jazzband/django-nose',
     license='BSD',
     packages=find_packages(exclude=['testapp', 'testapp/*']),

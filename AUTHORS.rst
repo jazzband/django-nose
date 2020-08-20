@@ -7,13 +7,25 @@ ago in the Django world.  It keeps running because of the contributions of
 volunteers.  Thank you to everyone who uses django-nose, keeps your projects
 up-to-date, files detailed bugs, and submits patches.
 
-Maintainers
------------
+Project Leads
+-------------
+* John Whitlock (`jwhitlock <https://github.com/jwhitlock>`_)
+
+This is a `Jazzband <https://jazzband.co>`_ project, supported by the members,
+who agree to abide by the
+`Contributor Code of Conduct <https://jazzband.co/about/conduct>`_ and follow the
+`guidelines <https://jazzband.co/about/guidelines>`_.
+If you'd like to become a project lead, please take a look at the
+`Releases documentation <https://jazzband.co/about/releases>`_ and reach out to us.
+
+Emeritus Maintainers
+--------------------
+Thank you for years of maintaining this project!
+
 * Jeff Balogh (`jbalogh <https://github.com/jbalogh>`_)
 * Erik Rose (`erikrose <https://github.com/erikrose>`_)
 * James Socol (`jscol <https://github.com/jsocol>`_)
 * Rob Hudson (`robhudson <https://github.com/robhudson>`_)
-* John Whitlock (`jwhitlock <https://github.com/jwhitlock>`_)
 
 Contributors
 ------------
@@ -31,6 +43,7 @@ These non-maintainers have contributed code to a django-nose release:
 * Conrado Buhrer (`conrado <https://github.com/conrado>`_)
 * David Baumgold (`singingwolfboy <https://github.com/singingwolfboy>`_)
 * David Cramer (`dcramer <https://github.com/dcramer>`_)
+* Dillon Lareau (`dlareau <https://github.com/dlareau>`_)
 * Dmitry Gladkov (`dgladkov <https://github.com/dgladkov>`_)
 * Ederson Mota (`edrmp <https://github.com/edrmp>`_)
 * Eric Zarowny (`ezarowny <https://github.com/ezarowny>`_)
@@ -38,6 +51,7 @@ These non-maintainers have contributed code to a django-nose release:
 * Fred Wenzel (`fwenzel <https://github.com/fwenzel>`_)
 * Fábio Santos (`fabiosantoscode <https://github.com/fabiosantoscode>`_)
 * Ionel Cristian Mărieș (`ionelmc <https://github.com/ionelmc>`_)
+* Jannis Leidel (`jezdez <https://github.com/jezdez>`_)
 * Jeremy Satterfield (`jsatt <https://github.com/jsatt>`_)
 * Johan Euphrosine (`proppy <https://github.com/proppy>`_)
 * Kyle Robertson (`dvelyk <https://github.com/dvelyk>`_)
