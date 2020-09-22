@@ -45,10 +45,8 @@ class FastFixtureTestCase(test.TransactionTestCase):
             raise NotImplementedError('%s supports only DBs with transaction '
                                       'capabilities.' % cls.__name__)
         for db in cls._databases():
-            # These MUST be balanced with one leave_* each:
-            transaction.enter_transaction_management(using=db)
             # Don't commit unless we say so:
-            transaction.managed(True, using=db)
+            transaction.set_autocommit(False, using=db)
 
         cls._fixture_setup()
 
@@ -59,15 +57,14 @@ class FastFixtureTestCase(test.TransactionTestCase):
         for db in cls._databases():
             # Finish off any transactions that may have happened in
             # tearDownClass in a child method.
-            if transaction.is_dirty(using=db):
-                transaction.commit(using=db)
-            transaction.leave_transaction_management(using=db)
+            transaction.commit(using=db)
 
     @classmethod
     def _fixture_setup(cls):
         """Load fixture data, and commit."""
         for db in cls._databases():
             if (hasattr(cls, 'fixtures') and
+                    cls.fixtures is not None and
                     getattr(cls, '_fb_should_setup_fixtures', True)):
                 # Iff the fixture-bundling test runner tells us we're the first
                 # suite having these fixtures, set them up:
@@ -122,8 +119,6 @@ class FastFixtureTestCase(test.TransactionTestCase):
         cache.cache.clear()
         settings.TEMPLATE_DEBUG = settings.DEBUG = False
 
-        test.testcases.disable_transaction_methods()
-
         self.client = self.client_class()
         # self._fixture_setup()
         self._urlconf_setup()
@@ -142,7 +137,6 @@ class FastFixtureTestCase(test.TransactionTestCase):
 
         """
         # Rollback any mutations made by tests:
-        test.testcases.restore_transaction_methods()
         for db in self._databases():
             transaction.rollback(using=db)
 
