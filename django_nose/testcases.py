@@ -12,7 +12,7 @@ from django_nose.fixture_tables import tables_used_by_fixtures
 from django_nose.utils import uses_mysql
 
 
-__all__ = ('FastFixtureTestCase', )
+__all__ = ("FastFixtureTestCase",)
 
 
 class FastFixtureTestCase(test.TransactionTestCase):
@@ -42,8 +42,9 @@ class FastFixtureTestCase(test.TransactionTestCase):
     def setUpClass(cls):
         """Turn on manual commits. Load and commit the fixtures."""
         if not test.testcases.connections_support_transactions():
-            raise NotImplementedError('%s supports only DBs with transaction '
-                                      'capabilities.' % cls.__name__)
+            raise NotImplementedError(
+                "%s supports only DBs with transaction " "capabilities." % cls.__name__
+            )
         for db in cls._databases():
             # These MUST be balanced with one leave_* each:
             transaction.enter_transaction_management(using=db)
@@ -67,13 +68,16 @@ class FastFixtureTestCase(test.TransactionTestCase):
     def _fixture_setup(cls):
         """Load fixture data, and commit."""
         for db in cls._databases():
-            if (hasattr(cls, 'fixtures') and
-                    getattr(cls, '_fb_should_setup_fixtures', True)):
+            if hasattr(cls, "fixtures") and getattr(
+                cls, "_fb_should_setup_fixtures", True
+            ):
                 # Iff the fixture-bundling test runner tells us we're the first
                 # suite having these fixtures, set them up:
-                call_command('loaddata', *cls.fixtures, **{'verbosity': 0,
-                                                           'commit': False,
-                                                           'database': db})
+                call_command(
+                    "loaddata",
+                    *cls.fixtures,
+                    **{"verbosity": 0, "commit": False, "database": db}
+                )
             # No matter what, to preserve the effect of cursor start-up
             # statements...
             transaction.commit(using=db)
@@ -81,8 +85,9 @@ class FastFixtureTestCase(test.TransactionTestCase):
     @classmethod
     def _fixture_teardown(cls):
         """Empty (only) the tables we loaded fixtures into, then commit."""
-        if hasattr(cls, 'fixtures') and \
-           getattr(cls, '_fb_should_teardown_fixtures', True):
+        if hasattr(cls, "fixtures") and getattr(
+            cls, "_fb_should_teardown_fixtures", True
+        ):
             # If the fixture-bundling test runner advises us that the next test
             # suite is going to reuse these fixtures, don't tear them down.
             for db in cls._databases():
@@ -100,15 +105,15 @@ class FastFixtureTestCase(test.TransactionTestCase):
                     # were loading additional Sites with a fixture, and then
                     # the Django-provided example.com site was evaporating.
                     if uses_mysql(connection):
-                        cursor.execute('SET FOREIGN_KEY_CHECKS=0')
+                        cursor.execute("SET FOREIGN_KEY_CHECKS=0")
                         for table in tables:
                             # Truncate implicitly commits.
-                            cursor.execute('TRUNCATE `%s`' % table)
+                            cursor.execute("TRUNCATE `%s`" % table)
                         # TODO: necessary?
-                        cursor.execute('SET FOREIGN_KEY_CHECKS=1')
+                        cursor.execute("SET FOREIGN_KEY_CHECKS=1")
                     else:
                         for table in tables:
-                            cursor.execute('DELETE FROM %s' % table)
+                            cursor.execute("DELETE FROM %s" % table)
 
                 transaction.commit(using=db)
                 # cursor.close()  # Should be unnecessary, since we committed
@@ -132,6 +137,7 @@ class FastFixtureTestCase(test.TransactionTestCase):
         # Clear site cache in case somebody's mutated Site objects and then
         # cached the mutated stuff:
         from django.contrib.sites.models import Site
+
         Site.objects.clear_cache()
 
     def _post_teardown(self):
@@ -157,7 +163,7 @@ class FastFixtureTestCase(test.TransactionTestCase):
 
     @classmethod
     def _databases(cls):
-        if getattr(cls, 'multi_db', False):
+        if getattr(cls, "multi_db", False):
             return connections
         else:
             return [DEFAULT_DB_ALIAS]

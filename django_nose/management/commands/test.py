@@ -13,7 +13,7 @@ from django.test.utils import get_runner
 
 TestRunner = get_runner(settings)
 
-if hasattr(TestRunner, 'options'):
+if hasattr(TestRunner, "options"):
     extra_options = TestRunner.options
 else:
     extra_options = []
@@ -22,4 +22,4 @@ else:
 class Command(Command):
     """Implement the ``test`` command."""
 
-    option_list = getattr(Command, 'option_list', ()) + tuple(extra_options)
+    option_list = getattr(Command, "option_list", ()) + tuple(extra_options)

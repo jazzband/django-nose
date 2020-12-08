@@ -38,7 +38,7 @@ class ResultPlugin(AlwaysOnPlugin):
     ``result`` after running the tests to get the TestResult object.
     """
 
-    name = 'result'
+    name = "result"
 
     def finalize(self, result):
         """Finalize test run by capturing the result."""
@@ -52,7 +52,7 @@ class DjangoSetUpPlugin(AlwaysOnPlugin):
     initialization of the test runner.
     """
 
-    name = 'django setup'
+    name = "django setup"
     score = 150
 
     def __init__(self, runner):
@@ -111,10 +111,10 @@ class Bucketer(object):
         if is_subclass_at_all(test.context, FastFixtureTestCase):
             # We bucket even FFTCs that don't have any fixtures, but it
             # shouldn't matter.
-            key = (frozenset(getattr(test.context, 'fixtures', [])),
-                   getattr(test.context,
-                           'exempt_from_fixture_bundling',
-                           False))
+            key = (
+                frozenset(getattr(test.context, "fixtures", [])),
+                getattr(test.context, "exempt_from_fixture_bundling", False),
+            )
             self.buckets.setdefault(key, []).append(test)
         else:
             self.remainder.append(test)
@@ -123,18 +123,20 @@ class Bucketer(object):
 class TestReorderer(AlwaysOnPlugin):
     """Reorder tests for various reasons."""
 
-    name = 'django-nose-test-reorderer'
+    name = "django-nose-test-reorderer"
 
     def options(self, parser, env):
         """Add --with-fixture-bundling to options."""
         super(TestReorderer, self).options(parser, env)  # pointless
-        parser.add_option('--with-fixture-bundling',
-                          action='store_true',
-                          dest='with_fixture_bundling',
-                          default=env.get('NOSE_WITH_FIXTURE_BUNDLING', False),
-                          help='Load a unique set of fixtures only once, even '
-                               'across test classes. '
-                               '[NOSE_WITH_FIXTURE_BUNDLING]')
+        parser.add_option(
+            "--with-fixture-bundling",
+            action="store_true",
+            dest="with_fixture_bundling",
+            default=env.get("NOSE_WITH_FIXTURE_BUNDLING", False),
+            help="Load a unique set of fixtures only once, even "
+            "across test classes. "
+            "[NOSE_WITH_FIXTURE_BUNDLING]",
+        )
 
     def configure(self, options, conf):
         """Configure plugin, reading the with_fixture_bundling option."""
@@ -156,6 +158,7 @@ class TestReorderer(AlwaysOnPlugin):
         you'd have to clean on entry to a test anyway." was once uttered on
         #django-dev.
         """
+
         def filthiness(test):
             """Return a score of how messy a test leaves the environment.
 
@@ -183,9 +186,10 @@ class TestReorderer(AlwaysOnPlugin):
 
             """
             test_class = test.context
-            if (is_subclass_at_all(test_class, TestCase) or
-                (is_subclass_at_all(test_class, TransactionTestCase) and
-                 getattr(test_class, 'cleans_up_after_itself', False))):
+            if is_subclass_at_all(test_class, TestCase) or (
+                is_subclass_at_all(test_class, TransactionTestCase)
+                and getattr(test_class, "cleans_up_after_itself", False)
+            ):
                 return 1
             return 2
 
@@ -208,6 +212,7 @@ class TestReorderer(AlwaysOnPlugin):
         bits. We return those first, then any remaining tests in the
         order they were received.
         """
+
         def suite_sorted_by_fixtures(suite):
             """Flatten and sort a tree of Suites by fixture.
 
