@@ -4,14 +4,12 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: build (Python ${{ matrix.python-version }}, Django ${{ matrix.django-version }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       max-parallel: 5
       matrix:
-        python-version: ['3.6', '3.7', '3.8']
-        django-version: ['1.8', '1.9', '1.10', '1.11', '2.0', '2.1', '2.2']
+        python-version: ['3.5', '3.6', '3.7', '3.8']
 
     services:
       postgres:
@@ -68,10 +66,9 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install --upgrade tox tox-gh-actions
 
-    - name: Test with tox (Python ${{ matrix.python-version }}, Django ${{ matrix.django-version }})
+    - name: Test with tox
       run: tox -v
       env:
-        DJANGO: '${{ matrix.django-version }}'
         COVERAGE: 1
         RUNTEST_ARGS: "-v --noinput"
 
