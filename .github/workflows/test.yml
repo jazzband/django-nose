@@ -67,7 +67,7 @@ jobs:
         python -m pip install --upgrade tox tox-gh-actions
 
     - name: Test with tox
-      run: tox -v
+      run: tox
       env:
         COVERAGE: 1
         RUNTEST_ARGS: "-v --noinput"
