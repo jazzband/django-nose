@@ -71,7 +71,7 @@ jobs:
     - name: Test with tox (Python ${{ matrix.python-version }}, Django ${{ matrix.django-version }})
       run: tox
       env:
-        DJANGO: ${{ matrix.django-version }}
+        DJANGO: "${{ matrix.django-version }}"
         COVERAGE: 1
         RUNTEST_ARGS: "-v --noinput"
 
