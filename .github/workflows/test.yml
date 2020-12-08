@@ -68,9 +68,11 @@ jobs:
         python -m pip install --upgrade tox tox-gh-actions
 
     - name: Test with tox (Python ${{ matrix.python-version }}, Django ${{ matrix.django-version }})
-      run: tox -v
+      run: tox
       env:
         DJANGO: ${{ matrix.django-version }}
+        COVERAGE: 1
+        RUNTEST_ARGS: "-v --noinput"
 
     - name: Upload coverage
       uses: codecov/codecov-action@v1
