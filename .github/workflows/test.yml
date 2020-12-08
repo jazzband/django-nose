@@ -69,7 +69,7 @@ jobs:
         python -m pip install --upgrade tox tox-gh-actions
 
     - name: Test with tox (Python ${{ matrix.python-version }}, Django ${{ matrix.django-version }})
-      run: tox
+      run: tox -v
       env:
         DJANGO: '${{ matrix.django-version }}'
         COVERAGE: 1
