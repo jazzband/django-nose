@@ -20,7 +20,6 @@ env = environ.Env(
 BASE_DIR = path.dirname(path.dirname(__file__))
 
 DATABASES = {"default": env.db("DATABASE_URL", default="sqlite:////tmp/test.sqlite")}
-print(DATABASES)
 
 MIDDLEWARE_CLASSES = ()
 
