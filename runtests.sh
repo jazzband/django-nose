@@ -36,6 +36,7 @@ then
 fi
 
 export PYTHONPATH=.
+export DATABASE_URL=${DATABASE_URL:"sqlite:////tmp/test.db"}
 
 HAS_HOTSHOT=$(python -c "\
 try:

@@ -9,7 +9,7 @@ Django>=2.2,<3.0
 -e .
 
 # Load database config from environment
-dj-database-url==0.4.2
+dj-database-url==0.5.0
 
 # Packaging
 wheel==0.29.0
