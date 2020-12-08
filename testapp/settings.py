@@ -19,17 +19,7 @@ env = environ.Env(
 
 BASE_DIR = path.dirname(path.dirname(__file__))
 
-
-def rel_path(*subpaths):
-    """Construct the full path given a relative path."""
-    return path.join(BASE_DIR, *subpaths)
-
-
-DATABASES = {
-    "default": env.db(
-        "DATABASE_URL", default="sqlite:///" + rel_path("testapp.sqlite3")
-    )
-}
+DATABASES = {"default": env.db("DATABASE_URL", default="sqlite:////tmp/test.sqlite")}
 print(DATABASES)
 
 MIDDLEWARE_CLASSES = ()
