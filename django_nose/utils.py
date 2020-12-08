@@ -1,7 +1,5 @@
 # coding: utf-8
 """django-nose utility methods."""
-from __future__ import unicode_literals
-
 
 def process_tests(suite, process):
     """Find and process the suite with setup/teardown methods.

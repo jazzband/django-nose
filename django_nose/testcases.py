@@ -1,7 +1,5 @@
 # coding: utf-8
 """TestCases that enable extra django-nose functionality."""
-from __future__ import unicode_literals
-
 from django import test
 from django.conf import settings
 from django.core import cache, mail

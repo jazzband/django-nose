@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """django-nose packaging."""
-from __future__ import unicode_literals
 import os
 from codecs import open
 from setuptools import setup, find_packages
@@ -42,7 +41,8 @@ _(Older changes can be found in the full documentation)._
 
 setup(
     name="django-nose",
-    version="1.4.7",
+    use_scm_version={"version_scheme": "post-release"},
+    setup_requires=["setuptools_scm"],
     description="Makes your Django tests simple and snappy",
     long_description=get_long_description("django-nose"),
     author="Jeff Balogh",

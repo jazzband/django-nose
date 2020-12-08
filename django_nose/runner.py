@@ -8,8 +8,6 @@ You can use... ::
 in settings.py for arguments that you want always passed to nose.
 
 """
-from __future__ import print_function, unicode_literals
-
 import os
 import sys
 from importlib import import_module

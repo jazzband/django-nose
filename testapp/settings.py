@@ -8,7 +8,6 @@ USE_SOUTH - Set to 1 to include South in INSTALLED_APPS
 TEST_RUNNER - Dotted path of test runner to use (can also use --test-runner)
 NOSE_PLUGINS - Comma-separated list of plugins to add
 """
-from __future__ import print_function
 from os import path
 import environ
 
