@@ -46,11 +46,11 @@ It also provides:
 django-nose requires nose 1.2.1 or later, and the `latest release`_ is
 recommended.  It follows the `Django's support policy`_, supporting:
 
-* Django 1.8 (LTS) with Python 2.7, 3.4, or 3.5
-* Django 1.9 with Python 2.7, 3.4, or 3.5
-* Django 1.10 with Python 2.7, 3.4, or 3.5
-* Django 1.11 (LTS) with Python 2.7, 3.4, 3.5, or 3.6
-* Django 2.0 with Python 3.4, 3.5, 3.6, or 3.7
+* Django 1.8 (LTS) with Python 3.5
+* Django 1.9 with Python 3.5
+* Django 1.10 with Python 3.5
+* Django 1.11 (LTS) with Python 3.5 or 3.6
+* Django 2.0 with Python 3.5, 3.6, or 3.7
 * Django 2.1 with Python 3.5, 3.6, or 3.7
 * Django 2.2 with Python 3.5, 3.6, or 3.7
 
