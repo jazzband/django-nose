@@ -1,6 +1,5 @@
 # coding: utf-8
 """django-nose utility methods."""
-from __future__ import unicode_literals
 
 
 def process_tests(suite, process):
@@ -25,8 +24,9 @@ def process_tests(suite, process):
     :arg process: The thing to call once we get to a leaf or a test with setup
         or teardown
     """
-    if (not hasattr(suite, '_tests') or
-            (hasattr(suite, 'hasFixtures') and suite.hasFixtures())):
+    if not hasattr(suite, "_tests") or (
+        hasattr(suite, "hasFixtures") and suite.hasFixtures()
+    ):
         # We hit a Test or something with setup, so do the thing. (Note that
         # "fixtures" here means setup or teardown routines, not Django
         # fixtures.)
@@ -50,4 +50,4 @@ def is_subclass_at_all(cls, class_info):
 
 def uses_mysql(connection):
     """Return whether the connection represents a MySQL DB."""
-    return 'mysql' in connection.settings_dict['ENGINE']
+    return "mysql" in connection.settings_dict["ENGINE"]

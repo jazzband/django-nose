@@ -4,7 +4,7 @@
     "repository": {
         "url": "https://github.com/jazzband/django-nose",
         "license": "BSD",
-        "tests": "https://travis-ci.org/jazzband/django-nose"
+        "tests": "https://github.com/jazzband/django-nose/actions"
     },
     "participate": {
         "home": "https://github.com/jazzband/django-nose",

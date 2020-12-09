@@ -23,8 +23,10 @@ except ImportError:
         """Emulate get_apps in Django 1.9 and later."""
         return [a.models_module for a in apps.get_app_configs()]
 
+
 try:
     import bz2
+
     has_bz2 = True
 except ImportError:
     has_bz2 = False
@@ -47,23 +49,20 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
         def __init__(self, *args, **kwargs):
             zipfile.ZipFile.__init__(self, *args, **kwargs)
             if settings.DEBUG:
-                assert len(self.namelist()) == 1, \
-                    "Zip-compressed fixtures must contain only one file."
+                assert (
+                    len(self.namelist()) == 1
+                ), "Zip-compressed fixtures must contain only one file."
 
         def read(self):
             return zipfile.ZipFile.read(self, self.namelist()[0])
 
-    compression_types = {
-        None:   open,
-        'gz':   gzip.GzipFile,
-        'zip':  SingleZipReader
-    }
+    compression_types = {None: open, "gz": gzip.GzipFile, "zip": SingleZipReader}
     if has_bz2:
-        compression_types['bz2'] = bz2.BZ2File
+        compression_types["bz2"] = bz2.BZ2File
 
     app_module_paths = []
     for app in get_apps():
-        if hasattr(app, '__path__'):
+        if hasattr(app, "__path__"):
             # It's a 'models/' subpackage
             for path in app.__path__:
                 app_module_paths.append(path)
@@ -72,10 +71,10 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
             app_module_paths.append(app.__file__)
 
     app_fixtures = [
-        os.path.join(os.path.dirname(path), 'fixtures')
-        for path in app_module_paths]
+        os.path.join(os.path.dirname(path), "fixtures") for path in app_module_paths
+    ]
     for fixture_label in fixture_labels:
-        parts = fixture_label.split('.')
+        parts = fixture_label.split(".")
 
         if len(parts) > 1 and parts[-1] in compression_types:
             compression_formats = [parts[-1]]
@@ -87,7 +86,7 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
             fixture_name = parts[0]
             formats = serializers.get_public_serializer_formats()
         else:
-            fixture_name, format = '.'.join(parts[:-1]), parts[-1]
+            fixture_name, format = ".".join(parts[:-1]), parts[-1]
             if format in serializers.get_public_serializer_formats():
                 formats = [format]
             else:
@@ -101,7 +100,7 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
         if os.path.isabs(fixture_name):
             fixture_dirs = [fixture_name]
         else:
-            fixture_dirs = app_fixtures + list(settings.FIXTURE_DIRS) + ['']
+            fixture_dirs = app_fixtures + list(settings.FIXTURE_DIRS) + [""]
 
         for fixture_dir in fixture_dirs:
             # stdout.write("Checking %s for fixtures...\n" %
@@ -110,11 +109,8 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
             label_found = False
             for combo in product([using, None], formats, compression_formats):
                 database, format, compression_format = combo
-                file_name = '.'.join(
-                    p for p in [
-                        fixture_name, database, format, compression_format
-                    ]
-                    if p
+                file_name = ".".join(
+                    p for p in [fixture_name, database, format, compression_format] if p
                 )
 
                 # stdout.write("Trying %s for %s fixture '%s'...\n" % \
@@ -122,7 +118,7 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
                 full_path = os.path.join(fixture_dir, file_name)
                 open_method = compression_types[compression_format]
                 try:
-                    fixture = open_method(full_path, 'r')
+                    fixture = open_method(full_path, "r")
                     if label_found:
                         fixture.close()
                         # stderr.write(style.ERROR("Multiple fixtures named
@@ -137,7 +133,8 @@ def tables_used_by_fixtures(fixture_labels, using=DEFAULT_DB_ALIAS):
                         # % (format, fixture_name, humanize(fixture_dir)))
                         try:
                             objects = serializers.deserialize(
-                                format, fixture, using=using)
+                                format, fixture, using=using
+                            )
                             for obj in objects:
                                 objects_in_fixture += 1
                                 cls = obj.object.__class__

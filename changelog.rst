@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+unreleased
+~~~~~~~~~~
+
+* Dropped Python 2 support.
+* Moved CI to
+  `GitHub Actions <https://github.com/jazzband/django-nose/actions>`_.
+
 1.4.7 (2020-08-19)
 ~~~~~~~~~~~~~~~~~~
 * Document Django 2.2 support, no changes needed

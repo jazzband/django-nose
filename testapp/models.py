@@ -11,7 +11,7 @@ class Question(models.Model):
     """A poll question."""
 
     question_text = models.CharField(max_length=200)
-    pub_date = models.DateTimeField('date published')
+    pub_date = models.DateTimeField("date published")
 
     def __str__(self):
         """Return string representation."""

@@ -125,7 +125,7 @@ Before you submit a pull request, check that it meets these guidelines:
 5. Make liberal use of `git rebase` to ensure clean commits on top of master.
 6. The pull request should pass QA tests and work for supported Python / Django
    combinations.  Check
-   https://travis-ci.org/jazzband/django-nose/pull_requests
+   https://github.com/jazzband/django-nose/actions
    and make sure that the tests pass for all supported Python versions.
 
 Tips

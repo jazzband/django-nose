@@ -6,13 +6,13 @@ django-nose
     :alt: The PyPI package
     :target: https://pypi.python.org/pypi/django-nose
 
-.. image:: https://img.shields.io/travis/jazzband/django-nose/master.svg
-    :alt: TravisCI Build Status
-    :target: https://travis-ci.org/jazzband/django-nose
+.. image:: https://github.com/jazzband/django-nose/workflows/Test/badge.svg
+    :target: https://github.com/jazzband/django-nose/actions
+    :alt: GitHub Actions
 
-.. image:: https://img.shields.io/coveralls/jazzband/django-nose/master.svg
-    :alt: Coveralls Test Coverage
-    :target: https://coveralls.io/r/jazzband/django-nose?branch=master
+.. image:: https://codecov.io/gh/jazzband/django-nose/branch/master/graph/badge.svg
+    :alt: Coverage
+    :target: https://codecov.io/gh/jazzband/django-nose
 
 .. image:: https://jazzband.co/static/img/badge.svg
     :alt: Jazzband

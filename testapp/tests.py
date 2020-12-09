@@ -16,8 +16,8 @@ class NoDatabaseTestCase(TestCase):
 
     def test_choice_str(self):
         """Test Choice.__str__ method."""
-        choice = Choice(choice_text='My name is Sir Lancelot of Camelot.')
-        self.assertEqual('My name is Sir Lancelot of Camelot.', str(choice))
+        choice = Choice(choice_text="My name is Sir Lancelot of Camelot.")
+        self.assertEqual("My name is Sir Lancelot of Camelot.", str(choice))
 
 
 class UsesDatabaseTestCase(TestCase):
@@ -26,9 +26,9 @@ class UsesDatabaseTestCase(TestCase):
     def test_question(self):
         """Test that votes is initialized to 0."""
         question = Question.objects.create(
-            question_text="What is your quest?", pub_date=datetime(1975, 4, 9))
-        Choice.objects.create(
-            question=question, choice_text="To seek the Holy Grail.")
+            question_text="What is your quest?", pub_date=datetime(1975, 4, 9)
+        )
+        Choice.objects.create(question=question, choice_text="To seek the Holy Grail.")
         self.assertTrue(question.choice_set.exists())
         the_choice = question.choice_set.get()
         self.assertEqual(0, the_choice.votes)
@@ -42,8 +42,7 @@ class UsesFixtureTestCase(TransactionTestCase):
     def test_fixture_loaded(self):
         """Test that fixture was loaded."""
         question = Question.objects.get()
-        self.assertEqual(
-            'What is your favorite color?', question.question_text)
+        self.assertEqual("What is your favorite color?", question.question_text)
         self.assertEqual(datetime(1975, 4, 9), question.pub_date)
         choice = question.choice_set.get()
         self.assertEqual("Blue.", choice.choice_text)
