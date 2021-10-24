@@ -448,6 +448,11 @@ class NoseTestSuiteRunner(BasicNoseRunner):
             creation = connection.creation
             test_db_name = creation._get_test_db_name()
 
+            # Close the connection ahead of doing a DB check as the connection 
+            # may already be established which will short circuit the 
+            # "should create" tests
+            connection.close()
+
             # Mess with the DB name so other things operate on a test DB
             # rather than the real one. This is done in create_test_db when
             # we don't monkeypatch it away with _skip_create_test_db.
