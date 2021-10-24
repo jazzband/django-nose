@@ -466,6 +466,13 @@ class NoseTestSuiteRunner(BasicNoseRunner):
                 # MySQLdb doesn't allow it, and SQLAlchemy attempts to reuse
                 # the existing connection from its pool.
                 connection.close()
+            elif (connection.settings_dict.get('TEST', {}).get('MIRROR') or
+                    connection.settings_dict.get('TEST_MIRROR')):
+                # The db.TEST.MIRROR setting (or db.TEST_MIRROR in Django 1.6
+                # and below) specifies that this is a mirror of another
+                # database. We don't need to initialize the same database
+                # twice, so skip this round.
+                pass
             else:
                 # Reset auto-increment sequences. Apparently, SUMO's tests are
                 # horrid and coupled to certain numbers.
