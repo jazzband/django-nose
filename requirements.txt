@@ -12,7 +12,7 @@ Django>=2.2,<3.0
 django-environ
 
 # Packaging
-wheel==0.29.0
+wheel==0.38.1
 twine==1.9.1
 
 # PEP8, PEP257, and static analysis
